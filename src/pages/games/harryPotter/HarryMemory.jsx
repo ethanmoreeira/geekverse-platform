@@ -3,7 +3,7 @@
 // Mecânica: Jogo da memória com personagens. Fácil (30), Médio (40), Desafio (50).
 // Controlador principal: gerencia estados do jogo, lógica de pares e vitória.
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MemoryBoard from '../../../components/game/memory/MemoryBoard';
 import MemoryStats from '../../../components/game/memory/MemoryStats';
@@ -11,9 +11,13 @@ import DifficultySelector from '../../../components/ui/DifficultySelector';
 import JsonViewer from '../../../components/feedback/JsonViewer';
 import { fetchCharactersForGame } from '../../../services/apis/harryPotterApi';
 import { DIFFICULTIES } from '../../../utils/difficultyConfig';
-import { FaArrowLeft, FaSyncAlt, FaMagic, FaTrophy, FaRedoAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaSyncAlt, FaMagic, FaTrophy, FaRedoAlt, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import ThemedGameLoader from '../../../components/feedback/ThemedGameLoader';
+import ThemedLogoutScreen from '../../../components/feedback/ThemedLogoutScreen';
 import '../../../styles/games.css';
-import boardBg from '../../../assets/backgrounds/harry-potter/harry-board-bg.png';
+import boardBg from '../../../assets/backgrounds/harry-potter/e86fd375-07cb-42a1-9784-0a31beb7e584.png';
+import victoryBg from '../../../assets/backgrounds/harry-potter/f087384f-df83-4ea0-bcbc-63a9473ae699.jpg';
+import magicAmbient from '../../../assets/audio/geoffharvey-let-the-mystery-unfold-122118.mp3';
 
 const SHUFFLE_DURATION = 3200; // 3.2 segundos de animação
 
@@ -29,12 +33,62 @@ const HarryMemory = () => {
   const navigate = useNavigate();
 
   // Estados de carregamento e API
+  const [showIntroLoader, setShowIntroLoader] = useState(true);
+  const [isLeaving, setIsLeaving] = useState(false);
   const [difficulty, setDifficulty] = useState(null);
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [adjustmentInfo, setAdjustmentInfo] = useState(null);
   const [apiMetadata, setApiMetadata] = useState(null);
+
+  // Efeito de intro loader
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntroLoader(false);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Música ambiente
+  const audioRef = useRef(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+
+  // Iniciar música quando o intro loader terminar (usuário já clicou para entrar)
+  useEffect(() => {
+    if (!showIntroLoader && audioRef.current) {
+      audioRef.current.volume = 0.18;
+      audioRef.current.play().then(() => {
+        setIsMusicPlaying(true);
+      }).catch(() => {
+        // Navegador bloqueou autoplay — o usuário pode clicar no botão
+        setIsMusicPlaying(false);
+      });
+    }
+  }, [showIntroLoader]);
+
+  // Pausar música ao sair da página
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isMusicPlaying) {
+      audioRef.current.pause();
+      setIsMusicPlaying(false);
+    } else {
+      audioRef.current.play().then(() => {
+        setIsMusicPlaying(true);
+      }).catch((err) => {
+        console.warn('Não foi possível tocar a música:', err.message);
+      });
+    }
+  };
 
   // Estados do jogo
   const [gameStatus, setGameStatus] = useState(GAME_STATUS.IDLE);
@@ -45,6 +99,14 @@ const HarryMemory = () => {
   const [pairsFound, setPairsFound] = useState(0);
   const [totalPairs, setTotalPairs] = useState(0);
 
+  // Timer
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [hasGameStarted, setHasGameStarted] = useState(false);
+
+  // Zoom temporário no card revelado
+  const [zoomedCardId, setZoomedCardId] = useState(null);
+  const zoomTimerRef = useRef(null);
   const shuffleTimerRef = useRef(null);
 
   /**
@@ -56,6 +118,11 @@ const HarryMemory = () => {
     setIsChecking(false);
     setAttempts(0);
     setPairsFound(0);
+    setElapsedTime(0);
+    setIsTimerRunning(false);
+    setHasGameStarted(false);
+    setZoomedCardId(null);
+    if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
   }, []);
 
   /**
@@ -95,8 +162,11 @@ const HarryMemory = () => {
       setCards(result.cards);
       setTotalPairs(result.metadata.pairsUsed);
 
-      // Iniciar animação de embaralhamento mágico
+      // Iniciar animação de embaralhamento mágico (timer inicia no primeiro clique)
       setGameStatus(GAME_STATUS.SHUFFLING);
+      setElapsedTime(0);
+      setIsTimerRunning(false);
+      setHasGameStarted(false);
       if (shuffleTimerRef.current) clearTimeout(shuffleTimerRef.current);
       shuffleTimerRef.current = setTimeout(() => {
         setGameStatus(GAME_STATUS.PLAYING);
@@ -136,8 +206,21 @@ const HarryMemory = () => {
       if (flippedCards.find((c) => c.uniqueId === card.uniqueId)) return;
       if (matchedPairs.has(card.pairId)) return;
 
+      // Iniciar timer no primeiro clique válido da partida
+      if (!hasGameStarted) {
+        setHasGameStarted(true);
+        setIsTimerRunning(true);
+      }
+
       const newFlipped = [...flippedCards, card];
       setFlippedCards(newFlipped);
+
+      // Zoom temporário no card revelado
+      setZoomedCardId(card.uniqueId);
+      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
+      zoomTimerRef.current = setTimeout(() => {
+        setZoomedCardId(null);
+      }, 1200);
 
       // Quando 2 cartas viradas, verificar par
       if (newFlipped.length === 2) {
@@ -170,7 +253,7 @@ const HarryMemory = () => {
         }
       }
     },
-    [gameStatus, flippedCards, matchedPairs, isChecking, pairsFound, totalPairs]
+    [gameStatus, flippedCards, matchedPairs, isChecking, pairsFound, totalPairs, hasGameStarted]
   );
 
   /**
@@ -220,17 +303,61 @@ const HarryMemory = () => {
     }
   };
 
+  const handleBack = () => {
+    setIsLeaving(true);
+    setTimeout(() => {
+      navigate('/app');
+    }, 4000);
+  };
+
+  // Intervalo do timer — inicia/para com isTimerRunning
+  useEffect(() => {
+    if (!isTimerRunning) return;
+    const interval = setInterval(() => {
+      setElapsedTime((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isTimerRunning]);
+
+  // Para o timer quando o jogo termina
+  useEffect(() => {
+    if (gameStatus === GAME_STATUS.FINISHED) {
+      setIsTimerRunning(false);
+    }
+  }, [gameStatus]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  };
+
   const isShuffling = gameStatus === GAME_STATUS.SHUFFLING;
   const isPlaying = gameStatus === GAME_STATUS.PLAYING;
   const isFinished = gameStatus === GAME_STATUS.FINISHED;
   const difficultyConfig = difficulty ? DIFFICULTIES[difficulty] : null;
 
+  if (showIntroLoader) {
+    return <ThemedGameLoader />;
+  }
+
+  if (isLeaving) {
+    return <ThemedLogoutScreen />;
+  }
+
   return (
-    <div className="gv-harry-page" style={{ backgroundImage: `url(${boardBg})` }}>
+    <div className="gv-harry-page">
+      <div className="gv-harry-page-bg" style={{ backgroundImage: `url(${boardBg})` }}></div>
       
+      <audio ref={audioRef} src={magicAmbient} loop preload="auto" />
+
       <div className="gv-harry-top-bar">
-        <button className="gv-btn-back-magic" onClick={() => navigate('/app')} id="btn-back">
+        <button className="gv-btn-back-magic" onClick={handleBack} id="btn-back">
           <FaArrowLeft /> Voltar
+        </button>
+        <button className="gv-btn-music-toggle" onClick={toggleMusic} id="btn-music" title={isMusicPlaying ? 'Pausar música' : 'Tocar música'}>
+          {isMusicPlaying ? <FaVolumeUp /> : <FaVolumeMute />}
+          <span>{isMusicPlaying ? 'Pausar' : 'Tocar'}</span>
         </button>
       </div>
 
@@ -258,6 +385,8 @@ const HarryMemory = () => {
             pairsFound={pairsFound}
             totalPairs={totalPairs}
             difficultyLabel={difficultyConfig.label}
+            elapsedTime={elapsedTime}
+            formatTime={formatTime}
           />
         )}
 
@@ -320,7 +449,40 @@ const HarryMemory = () => {
         {/* Tela de Vitória */}
         {isFinished && (
           <div className="gv-victory-overlay" id="victory-screen">
-            <div className="gv-victory-card">
+            {/* Partículas mágicas flutuantes — atrás do card */}
+            <div className="gv-victory-particles" aria-hidden="true">
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+              <span className="gv-vp"></span>
+            </div>
+            <div
+              className="gv-victory-card"
+              style={{
+                backgroundImage: `linear-gradient(rgba(10, 6, 25, 0.55), rgba(10, 6, 25, 0.65)), url(${victoryBg})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            >
+              {/* Aura mágica ao redor da taça */}
+              <div className="gv-victory-aura" aria-hidden="true"></div>
               <div className="gv-victory-icon">
                 <FaTrophy />
               </div>
@@ -356,6 +518,7 @@ const HarryMemory = () => {
             onCardClick={handleCardClick}
             isCardFlipped={isCardFlipped}
             isCardMatched={isCardMatched}
+            zoomedCardId={zoomedCardId}
           />
         )}
 

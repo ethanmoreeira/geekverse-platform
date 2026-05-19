@@ -2,7 +2,7 @@
 // Carta individual do jogo da memória.
 // Contém efeito de flip, imagem do personagem e estado (virada/oculta/encontrada).
 
-const MemoryCard = ({ card, onClick, isFlipped, isMatched, isShuffling, shuffleIndex }) => {
+const MemoryCard = ({ card, onClick, isFlipped, isMatched, isShuffling, shuffleIndex, isZoomed }) => {
   const handleClick = () => {
     if (isShuffling) return; // Bloquear durante embaralhamento
     if (!isFlipped && !isMatched && onClick) {
@@ -28,7 +28,7 @@ const MemoryCard = ({ card, onClick, isFlipped, isMatched, isShuffling, shuffleI
     <div
       className={`gv-memory-card ${isFlipped ? 'gv-card-flipped' : ''} ${
         isMatched ? 'gv-card-matched' : ''
-      } ${isShuffling ? 'gv-card-shuffling' : ''}`}
+      } ${isShuffling ? 'gv-card-shuffling' : ''} ${isZoomed ? 'gv-card-zoomed' : ''}`}
       onClick={handleClick}
       id={`card-${card.uniqueId}`}
       style={isShuffling ? { animationDelay: shuffleDelay } : undefined}

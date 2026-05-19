@@ -8,14 +8,24 @@
 .gv-harry-page {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 60px); /* Altura descontando navbar */
+  min-height: calc(100vh - 60px);
+  margin: -32px -5% -48px;
+  padding: 6px 5% 16px;
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.gv-harry-page-bg {
+  position: fixed;
+  inset: 0;
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
-  margin: -32px -5% -48px; /* Remove o padding do App.css gv-main-content */
-  padding: 32px 5% 48px;
-  position: relative;
-  width: 100vw;
+  background-repeat: no-repeat;
+  transform: scale(1.05);
+  transform-origin: center center;
+  z-index: -2;
+  overflow: hidden;
 }
 
 /* Película para escurecer o fundo para legibilidade (opcional) */
@@ -24,7 +34,7 @@
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.4); /* ajuste a opacidade se quiser a arte mais clara */
-  z-index: 0;
+  z-index: -1; /* Sobre a imagem, mas atrás do conteúdo */
 }
 
 .gv-harry-header, .gv-harry-content {
@@ -35,9 +45,13 @@
 /* Barra superior para o botão de voltar */
 .gv-harry-top-bar {
   position: absolute;
-  top: 32px;
+  top: 6px;
   left: 5%;
+  right: 5%;
   z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .gv-btn-back-magic {
@@ -47,10 +61,10 @@
   background: rgba(30, 20, 50, 0.6);
   border: 1px solid rgba(248, 212, 107, 0.4);
   color: #f8d46b;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-radius: 20px;
   font-family: 'Georgia', serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -65,19 +79,46 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
+/* Botão de controle de música */
+.gv-btn-music-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(30, 20, 50, 0.6);
+  border: 1px solid rgba(248, 212, 107, 0.4);
+  color: #f8d46b;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-family: 'Georgia', serif;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.gv-btn-music-toggle:hover {
+  background: rgba(45, 30, 75, 0.9);
+  border-color: #f8d46b;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
 .gv-harry-header {
   text-align: center;
-  margin-top: 8px;
-  margin-bottom: 12px;
+  margin-top: 0;
+  margin-bottom: 2px;
 }
 
 .gv-magic-title {
-  font-family: 'Cinzel', 'Georgia', serif; /* Fontes com estilo clássico/fantasia */
+  font-family: 'Cinzel', 'Georgia', serif;
   color: #f8d46b;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-size: clamp(1.1rem, 3vw, 1.8rem);
   font-weight: 700;
-  letter-spacing: 2px;
-  margin-bottom: 4px;
+  letter-spacing: 1.5px;
+  margin-bottom: 0;
+  line-height: 1;
   text-transform: uppercase;
   text-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.9),
@@ -87,7 +128,9 @@
 
 .gv-magic-subtitle {
   font-family: 'Georgia', serif;
-  font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  line-height: 1.2;
+  margin-bottom: 0;
   color: #e0e0e0;
   font-weight: 400;
   letter-spacing: 0.5px;
@@ -100,14 +143,14 @@
 
 .gv-difficulty-selector {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
 .gv-difficulty-label {
   font-family: 'Georgia', serif;
   color: #f8d46b;
-  font-size: 1.1rem;
-  margin-bottom: 10px;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
   letter-spacing: 1px;
 }
@@ -115,7 +158,7 @@
 .gv-difficulty-options {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -123,17 +166,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 1px;
   background: rgba(30, 20, 50, 0.7);
   border: 2px solid rgba(255, 215, 0, 0.3);
   color: #e0e0e0;
-  padding: 10px 16px;
-  border-radius: 12px;
+  padding: 4px 12px;
+  border-radius: 10px;
   font-family: 'Georgia', serif;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
-  min-width: 120px;
+  min-width: 100px;
 }
 
 .gv-difficulty-btn:hover:not(:disabled) {
@@ -156,17 +199,17 @@
 }
 
 .gv-difficulty-icon {
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 .gv-difficulty-name {
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: bold;
   color: #f8d46b;
 }
 
 .gv-difficulty-desc {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #aaa;
   letter-spacing: 0.5px;
 }
@@ -182,7 +225,7 @@
 .gv-reload-bar {
   display: flex;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .gv-btn-reload-magic {
@@ -192,10 +235,10 @@
   background: rgba(30, 20, 50, 0.6);
   border: 1px solid rgba(248, 212, 107, 0.4);
   color: #f8d46b;
-  padding: 8px 20px;
+  padding: 5px 16px;
   border-radius: 20px;
   font-family: 'Georgia', serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -248,6 +291,148 @@
 @keyframes gv-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* ============================================ */
+/* THEMED INTRO LOADER                          */
+/* ============================================ */
+
+.gv-themed-loader-wrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.gv-themed-loader-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  transform: scale(1.05);
+  transform-origin: center center;
+  z-index: 0;
+  filter: brightness(1.15);
+}
+
+.gv-themed-loader-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.05);
+  z-index: 1;
+}
+
+.gv-themed-loader-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 32px 24px;
+  min-width: clamp(280px, 50vw, 480px);
+}
+
+.gv-themed-loader-badge {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  color: #eab308;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(234, 179, 8, 0.6);
+  animation: gv-pulse 2s ease-in-out infinite;
+}
+
+.gv-themed-loader-title {
+  font-family: 'Cinzel', 'Georgia', serif;
+  color: #f8d46b;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    0 0 20px rgba(138, 43, 226, 0.9),
+    0 0 40px rgba(138, 43, 226, 0.4);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.gv-themed-loader-subtitle {
+  font-family: 'Georgia', serif;
+  color: #c8c8d8;
+  font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  margin: 0;
+  animation: gv-pulse 1.8s ease-in-out infinite;
+}
+
+.gv-themed-loader-spinner {
+  margin-top: 8px;
+}
+
+/* ============================================ */
+/* THEMED LOGOUT SCREEN                         */
+/* ============================================ */
+
+.gv-themed-logout-wrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.gv-themed-logout-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  z-index: 0;
+}
+
+.gv-themed-logout-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1); /* Overlay mais suave para a arte ficar clara */
+  z-index: 1;
+}
+
+.gv-themed-logout-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.gv-themed-logout-title {
+  font-family: 'Cinzel', 'Georgia', serif;
+  color: #f8d46b;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 20px rgba(138, 43, 226, 0.8);
+  margin: 0;
+}
+
+.gv-themed-logout-subtitle {
+  font-family: 'Georgia', serif;
+  color: #e0e0e0;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  margin: 0;
 }
 
 /* ============================================ */
@@ -311,11 +496,11 @@
 .gv-memory-board-wrapper {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   flex: 1;
-  padding: 10px 0;
-  overflow-x: hidden;
+  padding: 8px 14px;
+  overflow: visible;
 }
 
 .gv-memory-grid {
@@ -325,47 +510,7 @@
   max-width: 1200px;
   margin: 0 auto;
   justify-content: center;
-}
-
-/* Grid por dificuldade — Desktop */
-.gv-grid-easy, .gv-grid-medium {
-  grid-template-columns: repeat(10, minmax(0, 100px));
-}
-
-.gv-grid-challenge {
-  grid-template-columns: repeat(10, minmax(0, 80px)); /* Cartas menores para 50 cartas */
-  gap: 6px; /* Gap menor */
-}
-
-/* Responsividade - Tablets */
-@media (max-width: 1024px) {
-  .gv-grid-easy, .gv-grid-medium {
-    grid-template-columns: repeat(8, minmax(0, 110px));
-  }
-  .gv-grid-challenge {
-    grid-template-columns: repeat(8, minmax(0, 85px));
-    gap: 6px;
-  }
-}
-
-/* Responsividade - Mobile Grande */
-@media (max-width: 768px) {
-  .gv-grid-easy, .gv-grid-medium {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 6px;
-  }
-  .gv-grid-challenge {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 4px;
-  }
-}
-
-/* Responsividade - Mobile Pequeno */
-@media (max-width: 480px) {
-  .gv-grid-easy, .gv-grid-medium, .gv-grid-challenge {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 4px;
-  }
+  overflow: visible;
 }
 
 /* ============================================ */
@@ -506,6 +651,20 @@
   filter: brightness(1.1);
 }
 
+/* CARTA COM ZOOM TEMPORÁRIO (ao revelar) */
+.gv-card-zoomed {
+  z-index: 100;
+  transform: scale(1.22);
+  transform-origin: center center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gv-card-zoomed .gv-memory-card-front {
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.5),
+    0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
 /* ============================================ */
 /* JSON VIEWER                                  */
 /* ============================================ */
@@ -594,31 +753,31 @@
 .gv-memory-stats {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 4px;
   flex-wrap: wrap;
 }
 
 .gv-stat-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(30, 20, 50, 0.7);
   border: 1px solid rgba(255, 215, 0, 0.25);
-  padding: 8px 18px;
+  padding: 4px 10px;
   border-radius: 24px;
   backdrop-filter: blur(4px);
 }
 
 .gv-stat-icon {
   color: #ffd700;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .gv-stat-value {
   font-family: 'Georgia', serif;
   color: #fff;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: bold;
 }
 
@@ -627,6 +786,30 @@
   color: #aaa;
   font-size: 0.75rem;
   letter-spacing: 0.5px;
+}
+
+/* Timer pill — borda dourada sutil para destacar */
+.gv-stat-timer {
+  border-color: rgba(248, 212, 107, 0.45);
+}
+
+.gv-stat-timer .gv-stat-value {
+  font-family: 'Courier New', 'Consolas', monospace;
+  letter-spacing: 1px;
+  color: #f8d46b;
+}
+
+/* Animação da ampulheta — vira a cada 2s */
+.gv-hourglass-spin {
+  color: #f8d46b;
+  animation: gv-hourglass-flip 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes gv-hourglass-flip {
+  0%,  40% { transform: rotate(0deg);   }
+  50%, 90% { transform: rotate(180deg); }
+  100%      { transform: rotate(180deg); }
 }
 
 /* ============================================ */
@@ -638,37 +821,129 @@
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
-  animation: gv-victory-fadein 0.6s ease;
+  animation: gv-victory-fadein 0.8s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 @keyframes gv-victory-fadein {
-  from { opacity: 0; transform: scale(0.9); }
+  from { opacity: 0; transform: scale(0.92); }
   to   { opacity: 1; transform: scale(1); }
 }
 
+/* — Partículas mágicas flutuantes — */
+.gv-victory-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.gv-vp {
+  position: absolute;
+  width: var(--vp-size, 4px);
+  height: var(--vp-size, 4px);
+  border-radius: 50%;
+  background: var(--vp-color, #ffd700);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: gv-vp-float var(--vp-dur, 6s) var(--vp-delay, 0s) ease-in-out infinite;
+  box-shadow: 0 0 var(--vp-glow, 6px) var(--vp-color, rgba(255, 215, 0, 0.6));
+}
+
+/* Posições, tamanhos e tempos variados para cada partícula */
+.gv-vp:nth-child(1)  { left: 8%;  --vp-size: 3px; --vp-dur: 7s;  --vp-delay: 0s;   --vp-color: #ffd700; --vp-glow: 5px; }
+.gv-vp:nth-child(2)  { left: 15%; --vp-size: 5px; --vp-dur: 8s;  --vp-delay: 0.5s; --vp-color: #c9a0ff; --vp-glow: 8px; }
+.gv-vp:nth-child(3)  { left: 22%; --vp-size: 3px; --vp-dur: 6s;  --vp-delay: 1.2s; --vp-color: #ffd700; --vp-glow: 4px; }
+.gv-vp:nth-child(4)  { left: 30%; --vp-size: 4px; --vp-dur: 9s;  --vp-delay: 0.3s; --vp-color: #e8c4ff; --vp-glow: 7px; }
+.gv-vp:nth-child(5)  { left: 38%; --vp-size: 2px; --vp-dur: 7s;  --vp-delay: 2s;   --vp-color: #ffd700; --vp-glow: 4px; }
+.gv-vp:nth-child(6)  { left: 44%; --vp-size: 5px; --vp-dur: 8s;  --vp-delay: 0.8s; --vp-color: #ffd700; --vp-glow: 9px; }
+.gv-vp:nth-child(7)  { left: 50%; --vp-size: 3px; --vp-dur: 6.5s; --vp-delay: 1.5s; --vp-color: #b47cff; --vp-glow: 5px; }
+.gv-vp:nth-child(8)  { left: 56%; --vp-size: 4px; --vp-dur: 7.5s; --vp-delay: 0.2s; --vp-color: #ffd700; --vp-glow: 7px; }
+.gv-vp:nth-child(9)  { left: 62%; --vp-size: 2px; --vp-dur: 9s;  --vp-delay: 1.8s; --vp-color: #ffd700; --vp-glow: 4px; }
+.gv-vp:nth-child(10) { left: 68%; --vp-size: 5px; --vp-dur: 6s;  --vp-delay: 0.6s; --vp-color: #d9a0ff; --vp-glow: 8px; }
+.gv-vp:nth-child(11) { left: 74%; --vp-size: 3px; --vp-dur: 8.5s; --vp-delay: 1s;   --vp-color: #ffd700; --vp-glow: 5px; }
+.gv-vp:nth-child(12) { left: 80%; --vp-size: 4px; --vp-dur: 7s;  --vp-delay: 2.2s; --vp-color: #ffd700; --vp-glow: 6px; }
+.gv-vp:nth-child(13) { left: 86%; --vp-size: 2px; --vp-dur: 6.5s; --vp-delay: 0.4s; --vp-color: #c9a0ff; --vp-glow: 4px; }
+.gv-vp:nth-child(14) { left: 92%; --vp-size: 3px; --vp-dur: 8s;  --vp-delay: 1.4s; --vp-color: #ffd700; --vp-glow: 5px; }
+.gv-vp:nth-child(15) { left: 12%; --vp-size: 2px; --vp-dur: 9.5s; --vp-delay: 2.5s; --vp-color: #ffd700; --vp-glow: 3px; }
+.gv-vp:nth-child(16) { left: 35%; --vp-size: 4px; --vp-dur: 7.5s; --vp-delay: 0.7s; --vp-color: #e0b0ff; --vp-glow: 7px; }
+.gv-vp:nth-child(17) { left: 48%; --vp-size: 3px; --vp-dur: 8s;  --vp-delay: 1.8s; --vp-color: #ffd700; --vp-glow: 5px; }
+.gv-vp:nth-child(18) { left: 58%; --vp-size: 2px; --vp-dur: 6s;  --vp-delay: 3s;   --vp-color: #c9a0ff; --vp-glow: 4px; }
+.gv-vp:nth-child(19) { left: 72%; --vp-size: 5px; --vp-dur: 9s;  --vp-delay: 0.9s; --vp-color: #ffd700; --vp-glow: 8px; }
+.gv-vp:nth-child(20) { left: 88%; --vp-size: 3px; --vp-dur: 7s;  --vp-delay: 2.1s; --vp-color: #ffd700; --vp-glow: 5px; }
+
+@keyframes gv-vp-float {
+  0%   { bottom: -5%; opacity: 0; transform: translateX(0) scale(0.5); }
+  10%  { opacity: 0.7; }
+  50%  { opacity: 0.9; transform: translateX(15px) scale(1); }
+  90%  { opacity: 0.3; transform: translateX(-10px) scale(0.7); }
+  100% { bottom: 105%; opacity: 0; transform: translateX(5px) scale(0.3); }
+}
+
+/* — Aura mágica pulsante ao redor da taça — */
+.gv-victory-aura {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(138, 43, 226, 0.15) 0%,
+    rgba(255, 215, 0, 0.08) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+  animation: gv-aura-pulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes gv-aura-pulse {
+  0%   { transform: translateX(-50%) scale(0.9); opacity: 0.5; }
+  100% { transform: translateX(-50%) scale(1.15); opacity: 0.85; }
+}
+
+/* — Victory card com brilho aprimorado — */
 .gv-victory-card {
-  background: rgba(20, 12, 40, 0.92);
+  position: relative;
   border: 2px solid #ffd700;
   border-radius: 20px;
   padding: 40px 48px;
   text-align: center;
   max-width: 480px;
   width: 100%;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(255, 215, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+  z-index: 1;
+  box-shadow:
+    0 0 40px rgba(255, 215, 0, 0.12),
+    0 0 80px rgba(138, 43, 226, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.6);
+  animation: gv-victory-card-glow 4s ease-in-out infinite alternate;
+}
+
+@keyframes gv-victory-card-glow {
+  0%   { box-shadow: 0 0 30px rgba(255, 215, 0, 0.1),  0 0 60px rgba(138, 43, 226, 0.06), 0 8px 32px rgba(0, 0, 0, 0.6); }
+  100% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.18), 0 0 90px rgba(138, 43, 226, 0.12), 0 8px 32px rgba(0, 0, 0, 0.6); }
 }
 
 .gv-victory-icon {
   font-size: 3.5rem;
   color: #ffd700;
   margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
   filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.5));
-  animation: gv-trophy-bounce 1s ease-in-out infinite alternate;
+  animation: gv-trophy-float 2.5s ease-in-out infinite alternate;
 }
 
-@keyframes gv-trophy-bounce {
-  from { transform: translateY(0) scale(1); }
-  to   { transform: translateY(-8px) scale(1.08); }
+@keyframes gv-trophy-float {
+  0%   { transform: translateY(0) scale(1); filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.4)); }
+  100% { transform: translateY(-8px) scale(1.06); filter: drop-shadow(0 0 24px rgba(255, 215, 0, 0.7)); }
 }
 
 .gv-victory-title {
@@ -871,98 +1146,88 @@
 .gv-card-shuffling {
   pointer-events: none;
   cursor: default;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
   animation: gv-staircase-base 2.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
-/* Animação base — todas as cartas sobem e desaparecem primeiro, depois voltam */
+/* Animação base */
 @keyframes gv-staircase-base {
-  0%   { transform: translate(0, 0) scale(0.4) rotate(0deg); opacity: 0; }
+  0%   { transform: translate3d(0, 0, 0) scale(0.4); opacity: 0; }
   10%  { opacity: 0.7; }
-  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
 }
 
-/* Grupo 1 — Sobe pra direita, desce, sobe de novo */
+/* Grupo 1 */
 .gv-card-shuffling:nth-child(6n+1) {
   animation-name: gv-staircase-1;
 }
 @keyframes gv-staircase-1 {
-  0%   { transform: translate(120px, -200px) scale(0.3) rotate(15deg); opacity: 0; }
-  15%  { transform: translate(80px, -140px) scale(0.5) rotate(10deg); opacity: 0.6; }
-  30%  { transform: translate(-60px, 100px) scale(0.7) rotate(-8deg); opacity: 0.8; }
-  50%  { transform: translate(40px, -80px) scale(0.85) rotate(5deg); opacity: 0.9; }
-  70%  { transform: translate(-15px, 30px) scale(0.95) rotate(-2deg); opacity: 1; }
-  85%  { transform: translate(5px, -8px) scale(1.02) rotate(1deg); opacity: 1; }
-  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  0%   { transform: translate3d(30px, -40px, 0) scale(0.3) rotate(10deg); opacity: 0; }
+  20%  { transform: translate3d(15px, -25px, 0) scale(0.5) rotate(6deg); opacity: 0.6; }
+  45%  { transform: translate3d(-10px, 15px, 0) scale(0.75) rotate(-4deg); opacity: 0.85; }
+  70%  { transform: translate3d(5px, -5px, 0) scale(0.95) rotate(1deg); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 1; }
 }
 
-/* Grupo 2 — Desce pela esquerda, sobe, cai */
+/* Grupo 2 */
 .gv-card-shuffling:nth-child(6n+2) {
   animation-name: gv-staircase-2;
 }
 @keyframes gv-staircase-2 {
-  0%   { transform: translate(-150px, 180px) scale(0.3) rotate(-20deg); opacity: 0; }
-  15%  { transform: translate(-100px, 120px) scale(0.5) rotate(-12deg); opacity: 0.5; }
-  30%  { transform: translate(80px, -90px) scale(0.7) rotate(10deg); opacity: 0.7; }
-  50%  { transform: translate(-40px, 60px) scale(0.85) rotate(-5deg); opacity: 0.9; }
-  70%  { transform: translate(20px, -20px) scale(0.95) rotate(3deg); opacity: 1; }
-  85%  { transform: translate(-5px, 5px) scale(1.01) rotate(-1deg); opacity: 1; }
-  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  0%   { transform: translate3d(-35px, 30px, 0) scale(0.3) rotate(-12deg); opacity: 0; }
+  20%  { transform: translate3d(-20px, 18px, 0) scale(0.5) rotate(-7deg); opacity: 0.55; }
+  45%  { transform: translate3d(12px, -10px, 0) scale(0.75) rotate(5deg); opacity: 0.85; }
+  70%  { transform: translate3d(-4px, 3px, 0) scale(0.95) rotate(-1deg); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 1; }
 }
 
-/* Grupo 3 — Vem de cima, vai pro lado, volta */
+/* Grupo 3 */
 .gv-card-shuffling:nth-child(6n+3) {
   animation-name: gv-staircase-3;
 }
 @keyframes gv-staircase-3 {
-  0%   { transform: translate(0, -250px) scale(0.2) rotate(25deg); opacity: 0; }
-  15%  { transform: translate(100px, -160px) scale(0.5) rotate(15deg); opacity: 0.6; }
-  30%  { transform: translate(-120px, -40px) scale(0.7) rotate(-12deg); opacity: 0.8; }
-  50%  { transform: translate(60px, 50px) scale(0.9) rotate(6deg); opacity: 0.9; }
-  70%  { transform: translate(-25px, -15px) scale(0.95) rotate(-3deg); opacity: 1; }
-  85%  { transform: translate(8px, 5px) scale(1.02) rotate(1deg); opacity: 1; }
-  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  0%   { transform: translate3d(0, -45px, 0) scale(0.2) rotate(15deg); opacity: 0; }
+  20%  { transform: translate3d(20px, -28px, 0) scale(0.5) rotate(8deg); opacity: 0.6; }
+  45%  { transform: translate3d(-15px, 8px, 0) scale(0.75) rotate(-5deg); opacity: 0.85; }
+  70%  { transform: translate3d(6px, -3px, 0) scale(0.95) rotate(2deg); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 1; }
 }
 
-/* Grupo 4 — Vem de baixo-direita, escada ziguezague */
+/* Grupo 4 */
 .gv-card-shuffling:nth-child(6n+4) {
   animation-name: gv-staircase-4;
 }
 @keyframes gv-staircase-4 {
-  0%   { transform: translate(180px, 200px) scale(0.3) rotate(-18deg); opacity: 0; }
-  15%  { transform: translate(120px, 100px) scale(0.5) rotate(-10deg); opacity: 0.5; }
-  30%  { transform: translate(-90px, 140px) scale(0.65) rotate(14deg); opacity: 0.7; }
-  50%  { transform: translate(50px, -70px) scale(0.85) rotate(-6deg); opacity: 0.9; }
-  70%  { transform: translate(-20px, 25px) scale(0.95) rotate(2deg); opacity: 1; }
-  85%  { transform: translate(6px, -6px) scale(1.01) rotate(-1deg); opacity: 1; }
-  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  0%   { transform: translate3d(40px, 35px, 0) scale(0.3) rotate(-10deg); opacity: 0; }
+  20%  { transform: translate3d(25px, 20px, 0) scale(0.5) rotate(-6deg); opacity: 0.55; }
+  45%  { transform: translate3d(-12px, -8px, 0) scale(0.75) rotate(4deg); opacity: 0.85; }
+  70%  { transform: translate3d(4px, 3px, 0) scale(0.95) rotate(-1deg); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 1; }
 }
 
-/* Grupo 5 — Espiral da esquerda-cima */
+/* Grupo 5 */
 .gv-card-shuffling:nth-child(6n+5) {
   animation-name: gv-staircase-5;
 }
 @keyframes gv-staircase-5 {
-  0%   { transform: translate(-200px, -150px) scale(0.2) rotate(30deg); opacity: 0; }
-  15%  { transform: translate(-130px, 60px) scale(0.5) rotate(18deg); opacity: 0.6; }
-  30%  { transform: translate(100px, -100px) scale(0.7) rotate(-10deg); opacity: 0.8; }
-  50%  { transform: translate(-50px, 40px) scale(0.85) rotate(7deg); opacity: 0.9; }
-  70%  { transform: translate(18px, -18px) scale(0.95) rotate(-3deg); opacity: 1; }
-  85%  { transform: translate(-4px, 4px) scale(1.02) rotate(1deg); opacity: 1; }
-  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  0%   { transform: translate3d(-30px, -35px, 0) scale(0.2) rotate(18deg); opacity: 0; }
+  20%  { transform: translate3d(-18px, 10px, 0) scale(0.5) rotate(10deg); opacity: 0.6; }
+  45%  { transform: translate3d(15px, -12px, 0) scale(0.75) rotate(-5deg); opacity: 0.85; }
+  70%  { transform: translate3d(-5px, 4px, 0) scale(0.95) rotate(2deg); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 1; }
 }
 
-/* Grupo 6 — Queda livre + rebote lateral */
+/* Grupo 6 */
 .gv-card-shuffling:nth-child(6n) {
   animation-name: gv-staircase-6;
 }
 @keyframes gv-staircase-6 {
-  0%   { transform: translate(50px, -280px) scale(0.3) rotate(-22deg); opacity: 0; }
-  15%  { transform: translate(-70px, -180px) scale(0.45) rotate(-14deg); opacity: 0.5; }
-  30%  { transform: translate(90px, 80px) scale(0.7) rotate(12deg); opacity: 0.8; }
-  50%  { transform: translate(-60px, -50px) scale(0.85) rotate(-5deg); opacity: 0.9; }
-  70%  { transform: translate(15px, 20px) scale(0.95) rotate(2deg); opacity: 1; }
-  85%  { transform: translate(-3px, -5px) scale(1.01) rotate(-1deg); opacity: 1; }
-  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  0%   { transform: translate3d(10px, -40px, 0) scale(0.3) rotate(-14deg); opacity: 0; }
+  20%  { transform: translate3d(-15px, -25px, 0) scale(0.45) rotate(-8deg); opacity: 0.55; }
+  45%  { transform: translate3d(18px, 10px, 0) scale(0.75) rotate(6deg); opacity: 0.85; }
+  70%  { transform: translate3d(-4px, -3px, 0) scale(0.95) rotate(-1deg); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 1; }
 }
 
 /* Brilho extra no grid durante shuffle */
@@ -973,6 +1238,16 @@
 /* ============================================ */
 /* RESPONSIVIDADE                               */
 /* ============================================ */
+
+/* Grid por dificuldade — Desktop */
+.gv-grid-easy, .gv-grid-medium {
+  grid-template-columns: repeat(10, minmax(0, 100px));
+}
+
+.gv-grid-challenge {
+  grid-template-columns: repeat(10, minmax(0, 80px));
+  gap: 6px;
+}
 
 @media (max-width: 1024px) {
   .gv-grid-challenge {

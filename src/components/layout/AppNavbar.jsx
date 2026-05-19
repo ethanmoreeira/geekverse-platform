@@ -1,8 +1,9 @@
 // AppNavbar.jsx
 // Barra de navegação principal do GeekVerse G8.
 // Links para Dashboard, jogos, ranking, exportar e sobre.
-// Botão Sair com limpeza de autenticação.
+// Botão Sair.
 
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -13,21 +14,34 @@ import {
   FaSignOutAlt,
 } from 'react-icons/fa';
 import { GiJoystick } from 'react-icons/gi';
+import ThemedLogoutScreen from '../feedback/ThemedLogoutScreen';
 
 const AppNavbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
+    if (location.pathname.includes('/app/harry-potter')) {
+      setIsLoggingOut(true);
+      setTimeout(() => {
+        logout();
+        navigate('/login', { replace: true });
+      }, 4000);
+    } else {
+      logout();
+      navigate('/login', { replace: true });
+    }
   };
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="gv-navbar">
+    <>
+      {isLoggingOut && <ThemedLogoutScreen />}
+      <nav className="gv-navbar">
       <div className="gv-navbar-inner">
         <Link to="/app" className="gv-navbar-brand">
           <GiJoystick className="gv-navbar-brand-icon" />
@@ -66,11 +80,6 @@ const AppNavbar = () => {
         </div>
 
         <div className="gv-navbar-user">
-          {user && (
-            <span className="gv-navbar-username">
-              Olá, {user.username}
-            </span>
-          )}
           <button
             className="gv-btn-logout"
             onClick={handleLogout}
@@ -82,7 +91,9 @@ const AppNavbar = () => {
         </div>
       </div>
     </nav>
+    </>
   );
 };
 
 export default AppNavbar;
+

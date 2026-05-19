@@ -4,7 +4,7 @@
 
 import MemoryCard from './MemoryCard';
 
-const MemoryBoard = ({ cards, difficulty, isShuffling, onCardClick, isCardFlipped, isCardMatched }) => {
+const MemoryBoard = ({ cards, difficulty, isShuffling, onCardClick, isCardFlipped, isCardMatched, zoomedCardId }) => {
   // Determinar classe de grid conforme dificuldade
   const getGridClass = () => {
     if (!difficulty) return 'gv-grid-easy';
@@ -28,6 +28,7 @@ const MemoryBoard = ({ cards, difficulty, isShuffling, onCardClick, isCardFlippe
             isMatched={isCardMatched(card)}
             isShuffling={isShuffling}
             shuffleIndex={index}
+            isZoomed={zoomedCardId === card.uniqueId}
           />
         ))}
       </div>
@@ -36,3 +37,4 @@ const MemoryBoard = ({ cards, difficulty, isShuffling, onCardClick, isCardFlippe
 };
 
 export default MemoryBoard;
+

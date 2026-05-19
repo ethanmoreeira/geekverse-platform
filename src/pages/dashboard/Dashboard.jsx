@@ -12,6 +12,7 @@ import {
   GiCastle,
   GiGalaxy,
 } from 'react-icons/gi';
+import harryCardBg from '../../assets/backgrounds/harry-potter/harry-logout-bg.png';
 import {
   FaTrophy,
   FaFileExport,
@@ -32,6 +33,7 @@ const GAMES = [
     route: '/app/harry-potter',
     icon: GiMagicSwirl,
     color: '#f59e0b',
+    bgImage: harryCardBg,
   },
   {
     id: 'pokemon',
@@ -150,6 +152,15 @@ const Dashboard = () => {
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && navigate(game.route)}
+              style={
+                game.bgImage
+                  ? {
+                      backgroundImage: `linear-gradient(rgba(10, 6, 25, 0.25), rgba(10, 6, 25, 0.5)), url(${game.bgImage})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
+                  : undefined
+              }
             >
               <div
                 className="gv-game-card-icon-wrapper"

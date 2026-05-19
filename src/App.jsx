@@ -26,11 +26,13 @@ import Sobre from './pages/sobre/Sobre';
 import NotFound from './pages/NotFound';
 
 import './App.css';
+import FullscreenButton from './components/FullscreenButton/FullscreenButton';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <FullscreenButton />
         <Routes>
           {/* Rotas Públicas */}
           <Route element={<PublicLayout />}>

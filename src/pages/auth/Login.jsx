@@ -8,7 +8,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { FaUser, FaLock, FaSignInAlt, FaGamepad } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
-import loginBg from '../../assets/backgrounds/login/login-geekverse-bg.jpg';
+import loginBg from '../../assets/backgrounds/login/a96642b4-b257-45bb-a49b-2ce054400e58.png';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -53,6 +53,7 @@ const Login = () => {
       style={{ backgroundImage: `url(${loginBg})` }}
     >
       <div className="gv-login-overlay"></div>
+
       <div className="gv-login-container">
         <div className="gv-login-header">
           <FaGamepad className="gv-login-icon" />
