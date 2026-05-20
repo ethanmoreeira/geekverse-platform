@@ -13,6 +13,7 @@ import {
   GiGalaxy,
 } from 'react-icons/gi';
 import harryCardBg from '../../assets/backgrounds/harry-potter/harry-logout-bg.png';
+import rickCardBg from '../../assets/backgrounds/rick-morty/image.png';
 import {
   FaTrophy,
   FaFileExport,
@@ -46,12 +47,13 @@ const GAMES = [
   },
   {
     id: 'rick-morty',
-    name: 'Caçada Dimensional',
+    name: 'Show do Multiverso',
     api: 'Rick and Morty API',
-    description: 'Encontre o personagem-alvo antes do tempo acabar.',
+    description: 'Quiz interdimensional com cards de personagens, episódios e localizações da API.',
     route: '/app/rick-morty',
     icon: GiPortal,
     color: '#22c55e',
+    bgImage: rickCardBg,
   },
   {
     id: 'star-wars',

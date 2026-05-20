@@ -16,7 +16,7 @@ import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
 import HarryMemory from './pages/games/harryPotter/HarryMemory';
 import PokemonBattle from './pages/games/pokemon/PokemonBattle';
-import RickMortyHunt from './pages/games/rickMorty/RickMortyHunt';
+import ShowDoMultiverso from './pages/games/rickMorty/ShowDoMultiverso';
 import StarWarsChallenge from './pages/games/starWars/StarWarsChallenge';
 import IceFireWar from './pages/games/iceFire/IceFireWar';
 import MultiverseHunt from './pages/games/multiverseHunt/MultiverseHunt';
@@ -51,7 +51,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="harry-potter" element={<HarryMemory />} />
             <Route path="pokemon" element={<PokemonBattle />} />
-            <Route path="rick-morty" element={<RickMortyHunt />} />
+            <Route path="rick-morty" element={<ShowDoMultiverso />} />
             <Route path="star-wars" element={<StarWarsChallenge />} />
             <Route path="ice-fire" element={<IceFireWar />} />
             <Route path="multiverse-hunt" element={<MultiverseHunt />} />
