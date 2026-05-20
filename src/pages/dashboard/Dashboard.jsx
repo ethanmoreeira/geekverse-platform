@@ -35,6 +35,7 @@ const GAMES = [
     icon: GiMagicSwirl,
     color: '#f59e0b',
     bgImage: harryCardBg,
+    status: 'playable',
   },
   {
     id: 'pokemon',
@@ -54,6 +55,7 @@ const GAMES = [
     icon: GiPortal,
     color: '#22c55e',
     bgImage: rickCardBg,
+    status: 'playable',
   },
   {
     id: 'star-wars',
@@ -115,7 +117,7 @@ const TECH_BADGES = [
   { label: 'React', icon: FaCode },
   { label: 'Rotas Privadas', icon: FaRoute },
   { label: '5 APIs Públicas', icon: FaRocket },
-  { label: 'EmailJS (futuro)', icon: FaEnvelope },
+  { label: 'EmailJS', icon: FaEnvelope },
 ];
 
 const Dashboard = () => {
@@ -176,7 +178,9 @@ const Dashboard = () => {
                 <p className="gv-game-card-desc">{game.description}</p>
               </div>
               <div className="gv-game-card-footer">
-                <span className="gv-status-badge">Em desenvolvimento</span>
+                <span className={`gv-status-badge ${game.status === 'playable' ? 'gv-status-ok' : ''}`}>
+                  {game.status === 'playable' ? '✅ Jogável' : 'Em desenvolvimento'}
+                </span>
               </div>
             </div>
           ))}

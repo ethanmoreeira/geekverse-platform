@@ -3,9 +3,9 @@
 // Reutiliza o estilo do GeekVerse (gv-json-*) para manter consistência.
 
 import { useState } from 'react';
-import { FaCode, FaChevronDown, FaChevronRight } from 'react-icons/fa';
+import { FaCode, FaChevronDown, FaChevronRight, FaClipboardList } from 'react-icons/fa';
 
-const JsonViewer = ({ data, title = '📋 Dados da API (JSON)' }) => {
+const JsonViewer = ({ data, title = 'Dados da API (JSON)' }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!data) return null;
@@ -18,7 +18,7 @@ const JsonViewer = ({ data, title = '📋 Dados da API (JSON)' }) => {
         type="button"
         id="json-viewer-toggle-smv"
       >
-        <FaCode />
+        <FaClipboardList aria-hidden="true" className="smv-icon" />
         <span>{title}</span>
         {isOpen ? (
           <FaChevronDown className="smv-json-toggle-icon" />

@@ -10,7 +10,7 @@ export const PRIVATE_ROUTES = [
   { path: '/app/dashboard', label: 'Dashboard' },
   { path: '/app/harry-potter', label: 'Memória dos Bruxos' },
   { path: '/app/pokemon', label: 'Duelo Pokémon' },
-  { path: '/app/rick-morty', label: 'Caçada Dimensional' },
+  { path: '/app/rick-morty', label: 'Show do Multiverso' },
   { path: '/app/star-wars', label: 'Desafio das Galáxias' },
   { path: '/app/ice-fire', label: 'Guerra dos Reinos' },
   { path: '/app/multiverse-hunt', label: 'Caçada Multiverso' },

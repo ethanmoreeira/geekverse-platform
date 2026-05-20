@@ -2,7 +2,7 @@
 // Exibe a pergunta, número da rodada, dificuldade, prêmio e imagem quando disponível.
 // Suporta visualType: "question-image" e "question-and-answer-cards".
 
-import { FaStar, FaBolt, FaSkull } from 'react-icons/fa';
+import { FaStar, FaBolt, FaSkull, FaTrophy } from 'react-icons/fa';
 
 const DIFFICULTY_CONFIG = {
   easy: { label: 'Fácil', icon: FaStar, color: '#22c55e' },
@@ -41,7 +41,7 @@ const QuestionCard = ({
         <div className="smv-question-meta">
           {prizeValue != null && (
             <span className="smv-question-prize">
-              🏆 {formatCurrency(prizeValue)}
+              <FaTrophy aria-hidden="true" className="smv-icon smv-prize-icon" /> {formatCurrency(prizeValue)}
             </span>
           )}
           <span

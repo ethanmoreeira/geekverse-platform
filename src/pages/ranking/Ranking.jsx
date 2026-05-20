@@ -27,7 +27,7 @@ const TABS = [
   { id: 'all', label: 'Todos', icon: FaListUl },
   { id: 'harry-potter', label: 'Memória dos Bruxos', icon: GiMagicSwirl, color: '#f59e0b' },
   { id: 'pokemon', label: 'Duelo Pokémon', icon: GiSwordsPower, color: '#ef4444' },
-  { id: 'rick-morty', label: 'Caçada Dimensional', icon: GiPortal, color: '#22c55e' },
+  { id: 'rick-morty', label: 'Show do Multiverso', icon: GiPortal, color: '#22c55e' },
   { id: 'star-wars', label: 'Desafio das Galáxias', icon: GiSpaceship, color: '#3b82f6' },
   { id: 'ice-fire', label: 'Guerra dos Reinos', icon: GiCastle, color: '#8b5cf6' },
   { id: 'multiverse-hunt', label: 'Caçada Multiverso', icon: GiGalaxy, color: '#ec4899' },
@@ -96,7 +96,7 @@ const Ranking = () => {
             Cada partida finalizada salva automaticamente o resultado.
           </p>
           <span className="gv-status-badge gv-status-dev">
-            🚧 Os jogos estão em desenvolvimento
+            🚧 Ranking será populado conforme você joga
           </span>
         </div>
       </div>

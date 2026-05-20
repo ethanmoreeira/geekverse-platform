@@ -1,19 +1,29 @@
 // AnswerCard.jsx
 // Card clicável para cada alternativa do quiz.
-// Modo personagem: exibe imagem grande, nome, status, espécie, gênero e origem/localização.
+// Modo personagem: exibe imagem grande e nome.
+// Antes da resposta: esconde status, espécie, origem, localização e episódios.
+// Depois da resposta: revela todos os dados como confirmação.
 // Modo texto: exibe apenas texto (usado somente em question-image visual type).
 
-const STATUS_EMOJI = {
-  Alive: '🟢',
-  Dead: '🔴',
-  unknown: '⚪',
-};
+import {
+  FaCircle,
+  FaSkull,
+  FaQuestionCircle,
+  FaGlobeAmericas,
+  FaMapMarkerAlt,
+  FaTv,
+} from 'react-icons/fa';
 
-const GENDER_EMOJI = {
-  Male: '♂️',
-  Female: '♀️',
-  Genderless: '⚧',
-  unknown: '❓',
+/** Retorna o ícone de status com a classe de cor adequada. */
+const getStatusIcon = (status) => {
+  switch (status) {
+    case 'Alive':
+      return <FaCircle aria-hidden="true" className="smv-status-icon smv-status-alive" />;
+    case 'Dead':
+      return <FaSkull aria-hidden="true" className="smv-status-icon smv-status-dead" />;
+    default:
+      return <FaQuestionCircle aria-hidden="true" className="smv-status-icon smv-status-unknown" />;
+  }
 };
 
 const AnswerCard = ({
@@ -39,9 +49,6 @@ const AnswerCard = ({
     stateClass = 'smv-answer-selected';
   }
 
-  // Helpers to check if we should hide a specific field
-  const shouldHide = (field) => !showResult && questionFocus === field;
-
   return (
     <button
       className={`smv-answer-card ${stateClass} ${isCharacter ? 'smv-answer-has-character' : ''}`}
@@ -62,21 +69,38 @@ const AnswerCard = ({
           />
           <div className="smv-answer-character-info">
             <span className="smv-answer-character-name">{option.name}</span>
-            <span className="smv-answer-character-details">
-              {shouldHide('status') ? '❓ ???' : `${STATUS_EMOJI[option.status] || '⚪'} ${option.status || '?'}`} 
-              {' · '}
-              {shouldHide('species') ? '???' : (option.species || '?')}
-            </span>
-            <span className="smv-answer-character-extra">
-              {shouldHide('gender') ? '❓ ???' : `${GENDER_EMOJI[option.gender] || '❓'} ${option.gender || '?'}`}
-              {option.origin && option.origin !== 'Desconhecida' && (
-                <> · 🌍 {shouldHide('origin') ? '???' : option.origin}</>
-              )}
-            </span>
-            {option.episodeCount != null && (
-              <span className="smv-answer-character-episodes">
-                📺 {shouldHide('episodes') ? '??? episódios' : `${option.episodeCount} episódio${option.episodeCount !== 1 ? 's' : ''}`}
-              </span>
+
+            {/* Dados técnicos: ocultos antes da resposta, revelados depois */}
+            {showResult && (
+              <>
+                <span className="smv-answer-character-details smv-inline-meta">
+                  {getStatusIcon(option.status)}
+                  {' '}{option.status || '?'}
+                  {' · '}
+                  {option.species || '?'}
+                </span>
+                <span className="smv-answer-character-extra smv-inline-meta">
+                  {option.origin && option.origin !== 'Desconhecida' && (
+                    <>
+                      <FaGlobeAmericas aria-hidden="true" className="smv-meta-icon" />
+                      {' '}{option.origin}
+                    </>
+                  )}
+                  {option.location && option.location !== 'Desconhecida' && (
+                    <>
+                      {' · '}
+                      <FaMapMarkerAlt aria-hidden="true" className="smv-meta-icon" />
+                      {' '}{option.location}
+                    </>
+                  )}
+                </span>
+                {option.episodeCount != null && (
+                  <span className="smv-answer-character-episodes smv-inline-meta">
+                    <FaTv aria-hidden="true" className="smv-meta-icon" />
+                    {' '}{option.episodeCount} episódio{option.episodeCount !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </>
             )}
           </div>
         </div>

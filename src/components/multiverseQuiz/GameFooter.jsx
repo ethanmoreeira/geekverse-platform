@@ -39,37 +39,7 @@ const GameFooter = ({
           Pontuação: {formatCurrency(score)}
         </span>
       </div>
-      <div className="smv-footer-actions">
-        <button
-          className="smv-btn-back"
-          onClick={onBack}
-          type="button"
-          id="btn-back-dashboard"
-        >
-          <FaArrowLeft /> Voltar
-        </button>
-        {gameOver ? (
-          <button
-            className="smv-btn-primary"
-            onClick={onRestart}
-            type="button"
-            id="btn-restart-game"
-          >
-            <FaRedo /> Jogar Novamente
-          </button>
-        ) : (
-          showResult && (
-            <button
-              className="smv-btn-primary"
-              onClick={onNextQuestion}
-              type="button"
-              id="btn-next-question"
-            >
-              Próxima Pergunta <FaArrowRight />
-            </button>
-          )
-        )}
-      </div>
+
     </div>
   );
 };

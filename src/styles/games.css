@@ -16,6 +16,17 @@
   overflow-x: hidden;
 }
 
+/* Hide body scrollbar when Harry Potter game is active */
+html:has(.gv-harry-page) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html:has(.gv-harry-page)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .gv-harry-page-bg {
   position: fixed;
   inset: 0;

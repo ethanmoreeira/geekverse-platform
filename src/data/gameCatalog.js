@@ -21,10 +21,10 @@ export const GAME_CATALOG = [
   },
   {
     id: 'rick-morty',
-    name: 'Caçada Dimensional',
+    name: 'Show do Multiverso',
     route: '/app/rick-morty',
     api: 'Rick and Morty API',
-    description: 'Encontre o personagem-alvo antes do tempo acabar.',
+    description: 'Quiz interdimensional com dados da Rick and Morty API.',
     icon: 'GiPortal',
   },
   {

@@ -3,7 +3,7 @@
 // Quiz dinâmico com perguntas geradas a partir da Rick and Morty API.
 // 3 modos: Portal Verde (fácil), Viagem Interdimensional (médio), Desafio da Citadel (difícil).
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { generateQuestions } from '../../../utils/questionGenerator';
 import QuestionCard from '../../../components/multiverseQuiz/QuestionCard';
@@ -12,46 +12,54 @@ import ScoreBoard from '../../../components/multiverseQuiz/ScoreBoard';
 import JsonViewer from '../../../components/multiverseQuiz/JsonViewer';
 import GameFooter from '../../../components/multiverseQuiz/GameFooter';
 import RickMortyLoader from '../../../components/multiverseQuiz/RickMortyLoader';
+import RickMortyAudioControl from '../../../components/multiverseQuiz/RickMortyAudioControl';
 import { GiPortal } from 'react-icons/gi';
 import {
   FaStar, FaBolt, FaSkull, FaTrophy, FaTimesCircle,
-  FaArrowLeft, FaRedo
+  FaArrowLeft, FaArrowRight, FaRedo, FaExclamationTriangle, FaCheckCircle,
+  FaLightbulb, FaClipboardList,
 } from 'react-icons/fa';
+import rickMortyMusic from '../../../assets/audio/magpiemusic-ambient-meditative-clear-sky-353119.mp3';
 
 import '../../../styles/showDoMultiverso.css';
 import menuBg from '../../../assets/backgrounds/rick-morty/rick_and_morty_epic_style.png';
+import gameBg from '../../../assets/backgrounds/rick-morty/rick_and_morty_all_characters_depth.png';
+import quizBg from '../../../assets/backgrounds/rick-morty/rick_and_morty_portals_space.png';
+import loseBg from '../../../assets/backgrounds/rick-morty/rick_disappointed_no_text.png';
+import rickGameOverBg from '../../../assets/backgrounds/rick-morty/rick_game_over.png';
+import rickVictoryBg from '../../../assets/backgrounds/rick-morty/rick_trophy_winner.png';
 
 // ─── Configuração dos Modos ─────────────────────────────────────────
 const GAME_MODES = {
   easy: {
     key: 'easy',
     name: 'Portal Verde',
-    subtitle: 'Perguntas simples sobre personagens',
+    subtitle: 'Identifique personagens principais',
     icon: FaStar,
     color: '#22c55e',
     questionCount: 8,
-    description: 'Status, espécie, gênero, origem e localização dos personagens.',
-    prizes: [100, 250, 500, 1000, 2000, 3000, 4000, 5000],
+    description: 'Pistas sobre a família Smith e aliados de Rick.',
+    prizes: [100, 250, 500, 1000, 2000, 5000, 10000, 20000],
   },
   medium: {
     key: 'medium',
     name: 'Viagem Interdimensional',
-    subtitle: 'Compare personagens e descubra diferenças',
+    subtitle: 'Descubra personagens secundários e versões alternativas',
     icon: FaBolt,
     color: '#f59e0b',
     questionCount: 12,
-    description: 'Quem apareceu em mais episódios, quem não é humano, origens desconhecidas.',
-    prizes: [1000, 2000, 5000, 10000, 25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000],
+    description: 'Pistas narrativas sobre personagens secundários e variantes.',
+    prizes: [500, 1000, 2000, 5000, 10000, 20000, 35000, 50000, 75000, 100000, 150000, 200000],
   },
   hard: {
     key: 'hard',
     name: 'Desafio da Citadel',
-    subtitle: 'Cruze personagens, episódios e locais',
+    subtitle: 'Identifique personagens obscuros e conexões complexas',
     icon: FaSkull,
     color: '#ef4444',
     questionCount: 15,
-    description: 'Quem aparece em um episódio, quem pertence a uma localização, conexões complexas.',
-    prizes: [1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 300000, 400000, 500000, 750000, 850000, 950000, 1000000],
+    description: 'Pistas sobre personagens específicos, versões transformadas e papéis narrativos.',
+    prizes: [1000, 2000, 5000, 10000, 20000, 35000, 50000, 75000, 100000, 150000, 200000, 300000, 400000, 500000, 1000000],
   },
 };
 
@@ -63,17 +71,7 @@ const formatCurrency = (value) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-const getQuestionFocus = (questionText) => {
-  if (!questionText) return null;
-  const q = questionText.toLowerCase();
-  if (q.includes('vivo') || q.includes('morto') || q.includes('status')) return 'status';
-  if (q.includes('humano') || q.includes('alien') || q.includes('espécie')) return 'species';
-  if (q.includes('feminino') || q.includes('masculino') || q.includes('gênero')) return 'gender';
-  if (q.includes('origem')) return 'origin';
-  if (q.includes('localização')) return 'location';
-  if (q.includes('episódio') || q.includes('aparições')) return 'episodes';
-  return null;
-};
+// questionFocus agora vem direto da pergunta curada (curatedQ.questionFocus)
 
 // ─── Componente Principal ───────────────────────────────────────────
 const ShowDoMultiverso = () => {
@@ -81,8 +79,11 @@ const ShowDoMultiverso = () => {
 
   // Estado geral
   const [isEntering, setIsEntering] = useState(true);
+  const [isExiting, setIsExiting] = useState(false);
   const [gamePhase, setGamePhase] = useState('menu'); // menu | loading | playing | gameover
   const [selectedMode, setSelectedMode] = useState(null);
+  const [enteringPortal, setEnteringPortal] = useState(null);
+  const [isPortalTransitioning, setIsPortalTransitioning] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -91,6 +92,46 @@ const ShowDoMultiverso = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // ─── Música ambiente — padrão Harry Potter ──────────────────────
+  const audioRef = useRef(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+
+  // Toca a música quando o intro loader terminar (usuário já clicou para entrar no jogo)
+  useEffect(() => {
+    if (!isEntering && audioRef.current) {
+      audioRef.current.volume = 0.18;
+      audioRef.current.play().then(() => {
+        setIsMusicPlaying(true);
+      }).catch(() => {
+        // Navegador bloqueou autoplay — o usuário pode clicar no botão
+        setIsMusicPlaying(false);
+      });
+    }
+  }, [isEntering]);
+
+  // Para a música ao desmontar o componente (sair da página)
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isMusicPlaying) {
+      audioRef.current.pause();
+      setIsMusicPlaying(false);
+    } else {
+      audioRef.current.play().then(() => {
+        setIsMusicPlaying(true);
+      }).catch((err) => {
+        console.warn('[ShowDoMultiverso] Não foi possível tocar a música:', err.message);
+      });
+    }
+  };
 
   // Estado do jogo
   const [questions, setQuestions] = useState([]);
@@ -109,7 +150,7 @@ const ShowDoMultiverso = () => {
   const modeConfig = selectedMode ? GAME_MODES[selectedMode] : null;
   const currentQuestion = questions[currentQuestionIndex] || null;
   const prizeValues = modeConfig?.prizes || [];
-  const currentFocus = currentQuestion ? getQuestionFocus(currentQuestion.question) : null;
+  const currentFocus = currentQuestion?.questionFocus || null;
 
   // ─── Iniciar Jogo ───────────────────────────────────────────────
   const startGame = useCallback(async (mode) => {
@@ -172,6 +213,7 @@ const ShowDoMultiverso = () => {
       modo: modeConfig.name,
       visualType: currentQuestion.visualType || 'answer-cards',
       pergunta: currentQuestion.question,
+      explicacao: currentQuestion.explanation || null,
       respostaCorreta: currentQuestion.options.find(
         (o) => (typeof o === 'object' ? o.id : o) === currentQuestion.correctId
       ),
@@ -214,36 +256,73 @@ const ShowDoMultiverso = () => {
     }
   };
 
+  const handlePortalClick = (modeKey) => {
+    if (isPortalTransitioning) return;
+    setEnteringPortal(modeKey);
+    setIsPortalTransitioning(true);
+
+    setTimeout(() => {
+      startGame(modeKey);
+      setEnteringPortal(null);
+      setIsPortalTransitioning(false);
+    }, 1000);
+  };
+
   const handleBackToMenu = () => {
     setGamePhase('menu');
     setSelectedMode(null);
     setQuestions([]);
     setLoadError(null);
+    setCurrentQuestionIndex(0);
+    setSelectedOptionId(null);
+    setShowResult(false);
+    setGameWon(false);
+    setScore(0);
+    setCorrectCount(0);
+    setApiData(null);
   };
 
   const handleBackToDashboard = () => {
     navigate('/app');
   };
 
-  if (isEntering) {
-    return <RickMortyLoader />;
+  const handleExitToDashboard = () => {
+    if (isExiting) return;
+    setIsExiting(true);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setIsMusicPlaying(false);
+    setTimeout(() => {
+      navigate('/app');
+    }, 2000);
+  };
+
+  const renderScreen = () => {
+    if (isEntering) {
+      return <RickMortyLoader />;
+    }
+
+  if (isExiting) {
+    return <RickMortyLoader variant="exit" />;
   }
 
   // ─── TELA: MENU ──────────────────────────────────────────────────
   if (gamePhase === 'menu') {
     return (
       <div className="smv-menu-page">
-        {/* Fundo fixo em tela cheia — padrão gv-harry-page-bg */}
+        {/* Fundo fixo em tela cheia */}
         <div
           className="smv-menu-bg"
-          style={{ backgroundImage: `url(${menuBg})` }}
+          style={{ backgroundImage: `url(${gameBg})` }}
         />
 
         {/* Top bar */}
         <div className="smv-menu-topbar">
           <button
             className="smv-btn-top-back"
-            onClick={handleBackToDashboard}
+            onClick={handleExitToDashboard}
             type="button"
             id="btn-back-dashboard-menu"
           >
@@ -251,51 +330,45 @@ const ShowDoMultiverso = () => {
           </button>
         </div>
 
-        <div className="smv-menu-screen">
+        {isPortalTransitioning && <div className="smv-portal-transition-overlay" />}
+
+        <div className={`smv-menu-screen ${isPortalTransitioning ? 'smv-portal-transition-active' : ''}`}>
           <div className="smv-menu-header">
-            <GiPortal className="smv-menu-icon" />
-            <h1 className="smv-menu-title">Show do Multiverso</h1>
-            <p className="smv-menu-subtitle">
-              Quiz interdimensional com perguntas criadas a partir dos dados da Rick and Morty API.
-              Escolha um modo e teste seu conhecimento multiversal.
+            <h1 className="smv-brand-title smv-portal-hero-title">Show do Multiverso</h1>
+            <p className="smv-brand-subtitle">
+              Escolha um portal, descubra personagens e explore dados reais da Rick and Morty API.
             </p>
           </div>
 
           {loadError && (
             <div className="smv-error" style={{ maxWidth: 560, margin: '0 auto 24px' }}>
-              <p>⚠️ {loadError}</p>
+              <p><FaExclamationTriangle aria-hidden="true" className="smv-icon smv-icon-warning" /> {loadError}</p>
             </div>
           )}
 
           <div className="smv-mode-grid">
             {Object.values(GAME_MODES).map((mode) => {
               const ModeIcon = mode.icon;
+              const diffLabel = mode.key === 'easy' ? 'Fácil'
+                : mode.key === 'medium' ? 'Médio' : 'Difícil';
               return (
                 <button
                   key={mode.key}
-                  className="smv-mode-card"
-                  onClick={() => startGame(mode.key)}
+                  className={`smv-mode-card ${enteringPortal === mode.key ? 'smv-portal-entering' : ''}`}
+                  onClick={() => handlePortalClick(mode.key)}
                   type="button"
                   id={`mode-${mode.key}`}
                 >
                   <div className="smv-mode-portal">
-                    <div
-                      className="smv-mode-icon-wrapper"
-                      style={{ color: mode.color }}
-                    >
-                      <ModeIcon />
+                    <div className="smv-mode-portal-content">
+                      <h3 className="smv-mode-name">{mode.name}</h3>
+                      <span className="smv-mode-difficulty">
+                        {diffLabel.toUpperCase()}
+                      </span>
+                      <span className="smv-mode-questions">
+                        {mode.questionCount} perguntas
+                      </span>
                     </div>
-                  </div>
-                  <h3 className="smv-mode-name">{mode.name}</h3>
-                  <p className="smv-mode-subtitle">{mode.subtitle}</p>
-                  <p className="smv-mode-desc">{mode.description}</p>
-                  <div className="smv-mode-meta">
-                    <span className="smv-mode-questions">
-                      📝 {mode.questionCount} perguntas
-                    </span>
-                    <span className="smv-mode-prize" style={{ color: mode.color }}>
-                      🏆 Até {formatCurrency(mode.prizes[mode.prizes.length - 1])}
-                    </span>
                   </div>
                 </button>
               );
@@ -308,40 +381,57 @@ const ShowDoMultiverso = () => {
 
   // ─── TELA: LOADING ────────────────────────────────────────────────
   if (gamePhase === 'loading') {
-    return <RickMortyLoader message="Gerando perguntas do multiverso..." />;
+    let loaderTitle = 'Abrindo o Portal';
+    let loaderSubtitle = 'Sincronizando personagens e dimensões...';
+
+    if (selectedMode === 'easy') {
+      loaderTitle = 'Portal Verde';
+      loaderSubtitle = 'Carregando personagens principais...';
+    } else if (selectedMode === 'medium') {
+      loaderTitle = 'Viagem Interdimensional';
+      loaderSubtitle = 'Sincronizando versões alternativas...';
+    } else if (selectedMode === 'hard') {
+      loaderTitle = 'Desafio da Citadel';
+      loaderSubtitle = 'Preparando os desafios...';
+    }
+
+    return <RickMortyLoader title={loaderTitle} subtitle={loaderSubtitle} />;
   }
 
   // ─── TELA: GAME OVER ─────────────────────────────────────────────
   if (gamePhase === 'gameover') {
     return (
-      <div className="smv-page">
+      <div className="smv-page smv-bg-result" style={{ '--smv-rick-bg': `url(${gameWon ? quizBg : loseBg})` }}>
         {/* Top bar — padrão Harry Potter */}
         <div className="smv-top-bar">
           <button
             className="smv-btn-top-back"
-            onClick={handleBackToDashboard}
+            onClick={handleBackToMenu}
             type="button"
             id="btn-back-dashboard-gameover"
           >
-            <FaArrowLeft /> Voltar
+            <FaArrowLeft /> Voltar aos portais
           </button>
         </div>
 
         <div className="smv-gameover-screen">
-          <div className="smv-gameover-card">
+          <div 
+            className={`smv-gameover-card ${gameWon ? 'smv-gameover-win-card' : 'smv-gameover-lose-card'}`}
+            style={{ '--smv-game-over-bg': `url(${gameWon ? rickVictoryBg : rickGameOverBg})` }}
+          >
             {gameWon ? (
               <>
                 <FaTrophy className="smv-gameover-icon smv-gameover-win" />
-                <h1 className="smv-gameover-title">Parabéns!</h1>
-                <p className="smv-gameover-subtitle">
+                <h1 className="smv-brand-title smv-final-title">Parabéns!</h1>
+                <p className="smv-brand-subtitle" style={{marginBottom: 20}}>
                   Você completou o modo <strong>{modeConfig?.name}</strong> e conquistou o prêmio máximo!
                 </p>
               </>
             ) : (
               <>
                 <FaTimesCircle className="smv-gameover-icon smv-gameover-lose" />
-                <h1 className="smv-gameover-title">Fim de Jogo</h1>
-                <p className="smv-gameover-subtitle">
+                <h1 className="smv-brand-title smv-final-title">Fim de Jogo</h1>
+                <p className="smv-brand-subtitle" style={{marginBottom: 20}}>
                   Você errou na pergunta {currentQuestionIndex + 1}.
                   {currentQuestion && (
                     <>
@@ -379,7 +469,7 @@ const ShowDoMultiverso = () => {
               </div>
             </div>
 
-            <JsonViewer data={apiData} title="📋 JSON da última rodada" />
+            <JsonViewer data={apiData} title="JSON da última rodada" />
 
             <div className="smv-gameover-actions">
               <button
@@ -389,13 +479,6 @@ const ShowDoMultiverso = () => {
                 id="btn-restart-gameover"
               >
                 <FaRedo /> Jogar Novamente
-              </button>
-              <button
-                className="smv-btn-secondary"
-                onClick={handleBackToMenu}
-                type="button"
-              >
-                Escolher Outro Modo
               </button>
             </div>
           </div>
@@ -407,9 +490,9 @@ const ShowDoMultiverso = () => {
   // ─── TELA: PLAYING ────────────────────────────────────────────────
   if (!currentQuestion) {
     return (
-      <div className="smv-page">
+      <div className="smv-page smv-bg-game" style={{ '--smv-rick-bg': `url(${quizBg})` }}>
         <div className="smv-error" style={{ margin: '60px auto', maxWidth: 480 }}>
-          <p>⚠️ Erro: pergunta não encontrada.</p>
+          <p><FaExclamationTriangle aria-hidden="true" className="smv-icon smv-icon-warning" /> Erro: pergunta não encontrada.</p>
           <button className="smv-btn-primary" onClick={handleBackToMenu} type="button">
             Voltar ao Menu
           </button>
@@ -419,7 +502,7 @@ const ShowDoMultiverso = () => {
   }
 
   return (
-    <div className="smv-page">
+    <div className="smv-page smv-bg-game" style={{ '--smv-rick-bg': `url(${quizBg})` }}>
       {/* Top bar — padrão Harry Potter */}
       <div className="smv-top-bar">
         <button
@@ -428,18 +511,27 @@ const ShowDoMultiverso = () => {
           type="button"
           id="btn-back-dashboard-playing"
         >
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> Voltar aos portais
         </button>
       </div>
 
       <div className="smv-game-layout">
-        {/* Sidebar — ScoreBoard */}
+        {/* Sidebar — ScoreBoard + Footer */}
         <aside className="smv-sidebar">
           <ScoreBoard
             prizeValues={prizeValues}
             currentQuestionIndex={currentQuestionIndex}
             score={score}
             gameOver={false}
+          />
+          <GameFooter
+            difficulty={selectedMode}
+            score={score}
+            showResult={showResult}
+            gameOver={false}
+            onNextQuestion={handleNextQuestion}
+            onRestart={handleRestart}
+            onBack={handleBackToMenu}
           />
         </aside>
 
@@ -491,24 +583,52 @@ const ShowDoMultiverso = () => {
             </div>
           )}
 
-          {/* JSON Viewer (após responder) */}
-          {showResult && apiData && (
-            <JsonViewer data={apiData} title="📋 Dados da API desta rodada" />
+          {/* Feedback da resposta (após responder) */}
+          {showResult && currentQuestion && (
+            <div className={`smv-feedback-block ${
+              selectedOptionId === currentQuestion.correctId
+                ? 'smv-feedback-block-correct'
+                : 'smv-feedback-block-wrong'
+            }`}>
+              <p className="smv-feedback-title">
+                {selectedOptionId === currentQuestion.correctId
+                  ? <><FaCheckCircle aria-hidden="true" className="smv-icon smv-feedback-icon smv-feedback-correct" /> Resposta Correta!</>
+                  : <><FaTimesCircle aria-hidden="true" className="smv-icon smv-feedback-icon smv-feedback-wrong" /> Resposta Errada!</>}
+              </p>
+              {currentQuestion.explanation && (
+                <p className="smv-feedback-explanation">
+                  <FaLightbulb aria-hidden="true" className="smv-icon smv-icon-hint" /> {currentQuestion.explanation}
+                </p>
+              )}
+              <div className="smv-feedback-actions">
+                <button
+                  className="smv-btn-next"
+                  onClick={handleNextQuestion}
+                  type="button"
+                  id="btn-next-question"
+                >
+                  Próxima Pergunta <FaArrowRight />
+                </button>
+              </div>
+            </div>
           )}
 
-          {/* Footer — sem botão voltar (ele ficou no top bar) */}
-          <GameFooter
-            difficulty={selectedMode}
-            score={score}
-            showResult={showResult}
-            gameOver={false}
-            onNextQuestion={handleNextQuestion}
-            onRestart={handleRestart}
-            onBack={handleBackToMenu}
-          />
+          {/* JSON Viewer (após responder) */}
+          {showResult && apiData && (
+            <JsonViewer data={apiData} title="Dados da API desta rodada" />
+          )}
         </main>
       </div>
     </div>
+    );
+  };
+
+  return (
+    <>
+      <audio ref={audioRef} src={rickMortyMusic} loop preload="auto" />
+      <RickMortyAudioControl isMusicPlaying={isMusicPlaying} onToggle={toggleMusic} />
+      {renderScreen()}
+    </>
   );
 };
 
