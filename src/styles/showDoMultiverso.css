@@ -356,80 +356,32 @@
    flex-shrink: 0;
  }
 
- /* Anel externo rotativo — conic-gradient */
- .smv-mode-portal::before {
-   content: '';
-   position: absolute;
-   inset: -4px;
-   border-radius: 50%;
-   background: conic-gradient(from 0deg,
-     var(--portal-main, #22c55e) 0%,
-     var(--portal-accent, rgba(34, 197, 94, 0.15)) 20%,
-     var(--portal-main, #22c55e) 40%,
-     transparent 50%,
-     var(--portal-main, #22c55e) 60%,
-     var(--portal-accent, rgba(34, 197, 94, 0.1)) 80%,
-     var(--portal-main, #22c55e) 100%
-   );
-   opacity: 0.55;
-   filter: blur(3px);
-   animation: smv-portal-spin 10s linear infinite;
-   z-index: 0;
- }
+  @keyframes smv-portal-breathe {
+    0%, 100% {
+      opacity: 0.45;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.1), inset 0 0 20px rgba(34, 197, 94, 0.1);
+    }
+    50% {
+      opacity: 0.65;
+      box-shadow: 0 0 45px rgba(34, 197, 94, 0.4), inset 0 0 45px rgba(34, 197, 94, 0.4);
+    }
+  }
 
- /* Centro do portal — energia radial */
- .smv-mode-portal::after {
-   content: '';
-   position: absolute;
-   inset: 5px;
-   border-radius: 50%;
-   background:
-     radial-gradient(circle at 45% 40%,
-       rgba(34, 197, 94, 0.3) 0%,
-       rgba(34, 197, 94, 0.18) 30%,
-       rgba(6, 78, 59, 0.55) 60%,
-       rgba(5, 15, 10, 0.75) 100%
-     );
-   box-shadow:
-     inset 0 0 40px rgba(34, 197, 94, 0.2),
-     inset 0 0 80px rgba(34, 197, 94, 0.06),
-     0 0 24px rgba(34, 197, 94, 0.15);
-   z-index: 1;
-   animation: smv-portal-pulse 3.5s ease-in-out infinite;
- }
+  .smv-mode-portal-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+    animation: smv-portal-breathe 5s ease-in-out infinite;
+    transition: filter 0.3s ease;
+  }
 
- @keyframes smv-portal-spin {
-   from { transform: rotate(0deg); }
-   to { transform: rotate(360deg); }
- }
-
- @keyframes smv-portal-pulse {
-   0%, 100% {
-     box-shadow:
-       inset 0 0 40px rgba(34, 197, 94, 0.2),
-       inset 0 0 80px rgba(34, 197, 94, 0.06),
-       0 0 24px rgba(34, 197, 94, 0.15);
-   }
-   50% {
-     box-shadow:
-       inset 0 0 50px rgba(34, 197, 94, 0.3),
-       inset 0 0 100px rgba(34, 197, 94, 0.1),
-       0 0 40px rgba(34, 197, 94, 0.25);
-   }
- }
-
- /* Hover: portal brilha mais e gira mais rápido */
- .smv-mode-card:hover .smv-mode-portal::before {
-   opacity: 0.85;
-   animation-duration: 5s;
- }
-
- .smv-mode-card:hover .smv-mode-portal::after {
-   box-shadow:
-     inset 0 0 50px rgba(34, 197, 94, 0.35),
-     inset 0 0 100px rgba(34, 197, 94, 0.12),
-     0 0 50px rgba(34, 197, 94, 0.3);
- }
+  .smv-mode-card:hover .smv-mode-portal-bg {
+    filter: brightness(1.15) contrast(1.1);
+    animation-duration: 2.5s;
+  }
 
  /* ---- Conteúdo dentro do portal ---- */
  .smv-mode-portal-content {
@@ -450,16 +402,16 @@
    margin-bottom: 4px;
  }
 
- .smv-mode-name {
-   font-size: 18px;
-   font-weight: 800;
-   color: #4ade80;
-   text-shadow:
-     0 1px 6px rgba(0, 0, 0, 0.8),
-     0 0 12px rgba(34, 197, 94, 0.3);
-   line-height: 1.2;
-   margin-bottom: 4px;
- }
+  .smv-mode-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #4ade80;
+    text-shadow:
+      0 1px 6px rgba(0, 0, 0, 0.8),
+      0 0 12px rgba(34, 197, 94, 0.3);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
 
  .smv-mode-difficulty {
    font-size: 12px;
@@ -1819,56 +1771,156 @@
    z-index: 10;
  }
 
- @keyframes smv-portal-enter-anim {
-   0% {
-     transform: scale(1);
-     filter: brightness(1);
-   }
-   50% {
-     transform: scale(1.08);
-     filter: brightness(1.25);
-     box-shadow: 0 0 40px rgba(34, 197, 94, 0.8);
-     border-color: #22c55e;
-   }
-   100% {
-     transform: scale(1.25);
-     filter: brightness(1.5);
-     box-shadow: 0 0 100px rgba(34, 197, 94, 1);
-     border-color: #22c55e;
-     opacity: 0;
-   }
- }
-
- .smv-portal-transition-active {
-   pointer-events: none;
- }
-
- .smv-portal-transition-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-    pointer-events: none;
-    background: radial-gradient(circle at 50% 50%,
-      rgba(34, 197, 94, 0) 0%,
-      rgba(34, 197, 94, 0) 30%,
-      rgba(34, 197, 94, 0.35) 70%,
-      rgba(34, 197, 94, 0.7) 100%
-    );
-    animation: smv-portal-overlay-anim 1s ease-in forwards;
-  }
-
-  @keyframes smv-portal-overlay-anim {
+  @keyframes smv-portal-enter-anim {
     0% {
-      opacity: 0;
+      transform: scale(1);
+      filter: brightness(1);
     }
     50% {
-      opacity: 0.6;
+      transform: scale(1.05);
+      filter: brightness(1.2);
     }
     100% {
+      transform: scale(1.15);
+      filter: brightness(1.5);
+      opacity: 0;
+    }
+  }
+
+  .smv-portal-transition-active {
+    pointer-events: none;
+  }
+
+  /* --------------------------------------------------------- */
+  /* TRANSICAO DO PORTAL — DIMENSIONAL                         */
+  /* Sequencia: anel expande → fade escuro cobre tela → quiz   */
+  /* --------------------------------------------------------- */
+
+  .rick-portal-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* Overlay escuro que cresce em tela cheia */
+  .rick-portal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(3, 7, 18, 0.95);
+    opacity: 0;
+    animation: rick-overlay-in 0.95s ease-in forwards;
+  }
+
+  /* Container da animacao dentro do portal */
+  .rick-portal-explosion {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* Anel circular de energia — nasce do centro do portal */
+  .rick-portal-ring {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid rgba(34, 197, 94, 0.8);
+    box-shadow:
+      0 0 15px 4px rgba(34, 197, 94, 0.4),
+      inset 0 0 15px 4px rgba(34, 197, 94, 0.2);
+    opacity: 0;
+    transform: scale(0.3);
+    animation: rick-ring-burst 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* Nucleo luminoso central — glow suave */
+  .rick-portal-core {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(187, 247, 208, 0.9) 0%,
+      rgba(34, 197, 94, 0.5) 45%,
+      transparent 75%
+    );
+    filter: blur(3px);
+    opacity: 0;
+    transform: scale(0.2);
+    animation: rick-core-burst 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: 0.06s;
+  }
+
+  /* Vortex — energia giratoria translucida, sem blur para evitar borda quadrada */
+  .rick-portal-vortex {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(34, 197, 94, 0.4) 0%,
+      rgba(74, 222, 128, 0.2) 30%,
+      rgba(34, 197, 94, 0.1) 50%,
+      transparent 70%
+    );
+    opacity: 0;
+    transform: scale(0.15) rotate(0deg);
+    animation: rick-vortex-spin 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes rick-overlay-in {
+    0%   { opacity: 0; }
+    60%  { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes rick-ring-burst {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    30% {
       opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(5); /* Reduzido de 8 para 5 */
+    }
+  }
+
+  @keyframes rick-core-burst {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    40% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(7); /* Reduzido de 10 para 7 */
+    }
+  }
+
+  @keyframes rick-vortex-spin {
+    0% {
+      opacity: 0;
+      transform: scale(0.5) rotate(0deg);
+    }
+    50% {
+      opacity: 0.9;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.1) rotate(135deg); /* Reduzido de 1.5 para 1.1 */
     }
   }
 
@@ -1905,7 +1957,7 @@
 
  .smv-brand-title {
    font-family: Georgia, "Times New Roman", serif;
-   font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+   font-size: clamp(1.4rem, 3vw, 2.3rem);
    font-weight: 800;
    letter-spacing: 0.01em;
    color: #f8fafc;
@@ -1919,7 +1971,6 @@
 
  .smv-brand-subtitle {
    font-size: 15px;
-   color: #cbd5e1;
    font-weight: 400;
    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
    max-width: 600px;

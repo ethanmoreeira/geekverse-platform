@@ -15,9 +15,9 @@ import PublicLayout from './components/layout/PublicLayout';
 import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
 import HarryMemory from './pages/games/harryPotter/HarryMemory';
-import PokemonBattle from './pages/games/pokemon/PokemonBattle';
+import PokeSombra from './pages/games/pokemon/PokeSombra';
 import ShowDoMultiverso from './pages/games/rickMorty/ShowDoMultiverso';
-import StarWarsChallenge from './pages/games/starWars/StarWarsChallenge';
+import StarWarsGame from './pages/games/starWars/StarWarsGame';
 import IceFireWar from './pages/games/iceFire/IceFireWar';
 import MultiverseHunt from './pages/games/multiverseHunt/MultiverseHunt';
 import Ranking from './pages/ranking/Ranking';
@@ -50,9 +50,9 @@ function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="harry-potter" element={<HarryMemory />} />
-            <Route path="pokemon" element={<PokemonBattle />} />
+            <Route path="pokemon" element={<PokeSombra />} />
             <Route path="rick-morty" element={<ShowDoMultiverso />} />
-            <Route path="star-wars" element={<StarWarsChallenge />} />
+            <Route path="star-wars" element={<StarWarsGame />} />
             <Route path="ice-fire" element={<IceFireWar />} />
             <Route path="multiverse-hunt" element={<MultiverseHunt />} />
             <Route path="ranking" element={<Ranking />} />

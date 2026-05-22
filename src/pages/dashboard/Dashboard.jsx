@@ -14,6 +14,8 @@ import {
 } from 'react-icons/gi';
 import harryCardBg from '../../assets/backgrounds/harry-potter/harry-logout-bg.png';
 import rickCardBg from '../../assets/backgrounds/rick-morty/image.png';
+import pokemonCardBg from '../../assets/backgrounds/pokemon/pokemon_trainer_classic_dark.png';
+import starWarsBg from '../../assets/backgrounds/star-wars/star_wars_space_wallpaper.png';
 import {
   FaTrophy,
   FaFileExport,
@@ -39,12 +41,14 @@ const GAMES = [
   },
   {
     id: 'pokemon',
-    name: 'Duelo Pokémon',
-    api: 'PokéAPI',
-    description: 'Compare atributos reais dos Pokémon em batalhas de cartas.',
+    name: 'PokeSombra',
+    api: 'PokeAPI',
+    description: 'Cacada visual por silhuetas usando dados reais da PokeAPI.',
     route: '/app/pokemon',
     icon: GiSwordsPower,
     color: '#ef4444',
+    bgImage: pokemonCardBg,
+    status: 'playable',
   },
   {
     id: 'rick-morty',
@@ -59,12 +63,13 @@ const GAMES = [
   },
   {
     id: 'star-wars',
-    name: 'Desafio das Galáxias',
+    name: 'Fuga do Hiperespaço',
     api: 'SWAPI',
-    description: 'Compare personagens, planetas e naves de Star Wars.',
+    description: 'Monte sua missão e escape do campo de asteroides.',
     route: '/app/star-wars',
     icon: GiSpaceship,
     color: '#3b82f6',
+    bgImage: starWarsBg,
   },
   {
     id: 'ice-fire',
@@ -159,29 +164,21 @@ const Dashboard = () => {
               style={
                 game.bgImage
                   ? {
-                      backgroundImage: `linear-gradient(rgba(10, 6, 25, 0.25), rgba(10, 6, 25, 0.5)), url(${game.bgImage})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }
+                    backgroundImage: game.id === 'star-wars' 
+                      ? `url(${game.bgImage})` 
+                      : `linear-gradient(rgba(10, 6, 25, 0), rgba(10, 6, 25, 0.15)), url(${game.bgImage})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }
                   : undefined
               }
             >
-              <div
-                className="gv-game-card-icon-wrapper"
-                style={{ background: `${game.color}20`, color: game.color }}
-              >
-                <game.icon />
-              </div>
+
               <div className="gv-game-card-body">
                 <h3 className="gv-game-card-title">{game.name}</h3>
                 <span className="gv-game-card-api">{game.api}</span>
-                <p className="gv-game-card-desc">{game.description}</p>
               </div>
-              <div className="gv-game-card-footer">
-                <span className={`gv-status-badge ${game.status === 'playable' ? 'gv-status-ok' : ''}`}>
-                  {game.status === 'playable' ? '✅ Jogável' : 'Em desenvolvimento'}
-                </span>
-              </div>
+
             </div>
           ))}
         </div>

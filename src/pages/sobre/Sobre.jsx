@@ -20,7 +20,7 @@ const APIS_USED = [
   { name: 'Harry Potter API', url: 'https://hp-api.onrender.com/', game: 'Memória dos Bruxos' },
   { name: 'PokéAPI', url: 'https://pokeapi.co/', game: 'Duelo Pokémon' },
   { name: 'Rick and Morty API', url: 'https://rickandmortyapi.com/', game: 'Show do Multiverso' },
-  { name: 'SWAPI', url: 'https://swapi.dev/', game: 'Desafio das Galáxias' },
+  { name: 'SWAPI', url: 'https://swapi.dev/', game: 'Fuga do Hiperespaço' },
   { name: 'An API of Ice and Fire', url: 'https://anapioficeandfire.com/', game: 'Guerra dos Reinos' },
 ];
 

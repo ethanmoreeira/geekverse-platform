@@ -5,9 +5,9 @@
 import { FaStar, FaBolt, FaSkull, FaTrophy } from 'react-icons/fa';
 
 const DIFFICULTY_CONFIG = {
-  easy: { label: 'Fácil', icon: FaStar, color: '#22c55e' },
-  medium: { label: 'Médio', icon: FaBolt, color: '#f59e0b' },
-  hard: { label: 'Difícil', icon: FaSkull, color: '#ef4444' },
+  easy: { label: 'Fácil', color: '#22c55e' },
+  medium: { label: 'Médio', color: '#22c55e' },
+  hard: { label: 'Difícil', color: '#22c55e' },
 };
 
 const formatCurrency = (value) =>
@@ -30,7 +30,6 @@ const QuestionCard = ({
   showResult,
 }) => {
   const config = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.easy;
-  const DiffIcon = config.icon;
 
   return (
     <div className="smv-question-card">
@@ -52,7 +51,7 @@ const QuestionCard = ({
               borderColor: `${config.color}40`,
             }}
           >
-            <DiffIcon /> {config.label}
+            {config.label}
           </span>
         </div>
       </div>

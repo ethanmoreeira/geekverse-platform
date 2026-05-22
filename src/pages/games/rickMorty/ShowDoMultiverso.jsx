@@ -28,6 +28,7 @@ import quizBg from '../../../assets/backgrounds/rick-morty/rick_and_morty_portal
 import loseBg from '../../../assets/backgrounds/rick-morty/rick_disappointed_no_text.png';
 import rickGameOverBg from '../../../assets/backgrounds/rick-morty/rick_game_over.png';
 import rickVictoryBg from '../../../assets/backgrounds/rick-morty/rick_trophy_winner.png';
+import portalCircleBg from '../../../assets/backgrounds/rick-morty/rick_morty_portal_realistic.png';
 
 // ─── Configuração dos Modos ─────────────────────────────────────────
 const GAME_MODES = {
@@ -261,11 +262,18 @@ const ShowDoMultiverso = () => {
     setEnteringPortal(modeKey);
     setIsPortalTransitioning(true);
 
+    // Fase 1 — aguarda a animação do portal cobrir a tela (900ms)
+    // Fase 2 — inicia o quiz; o overlay ainda está visível em cima
+    // Fase 3 — limpa isPortalTransitioning após a troca de fase
     setTimeout(() => {
       startGame(modeKey);
-      setEnteringPortal(null);
-      setIsPortalTransitioning(false);
-    }, 1000);
+      // Limpa o estado de transição com pequeno delay para
+      // garantir que a tela do quiz já foi montada sob o overlay
+      setTimeout(() => {
+        setEnteringPortal(null);
+        setIsPortalTransitioning(false);
+      }, 150);
+    }, 950);
   };
 
   const handleBackToMenu = () => {
@@ -330,7 +338,12 @@ const ShowDoMultiverso = () => {
           </button>
         </div>
 
-        {isPortalTransitioning && <div className="smv-portal-transition-overlay" />}
+        {/* O overlay escuro de fundo (tela cheia) */}
+        {isPortalTransitioning && (
+          <div className="rick-portal-fullscreen" aria-hidden="true">
+            <div className="rick-portal-overlay"></div>
+          </div>
+        )}
 
         <div className={`smv-menu-screen ${isPortalTransitioning ? 'smv-portal-transition-active' : ''}`}>
           <div className="smv-menu-header">
@@ -360,6 +373,7 @@ const ShowDoMultiverso = () => {
                   id={`mode-${mode.key}`}
                 >
                   <div className="smv-mode-portal">
+                    <div className="smv-mode-portal-bg" style={{ backgroundImage: `url(${portalCircleBg})` }} />
                     <div className="smv-mode-portal-content">
                       <h3 className="smv-mode-name">{mode.name}</h3>
                       <span className="smv-mode-difficulty">
@@ -369,6 +383,14 @@ const ShowDoMultiverso = () => {
                         {mode.questionCount} perguntas
                       </span>
                     </div>
+                    {/* Animação que nasce de dentro do portal clicado */}
+                    {isPortalTransitioning && enteringPortal === mode.key && (
+                      <div className="rick-portal-explosion">
+                        <div className="rick-portal-ring"></div>
+                        <div className="rick-portal-core"></div>
+                        <div className="rick-portal-vortex"></div>
+                      </div>
+                    )}
                   </div>
                 </button>
               );

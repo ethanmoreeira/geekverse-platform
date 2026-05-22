@@ -13,10 +13,10 @@ export const GAME_CATALOG = [
   },
   {
     id: 'pokemon',
-    name: 'Duelo Pokémon',
+    name: 'PokeSombra',
     route: '/app/pokemon',
-    api: 'PokéAPI',
-    description: 'Duelo de cartas com atributos reais de Pokémon.',
+    api: 'PokeAPI',
+    description: 'Cacada visual por silhuetas usando dados reais da PokeAPI.',
     icon: 'GiPokecog',
   },
   {
@@ -29,11 +29,11 @@ export const GAME_CATALOG = [
   },
   {
     id: 'star-wars',
-    name: 'Desafio das Galáxias',
+    name: 'Fuga do Hiperespaço',
     route: '/app/star-wars',
     api: 'SWAPI',
-    description: 'Compare dados de personagens, planetas e naves.',
-    icon: 'GiLightSabers',
+    description: 'Monte sua missão e escape do campo de asteroides com dados reais da SWAPI.',
+    icon: 'GiSpaceship',
   },
   {
     id: 'ice-fire',
