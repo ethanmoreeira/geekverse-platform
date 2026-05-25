@@ -149,13 +149,7 @@ const MissionSummary = ({
 
       {/* Ações */}
       <div className="sw-summary-actions">
-        <button
-          className="sw-btn sw-btn-secondary"
-          onClick={onBackToBuilder}
-          type="button"
-        >
-          <FaArrowLeft /> Editar Missao
-        </button>
+
         <button
           className="sw-btn sw-btn-primary sw-btn-glow"
           onClick={onStartArena}

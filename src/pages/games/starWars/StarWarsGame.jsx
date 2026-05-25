@@ -36,6 +36,9 @@ import {
 // CSS
 import '../../../styles/starWars.css';
 
+// Imagens
+import exitImage from '../../../assets/backgrounds/star-wars/capital_ship_exit_screen_8k.png';
+
 // ─── Fases do Jogo ──────────────────────────────────────────────────
 
 const GAME_PHASES = {
@@ -118,6 +121,30 @@ const StarWarsGame = () => {
   const [missionStats, setMissionStats] = useState(null);
   const [gamePhase, setGamePhase] = useState(GAME_PHASES.BUILDER);
   const [activeBuilderStep, setActiveBuilderStep] = useState(BUILDER_STEPS.STARSHIP);
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleExit = () => {
+    // Se não estiver na tela de construção, volta para a tela de construção
+    if (gamePhase !== GAME_PHASES.BUILDER) {
+      setGamePhase(GAME_PHASES.BUILDER);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Se estiver na tela de construção mas NÃO no primeiro passo, volta um passo
+    const currentStepIndex = STEP_ORDER.indexOf(activeBuilderStep);
+    if (currentStepIndex > 0) {
+      setActiveBuilderStep(STEP_ORDER[currentStepIndex - 1]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Se estiver no primeiro passo da construção, sai para o dashboard
+    setIsExiting(true);
+    setTimeout(() => {
+      navigate('/app');
+    }, 1500);
+  };
 
   // ── Carregar dados ──
   const loadData = useCallback(async () => {
@@ -263,12 +290,33 @@ const StarWarsGame = () => {
       <div className="sw-top-bar">
         <button
           className="sw-btn-back"
-          onClick={() => navigate('/app')}
+          onClick={handleExit}
           type="button"
+          style={(activeBuilderStep === BUILDER_STEPS.PILOT || activeBuilderStep === BUILDER_STEPS.DIFFICULTY) ? { marginLeft: '-75px' } : {}}
         >
-          <FaArrowLeft /> Dashboard
+          <FaArrowLeft /> Voltar
         </button>
       </div>
+
+      {/* ── EXIT LOADING ── */}
+      {isExiting && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          backgroundImage: `linear-gradient(rgba(3, 7, 18, 0.05), rgba(3, 7, 18, 0.2)), url(${exitImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '24px'
+        }}>
+          <div className="sw-loading-spinner" />
+          <span className="sw-loading-text" style={{ fontSize: '1.2rem', color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Saindo da órbita...</span>
+        </div>
+      )}
 
       {/* Hero */}
       <div className="sw-hero sw-hero-compact">
@@ -394,15 +442,7 @@ const StarWarsGame = () => {
 
             {/* Stepper Footer Actions */}
             <div className="sw-stepper-actions">
-              <button
-                className="sw-btn sw-btn-secondary"
-                onClick={handlePrevStep}
-                disabled={currentStepIndex === 0}
-                type="button"
-              >
-                Voltar
-              </button>
-
+              <div />
               {currentStepIndex < STEP_ORDER.length - 1 ? (
                 <button
                   className="sw-btn sw-btn-primary"

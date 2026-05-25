@@ -3,11 +3,7 @@
 
 import { DIFFICULTY_CONFIG } from '../../../utils/starWarsMission';
 
-const DIFF_ICONS = {
-  easy: '▲',
-  medium: '◆',
-  hard: '■',
-};
+
 
 const DifficultySelector = ({ selected, onSelect }) => {
   return (
@@ -23,9 +19,7 @@ const DifficultySelector = ({ selected, onSelect }) => {
             aria-label={`Dificuldade: ${diff.label}`}
             style={{ '--diff-color': diff.color }}
           >
-            <div className="sw-difficulty-icon" style={{ color: diff.color }}>
-              {DIFF_ICONS[diff.key]}
-            </div>
+
             <div className="sw-difficulty-name-compact">{diff.label}</div>
             <div className="sw-difficulty-desc-compact">{diff.description}</div>
             <div className="sw-difficulty-stats-compact">

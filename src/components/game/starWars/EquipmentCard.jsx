@@ -11,10 +11,30 @@ const EQUIP_TYPE_LABELS = {
   utility: 'Utilitário',
 };
 
-const translateValue = (val) => {
-  if (!val || val === 'unknown' || val === 'n/a' || val === 'none') return 'Desconhecido';
-  return val;
+const isValidValue = (value) => {
+  if (value === undefined || value === null) return false;
+  const normalized = String(value).trim().toLowerCase();
+  return (
+    normalized !== "" &&
+    normalized !== "unknown" &&
+    normalized !== "n/a" &&
+    normalized !== "none" &&
+    normalized !== "desconhecido" &&
+    normalized !== "desconhecida" &&
+    normalized !== "nan"
+  );
 };
+
+const CLASS_LABELS = {
+  airspeeder: 'Aerodeslizador',
+  walker: 'Caminhante',
+  submarine: 'Submarino',
+  repulsorcraft: 'Nave repulsora',
+  speeder: 'Speeder',
+  'wheeled walker': 'Caminhante com rodas'
+};
+
+const translateClass = (val) => CLASS_LABELS[val.toLowerCase()] || val;
 
 import veiculoGeloImg from '../../../assets/backgrounds/star-wars/veiculo_terrestre_gelo.png';
 import veiculoPesadoImg from '../../../assets/backgrounds/star-wars/veiculo_pesado_quadrupede.png';
@@ -111,20 +131,26 @@ const EquipmentCard = ({ vehicle, isSelected, onSelect }) => {
 
       <div className="sw-card-body sw-card-body-compact">
         <h4 className="sw-card-title">{vehicle.name}</h4>
-        <p className="sw-card-subtitle">{translateValue(vehicle.model)}</p>
-        <p className="sw-card-meta">{translateValue(vehicle.manufacturer)}</p>
+        {isValidValue(vehicle.model) && (
+          <p className="sw-card-subtitle">{vehicle.model}</p>
+        )}
 
         <div className="sw-card-info sw-card-info-compact">
-          <span className="sw-card-info-item"><strong>Classe:</strong> {translateValue(vehicle.vehicleClass)}</span>
-          <span className="sw-card-info-item"><strong>Velocidade:</strong> {vehicle.maxSpeed > 0 ? vehicle.maxSpeed : 'Desconhecida'}</span>
-          <span className="sw-card-info-item"><strong>Carga:</strong> {vehicle.cargoCapacity > 0 ? vehicle.cargoCapacity.toLocaleString('pt-BR') : 'Desconhecida'}</span>
+          {isValidValue(vehicle.vehicleClass) && (
+            <span className="sw-card-info-item"><strong>Classe:</strong> {translateClass(vehicle.vehicleClass)}</span>
+          )}
+          {isValidValue(vehicle.cargoCapacity) && vehicle.cargoCapacity > 0 && (
+            <span className="sw-card-info-item"><strong>Carga:</strong> {vehicle.cargoCapacity.toLocaleString('pt-BR')}</span>
+          )}
         </div>
 
         <div className="sw-card-badges sw-card-badges-compact">
-          <span className="sw-badge sw-badge-speed" title="Bônus de velocidade">Vel +{vehicle.equipmentSpeedBonus}</span>
-          <span className="sw-badge sw-badge-shield" title="Bônus de escudo">Esc +{vehicle.equipmentShieldBonus}</span>
-          <span className="sw-badge sw-badge-handling" title="Bônus de controle">Ctrl +{vehicle.equipmentHandlingBonus}</span>
-          <span className="sw-badge sw-badge-role">{EQUIP_TYPE_LABELS[vehicle.equipmentType] || vehicle.equipmentType}</span>
+          <span className="sw-badge sw-badge-speed" title="Bônus de velocidade">Velocidade +{vehicle.equipmentSpeedBonus}</span>
+          <span className="sw-badge sw-badge-shield" title="Bônus de escudo">Escudo +{vehicle.equipmentShieldBonus}</span>
+          <span className="sw-badge sw-badge-handling" title="Bônus de controle">Controle +{vehicle.equipmentHandlingBonus}</span>
+          {isValidValue(vehicle.equipmentType) && (
+            <span className="sw-badge sw-badge-role">Perfil: {EQUIP_TYPE_LABELS[vehicle.equipmentType] || vehicle.equipmentType}</span>
+          )}
         </div>
       </div>
 

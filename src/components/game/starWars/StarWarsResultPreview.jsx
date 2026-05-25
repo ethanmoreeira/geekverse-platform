@@ -59,13 +59,7 @@ const StarWarsResultPreview = ({ missionStats, starship, pilot, planet, onBackTo
           >
             <FaRedo /> Nova Missão
           </button>
-          <button
-            className="sw-btn sw-btn-secondary"
-            onClick={onBackToBuilder}
-            type="button"
-          >
-            <FaArrowLeft /> Voltar à Montagem
-          </button>
+
         </div>
       </div>
     </div>

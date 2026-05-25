@@ -19,10 +19,29 @@ const SIZE_LABELS = {
   colossal: 'Colossal',
 };
 
-const translateValue = (val) => {
-  if (!val || val === 'unknown' || val === 'n/a' || val === 'none') return 'Desconhecido';
-  return val;
+const isValidValue = (value) => {
+  if (value === undefined || value === null) return false;
+  const normalized = String(value).trim().toLowerCase();
+  return (
+    normalized !== "" &&
+    normalized !== "unknown" &&
+    normalized !== "n/a" &&
+    normalized !== "none" &&
+    normalized !== "desconhecido" &&
+    normalized !== "desconhecida" &&
+    normalized !== "nan"
+  );
 };
+
+const CLASS_LABELS = {
+  starfighter: 'Caça',
+  corvette: 'Corveta',
+  'Star Destroyer': 'Destróier',
+  'Deep Space Mobile Battlestation': 'Estação espacial',
+  transport: 'Transporte',
+};
+
+const translateClass = (val) => CLASS_LABELS[val] || val;
 
 import corvetaEspacialImg from '../../../assets/backgrounds/star-wars/corveta_espacial.png';
 import estacaoEspacialImg from '../../../assets/backgrounds/star-wars/estacao_espacial.png';
@@ -119,22 +138,26 @@ const StarshipCard = ({ starship, isSelected, onSelect }) => {
 
       <div className="sw-card-body sw-card-body-compact">
         <h4 className="sw-card-title">{starship.name}</h4>
-        <p className="sw-card-subtitle">{translateValue(starship.model)}</p>
-        <p className="sw-card-meta">{translateValue(starship.manufacturer)}</p>
+        {isValidValue(starship.model) && (
+          <p className="sw-card-subtitle">{starship.model}</p>
+        )}
 
         <div className="sw-card-info sw-card-info-compact">
-          <span className="sw-card-info-item"><strong>Classe:</strong> {translateValue(starship.starshipClass)}</span>
-          <span className="sw-card-info-item"><strong>Tripulação:</strong> {translateValue(starship.crew)}</span>
-          <span className="sw-card-info-item"><strong>Passageiros:</strong> {translateValue(starship.passengers)}</span>
-          <span className="sw-card-info-item"><strong>Hyperdrive:</strong> {translateValue(starship.hyperdriveRating)}</span>
+          {isValidValue(starship.starshipClass) && (
+            <span className="sw-card-info-item"><strong>Classe:</strong> {translateClass(starship.starshipClass)}</span>
+          )}
+          {isValidValue(starship.shipSize) && (
+            <span className="sw-card-info-item"><strong>Porte:</strong> {SIZE_LABELS[starship.shipSize] || starship.shipSize}</span>
+          )}
         </div>
 
         <div className="sw-card-badges sw-card-badges-compact">
-          <span className="sw-badge sw-badge-speed" title="Velocidade">Vel {starship.gameSpeed}</span>
-          <span className="sw-badge sw-badge-shield" title="Escudo">Esc {starship.baseShield}</span>
-          <span className="sw-badge sw-badge-handling" title="Controle">Ctrl {starship.handling}</span>
-          <span className="sw-badge sw-badge-role">{ROLE_LABELS[starship.shipRole] || 'Desconhecido'}</span>
-          <span className="sw-badge sw-badge-size">{SIZE_LABELS[starship.shipSize] || starship.shipSize}</span>
+          <span className="sw-badge sw-badge-speed" title="Velocidade">Velocidade {starship.gameSpeed}</span>
+          <span className="sw-badge sw-badge-shield" title="Escudo">Escudo {starship.baseShield}</span>
+          <span className="sw-badge sw-badge-handling" title="Controle">Controle {starship.handling}</span>
+          {isValidValue(starship.shipRole) && (
+            <span className="sw-badge sw-badge-role">Perfil: {ROLE_LABELS[starship.shipRole] || starship.shipRole}</span>
+          )}
         </div>
       </div>
 

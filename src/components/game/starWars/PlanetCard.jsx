@@ -15,9 +15,18 @@ const ENV_LABELS = {
   gas: 'Gasoso',
 };
 
-const translateValue = (val) => {
-  if (!val || val === 'unknown' || val === 'n/a' || val === 'none') return 'Desconhecido';
-  return val;
+const isValidValue = (value) => {
+  if (value === undefined || value === null) return false;
+  const normalized = String(value).trim().toLowerCase();
+  return (
+    normalized !== "" &&
+    normalized !== "unknown" &&
+    normalized !== "n/a" &&
+    normalized !== "none" &&
+    normalized !== "desconhecido" &&
+    normalized !== "desconhecida" &&
+    normalized !== "nan"
+  );
 };
 
 import planetaDeserticoImg from '../../../assets/backgrounds/star-wars/planeta_desertico_espaco.png';
@@ -117,20 +126,26 @@ const PlanetCard = ({ planet, isSelected, onSelect }) => {
 
       <div className="sw-card-body sw-card-body-compact">
         <h4 className="sw-card-title">{planet.name}</h4>
-        <p className="sw-card-subtitle">{translateValue(planet.climate)}</p>
+        {isValidValue(planet.climate) && (
+          <p className="sw-card-subtitle">{planet.climate}</p>
+        )}
 
         <div className="sw-card-info sw-card-info-compact">
-          <span className="sw-card-info-item"><strong>Terreno:</strong> {translateValue(planet.terrain)}</span>
-          <span className="sw-card-info-item"><strong>Gravidade:</strong> {planet.gravity}x</span>
-          <span className="sw-card-info-item"><strong>Diâmetro:</strong> {planet.diameter > 0 ? `${planet.diameter.toLocaleString('pt-BR')}km` : 'Desconhecido'}</span>
-          <span className="sw-card-info-item"><strong>População:</strong> {planet.population > 0 ? planet.population.toLocaleString('pt-BR') : 'Desconhecida'}</span>
+          {isValidValue(planet.terrain) && (
+            <span className="sw-card-info-item"><strong>Terreno:</strong> {planet.terrain}</span>
+          )}
+          {isValidValue(planet.gravity) && (
+            <span className="sw-card-info-item"><strong>Gravidade:</strong> {planet.gravity}x</span>
+          )}
         </div>
 
         <div className="sw-card-badges sw-card-badges-compact">
           <span className="sw-badge sw-badge-danger" title={`Perigo: ${planet.planetDanger}/5`}>{dangerLevel}</span>
-          <span className="sw-badge sw-badge-env">{ENV_LABELS[planet.environmentType] || planet.environmentType}</span>
+          {isValidValue(planet.environmentType) && (
+            <span className="sw-badge sw-badge-env">{ENV_LABELS[planet.environmentType] || planet.environmentType}</span>
+          )}
           {planet.handlingPenalty > 0 && (
-            <span className="sw-badge sw-badge-penalty" title="Penalidade de controle">Ctrl -{planet.handlingPenalty}</span>
+            <span className="sw-badge sw-badge-penalty" title="Penalidade de controle">Controle -{planet.handlingPenalty}</span>
           )}
         </div>
       </div>

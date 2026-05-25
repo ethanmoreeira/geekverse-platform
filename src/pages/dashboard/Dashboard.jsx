@@ -184,33 +184,7 @@ const Dashboard = () => {
         </div>
       </section>
 
-      {/* Quick Links */}
-      <section className="gv-section">
-        <h2 className="gv-section-title">
-          <FaRocket /> Acesso Rápido
-        </h2>
-        <div className="gv-quick-links">
-          {QUICK_LINKS.map((link) => (
-            <div
-              key={link.id}
-              className="gv-quick-link-card"
-              onClick={() => navigate(link.route)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate(link.route)}
-            >
-              <link.icon
-                className="gv-quick-link-icon"
-                style={{ color: link.color }}
-              />
-              <div>
-                <h4 className="gv-quick-link-title">{link.name}</h4>
-                <p className="gv-quick-link-desc">{link.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+
     </div>
   );
 };

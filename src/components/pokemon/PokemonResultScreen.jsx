@@ -122,18 +122,18 @@ const PokemonResultScreen = ({
 
         <div className="pks-result-actions">
           <button
+            className="pks-btn-primary"
+            onClick={onPlayAgain}
+            type="button"
+            id="pks-btn-play-again"
+          >
+            <FaRedo /> Jogar Novamente
+          </button>
+          <button
             className="pks-btn-secondary"
             onClick={onChooseLevel}
             type="button"
             id="pks-btn-choose-level"
-          >
-            <FaArrowLeft /> Escolher outro nível
-          </button>
-          <button
-            className="pks-btn-secondary"
-            onClick={onBack}
-            type="button"
-            id="pks-btn-back-dashboard"
           >
             <FaArrowLeft /> Voltar
           </button>

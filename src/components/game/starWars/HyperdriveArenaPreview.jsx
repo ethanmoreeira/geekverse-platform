@@ -66,13 +66,7 @@ const HyperdriveArenaPreview = ({ missionStats, starship, onSimulateResult, onBa
 
       {/* Ações */}
       <div className="sw-arena-actions">
-        <button
-          className="sw-btn sw-btn-secondary"
-          onClick={onBackToBuilder}
-          type="button"
-        >
-          <FaArrowLeft /> Voltar à Montagem
-        </button>
+
         <button
           className="sw-btn sw-btn-primary"
           onClick={onSimulateResult}

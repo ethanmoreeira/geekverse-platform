@@ -18,9 +18,18 @@ const translateGender = (gender) => {
   return gender;
 };
 
-const translateValue = (val) => {
-  if (!val || val === 'unknown' || val === 'n/a' || val === 'none') return 'Desconhecido';
-  return val;
+const isValidValue = (value) => {
+  if (value === undefined || value === null) return false;
+  const normalized = String(value).trim().toLowerCase();
+  return (
+    normalized !== "" &&
+    normalized !== "unknown" &&
+    normalized !== "n/a" &&
+    normalized !== "none" &&
+    normalized !== "desconhecido" &&
+    normalized !== "desconhecida" &&
+    normalized !== "nan"
+  );
 };
 
 import pilotoEspacialImg from '../../../assets/backgrounds/star-wars/piloto_espacial.png';
@@ -42,97 +51,47 @@ const PilotCard = ({ pilot, isSelected, onSelect }) => {
       aria-pressed={isSelected}
     >
       {pilot.name === 'Luke Skywalker' ? (
-        <div 
-          className="sw-card-image-compact"
-          style={{
-            backgroundImage: `url(${pilotoEspacialImg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            height: '160px',
-            borderBottom: '1px solid var(--sw-border)',
-          }}
-        />
+        <img src={pilotoEspacialImg} alt="Luke Skywalker" className="sw-card-image-compact" />
       ) : pilot.name === 'Darth Vader' ? (
-        <div 
-          className="sw-card-image-compact"
-          style={{
-            backgroundImage: `url(${guerreiroEspacialImg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            height: '160px',
-            borderBottom: '1px solid var(--sw-border)',
-          }}
-        />
+        <img src={guerreiroEspacialImg} alt="Darth Vader" className="sw-card-image-compact" />
       ) : pilot.name === 'Leia Organa' ? (
-        <div 
-          className="sw-card-image-compact"
-          style={{
-            backgroundImage: `url(${liderRebeldeImg})`,
-            backgroundSize: '140%',
-            backgroundPosition: 'center',
-            height: '160px',
-            borderBottom: '1px solid var(--sw-border)',
-          }}
-        />
+        <img src={liderRebeldeImg} alt="Leia Organa" className="sw-card-image-compact" />
       ) : pilot.name === 'R2-D2' ? (
-        <div 
-          className="sw-card-image-compact"
-          style={{
-            backgroundImage: `url(${droideAstromecanicoImg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            height: '160px',
-            borderBottom: '1px solid var(--sw-border)',
-          }}
-        />
+        <img src={droideAstromecanicoImg} alt="R2-D2" className="sw-card-image-compact" />
       ) : pilot.name === 'C-3PO' ? (
-        <div 
-          className="sw-card-image-compact"
-          style={{
-            backgroundImage: `url(${droideHumanoideDouradoImg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            height: '160px',
-            borderBottom: '1px solid var(--sw-border)',
-          }}
-        />
+        <img src={droideHumanoideDouradoImg} alt="C-3PO" className="sw-card-image-compact" />
       ) : pilot.name === 'Obi-Wan Kenobi' ? (
-        <div 
-          className="sw-card-image-compact"
-          style={{
-            backgroundImage: `url(${mestreGuerreiroEspacialImg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            height: '160px',
-            borderBottom: '1px solid var(--sw-border)',
-          }}
-        />
+        <img src={mestreGuerreiroEspacialImg} alt="Obi-Wan Kenobi" className="sw-card-image-compact" />
       ) : (
-        <div 
-          className="sw-card-image-placeholder sw-card-image-compact"
-          style={{ height: '160px' }}
-        >
+        <div className="sw-card-image-placeholder sw-card-image-compact">
           <GiPerson className="sw-card-placeholder-icon" style={{ fontSize: '3rem' }} />
         </div>
       )}
 
       <div className="sw-card-body sw-card-body-compact">
         <h4 className="sw-card-title">{pilot.name}</h4>
-        <p className="sw-card-subtitle">
-          {translateGender(pilot.gender)}
-          {translateValue(pilot.birthYear) !== 'Desconhecido' ? ` • ${pilot.birthYear}` : ''}
-        </p>
+        {isValidValue(pilot.gender) && isValidValue(pilot.birthYear) ? (
+          <p className="sw-card-subtitle">{translateGender(pilot.gender)} • {pilot.birthYear}</p>
+        ) : isValidValue(pilot.gender) ? (
+          <p className="sw-card-subtitle">{translateGender(pilot.gender)}</p>
+        ) : null}
 
         <div className="sw-card-info sw-card-info-compact">
-          <span className="sw-card-info-item"><strong>Altura:</strong> {pilot.height > 0 ? `${pilot.height}cm` : 'Desconhecido'}</span>
-          <span className="sw-card-info-item"><strong>Massa:</strong> {pilot.mass > 0 ? `${pilot.mass}kg` : 'Desconhecido'}</span>
+          {isValidValue(pilot.height) && pilot.height > 0 && (
+            <span className="sw-card-info-item"><strong>Altura:</strong> {pilot.height}cm</span>
+          )}
+          {isValidValue(pilot.mass) && pilot.mass > 0 && (
+            <span className="sw-card-info-item"><strong>Massa:</strong> {pilot.mass}kg</span>
+          )}
         </div>
 
         <div className="sw-card-badges sw-card-badges-compact">
-          <span className="sw-badge sw-badge-speed" title="Bônus de velocidade">Vel {pilot.speedBonus >= 0 ? `+${pilot.speedBonus}` : pilot.speedBonus}</span>
-          <span className="sw-badge sw-badge-shield" title="Bônus de escudo">Esc {pilot.shieldBonus >= 0 ? `+${pilot.shieldBonus}` : pilot.shieldBonus}</span>
-          <span className="sw-badge sw-badge-handling" title="Bônus de controle">Ctrl {pilot.handlingBonus >= 0 ? `+${pilot.handlingBonus}` : pilot.handlingBonus}</span>
-          <span className="sw-badge sw-badge-role">{PILOT_TYPE_LABELS[pilot.pilotType] || pilot.pilotType}</span>
+          <span className="sw-badge sw-badge-speed" title="Bônus de velocidade">Velocidade {pilot.speedBonus >= 0 ? `+${pilot.speedBonus}` : pilot.speedBonus}</span>
+          <span className="sw-badge sw-badge-shield" title="Bônus de escudo">Escudo {pilot.shieldBonus >= 0 ? `+${pilot.shieldBonus}` : pilot.shieldBonus}</span>
+          <span className="sw-badge sw-badge-handling" title="Bônus de controle">Controle {pilot.handlingBonus >= 0 ? `+${pilot.handlingBonus}` : pilot.handlingBonus}</span>
+          {isValidValue(pilot.pilotType) && (
+            <span className="sw-badge sw-badge-role">Perfil: {PILOT_TYPE_LABELS[pilot.pilotType] || pilot.pilotType}</span>
+          )}
         </div>
       </div>
 
