@@ -17,7 +17,7 @@ import pokemonCardBg from '../../assets/backgrounds/pokemon/pokemon_trainer_clas
 import starWarsBg from '../../assets/backgrounds/star-wars/star_wars_space_wallpaper.png';
 import dashboardBg from '../../assets/backgrounds/dashboard/geekverse_g8_dashboard_background.png';
 import g8LogoV10 from '../../assets/backgrounds/dashboard/g8_logo_v10.png';
-import geekverseLogoFinal from '../../assets/backgrounds/dashboard/geekverse_logo_final.png';
+import geekverseLogoFinal from '../../assets/backgrounds/dashboard/geekverse_logo_cropped.png';
 import {
   FaGamepad,
   FaRocket,

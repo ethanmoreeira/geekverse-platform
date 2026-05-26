@@ -260,37 +260,41 @@ body {
   background-color: var(--gv-bg-primary);
 }
 
-/* Overlay leve — deixa a imagem mais viva, sem apagar */
+/* Overlay — escurece levemente para contraste do card */
 .gv-login-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.03);
+  background: radial-gradient(ellipse at center,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(0, 0, 0, 0.35) 100%);
   z-index: 1;
 }
 
-
-/* Card de login: compacto, translúcido, elegante */
+/* Card de login: glassmorphism escuro com boa legibilidade */
 .gv-login-container {
   width: 100%;
-  max-width: 280px;
+  max-width: 280px; /* Reduced from 320px */
   position: relative;
   z-index: 2;
-  background: rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(1.5px);
-  -webkit-backdrop-filter: blur(1.5px);
-  border: 1px solid rgba(0, 255, 255, 0.25);
-  border-radius: 14px;
-  padding: 22px 18px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  margin-top: 64px; /* Push down to align with background arena */
+  background: rgba(8, 12, 28, 0.15); /* Slightly less opaque */
+  backdrop-filter: blur(2px) saturate(1.1); /* Very subtle blur */
+  -webkit-backdrop-filter: blur(2px) saturate(1.1);
+  border: 1px solid rgba(0, 220, 255, 0.18);
+  border-radius: 18px;
+  padding: 6px 16px 6px; /* Reduced vertical padding further */
+  box-shadow:
+    0 0 28px rgba(0, 220, 255, 0.16),
+    0 18px 50px rgba(0, 0, 0, 0.45);
   animation:
     gv-login-appear 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-    gv-login-portal-glow 2s 0.6s ease-in-out infinite alternate;
+    gv-login-portal-glow 3s 0.6s ease-in-out infinite alternate;
 }
 
 @keyframes gv-login-appear {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.97);
+    transform: translateY(24px) scale(0.96);
   }
 
   to {
@@ -302,132 +306,217 @@ body {
 @keyframes gv-login-portal-glow {
   0% {
     box-shadow:
-      0 0 6px 1px rgba(0, 191, 255, 0.2),
-      0 -2px 10px 2px rgba(0, 255, 255, 0.15),
-      0 -4px 12px 3px rgba(138, 43, 226, 0.1),
-      0 12px 30px rgba(0, 0, 0, 0.6),
-      inset 0 0 6px 1px rgba(0, 255, 255, 0.1);
+      0 0 8px 1px rgba(0, 210, 255, 0.15),
+      0 -2px 12px 2px rgba(0, 255, 255, 0.1),
+      0 -4px 14px 3px rgba(138, 43, 226, 0.08),
+      0 12px 32px rgba(0, 0, 0, 0.5),
+      inset 0 0 8px 1px rgba(0, 255, 255, 0.06);
   }
 
   100% {
     box-shadow:
-      0 0 12px 2px rgba(0, 191, 255, 0.35),
-      0 -4px 15px 3px rgba(0, 255, 255, 0.25),
-      0 -8px 18px 4px rgba(138, 43, 226, 0.15),
-      0 12px 35px rgba(0, 0, 0, 0.7),
-      inset 0 0 10px 2px rgba(0, 255, 255, 0.2);
+      0 0 16px 3px rgba(0, 210, 255, 0.28),
+      0 -4px 18px 4px rgba(0, 255, 255, 0.18),
+      0 -8px 20px 5px rgba(138, 43, 226, 0.12),
+      0 14px 40px rgba(0, 0, 0, 0.6),
+      inset 0 0 12px 2px rgba(0, 255, 255, 0.12);
   }
 }
 
 .gv-login-header {
   text-align: center;
-  margin-bottom: 16px;
-}
-
-.gv-login-icon {
-  font-size: 32px;
-  color: var(--gv-accent);
   margin-bottom: 6px;
-  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.5));
 }
 
-.gv-login-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #f0e6ff;
-  margin-bottom: 4px;
-  letter-spacing: 0.5px;
-  text-shadow:
-    0 0 8px rgba(168, 85, 247, 0.45),
-    0 0 20px rgba(0, 255, 255, 0.15),
-    0 2px 10px rgba(0, 0, 0, 0.7);
+/* Logo wrapper */
+.gv-login-logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Logo image — mix-blend-mode: screen removes the black background */
+.gv-login-logo {
+  display: block;
+  width: min(315px, 93%); /* Increased slightly */
+  height: auto;
+  max-height: 74px; /* Increased slightly */
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.25));
 }
 
 .gv-login-subtitle {
-  font-size: 11px;
-  color: rgba(200, 210, 230, 0.85);
+  font-size: 12px;
+  color: rgba(180, 225, 255, 0.95); /* Light blue tone */
   letter-spacing: 0.3px;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  font-weight: 400;
 }
 
 .gv-login-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .gv-input-group {
   position: relative;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+}
+
+.gv-input-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(0, 212, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 2px;
+  padding-left: 2px;
 }
 
 .gv-input-icon {
   position: absolute;
   left: 14px;
-  color: var(--gv-text-muted);
+  bottom: 5px;
+  color: rgba(0, 220, 255, 0.78); /* Increased contrast */
   font-size: 14px;
   z-index: 1;
+  transition: color var(--gv-transition);
+}
+
+.gv-input-group:focus-within .gv-input-icon {
+  color: #00d4ff;
 }
 
 .gv-input-group input {
   width: 100%;
-  padding: 12px 14px 12px 40px;
-  background: rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 4px 14px 4px 38px;
+  background: rgba(8, 12, 28, 0.76); /* Darker and more legible */
+  border: 1px solid rgba(0, 220, 255, 0.22);
   border-radius: var(--gv-radius-sm);
-  color: var(--gv-text-primary);
+  color: rgba(245, 248, 255, 0.96); /* Higher contrast */
   font-size: 14px;
+  line-height: 1;
   font-family: var(--gv-font);
-  transition: border-color var(--gv-transition);
+  transition: all var(--gv-transition);
   outline: none;
 }
 
 .gv-input-group input:focus {
-  border-color: var(--gv-accent);
-  box-shadow: 0 0 0 3px var(--gv-accent-glow);
+  border-color: rgba(0, 212, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12), inset 0 0 6px rgba(0, 212, 255, 0.05);
+  background: rgba(15, 15, 40, 0.75);
 }
 
 .gv-input-group input::placeholder {
-  color: var(--gv-text-muted);
+  color: rgba(220, 230, 255, 0.58); /* Increased contrast */
+  font-weight: 300;
 }
 
 .gv-login-error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: var(--gv-radius-xs);
   padding: 10px 14px;
   color: #fca5a5;
   font-size: 13px;
   text-align: center;
+  animation: gv-shake 0.4s ease-in-out;
+}
+
+@keyframes gv-shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-6px);
+  }
+
+  40% {
+    transform: translateX(6px);
+  }
+
+  60% {
+    transform: translateX(-4px);
+  }
+
+  80% {
+    transform: translateX(4px);
+  }
 }
 
 .gv-btn-login {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  background: var(--gv-accent);
-  border: none;
+  gap: 6px;
+  padding: 4px 16px;
+  background: linear-gradient(135deg, #00b8d4 0%, #0097a7 50%, #00838f 100%);
+  border: 1px solid rgba(0, 212, 255, 0.2);
   border-radius: var(--gv-radius-sm);
-  color: #fff;
-  font-size: 15px;
+  color: #e0fcfd; /* Light blue tone instead of pure white */
+  font-size: 13px;
   font-weight: 600;
   font-family: var(--gv-font);
   cursor: pointer;
-  transition: background var(--gv-transition);
-  margin-top: 4px;
+  transition: all 0.25s ease;
+  margin-top: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.gv-btn-login::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .gv-btn-login:hover:not(:disabled) {
-  background: var(--gv-accent-hover);
+  background: linear-gradient(135deg, #00c9e0 0%, #00acc1 50%, #0097a7 100%);
+  box-shadow: 0 4px 20px rgba(0, 184, 212, 0.35), 0 0 8px rgba(0, 212, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.gv-btn-login:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.gv-btn-login:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 184, 212, 0.25);
 }
 
 .gv-btn-login:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Hint area below the form */
+.gv-login-hint {
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.gv-login-hint p {
+  font-size: 11px;
+  color: rgba(230, 240, 255, 0.76); /* Improved readability */
+  line-height: 1.5;
+  margin: 0;
+}
+
+
 
 .gv-login-footer {
   text-align: center;

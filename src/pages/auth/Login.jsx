@@ -1,25 +1,31 @@
 // Login.jsx
 // Página de login do GeekVerse G8.
-// Credenciais acadêmicas: Usuário G8 / Senha 2026
+// Identificação acadêmica: Nome + E-mail + Senha padrão G82026.
 // Após login correto, redireciona para /app (Dashboard).
+// Registra evento de auditoria ao logar.
 
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { FaUser, FaLock, FaSignInAlt, FaGamepad } from 'react-icons/fa';
+import { FaUser, FaLock, FaSignInAlt, FaEnvelope } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
+import { registerAuditEvent } from '../../services/auditService';
 import loginBg from '../../assets/backgrounds/login/a96642b4-b257-45bb-a49b-2ce054400e58.png';
+import geekverseLogo from '../../assets/backgrounds/dashboard/geekverse_logo_cropped.png';
+import LoginTransitionLoader from '../../components/feedback/LoginTransitionLoader';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isEntering, setIsEntering] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   // Se já está logado, redireciona direto
-  if (isAuthenticated) {
+  if (isAuthenticated && !isEntering) {
     return <Navigate to="/app" replace />;
   }
 
@@ -27,25 +33,40 @@ const Login = () => {
     e.preventDefault();
     setError('');
 
-    if (!username.trim() || !password.trim()) {
-      setError('Preencha todos os campos.');
-      return;
-    }
-
     setIsLoading(true);
 
     // Simula um pequeno delay para UX
     await new Promise((resolve) => setTimeout(resolve, 600));
 
-    const result = login(username.trim(), password.trim());
+    const result = login(nome.trim(), email.trim(), password.trim());
 
     if (result.success) {
-      navigate('/app', { replace: true });
+      // Registrar evento de auditoria
+      try {
+        registerAuditEvent(
+          'login_realizado',
+          '/login',
+          nome.trim(),
+          `E-mail: ${email.trim()}`
+        );
+      } catch (err) {
+        // Auditoria não deve impedir o login
+        console.warn('Auditoria: erro ao registrar login', err);
+      }
+
+      setIsEntering(true);
+      setTimeout(() => {
+        navigate('/app', { replace: true });
+      }, 1800);
     } else {
       setError(result.message);
       setIsLoading(false);
     }
   };
+
+  if (isEntering) {
+    return <LoginTransitionLoader />;
+  }
 
   return (
     <div
@@ -56,34 +77,55 @@ const Login = () => {
 
       <div className="gv-login-container">
         <div className="gv-login-header">
-          <FaGamepad className="gv-login-icon" />
-          <h1 className="gv-login-title">GeekVerse G8</h1>
+          <div className="gv-login-logo-wrapper">
+            <img
+              src={geekverseLogo}
+              alt="GeekVerse G8"
+              className="gv-login-logo"
+            />
+          </div>
           <p className="gv-login-subtitle">
-            Arcade interativo com APIs públicas
+            Identifique-se para acessar o arcade
           </p>
         </div>
 
         <form className="gv-login-form" onSubmit={handleSubmit}>
           <div className="gv-input-group">
+            <label className="gv-input-label" htmlFor="login-nome">Nome do jogador</label>
             <FaUser className="gv-input-icon" />
             <input
-              id="login-username"
+              id="login-nome"
               type="text"
-              placeholder="Usuário"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Digite seu nome"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
               disabled={isLoading}
-              autoComplete="username"
+              autoComplete="name"
               autoFocus
             />
           </div>
 
           <div className="gv-input-group">
+            <label className="gv-input-label" htmlFor="login-email">E-mail</label>
+            <FaEnvelope className="gv-input-icon" />
+            <input
+              id="login-email"
+              type="email"
+              placeholder="Digite seu e-mail"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              autoComplete="email"
+            />
+          </div>
+
+          <div className="gv-input-group">
+            <label className="gv-input-label" htmlFor="login-password">Senha de acesso</label>
             <FaLock className="gv-input-icon" />
             <input
               id="login-password"
               type="password"
-              placeholder="Senha"
+              placeholder="Digite a senha G82026"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
@@ -113,6 +155,10 @@ const Login = () => {
             )}
           </button>
         </form>
+
+        <div className="gv-login-hint">
+          <p>Seu nome será usado no ranking e seu e-mail na exportação e auditoria dos resultados.</p>
+        </div>
       </div>
     </div>
   );
