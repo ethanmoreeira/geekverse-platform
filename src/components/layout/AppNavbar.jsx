@@ -45,8 +45,7 @@ const AppNavbar = () => {
       <nav className="gv-navbar">
         <div className="gv-navbar-inner">
           <Link to="/app" className="gv-navbar-brand">
-            <img src={g8LogoV10} alt="G8 Logo" style={{ height: '24px', width: 'auto' }} />
-            <span>GeekVerse G8</span>
+            <img src={g8LogoV10} alt="G8 Logo" style={{ height: '48px', width: 'auto' }} />
           </Link>
 
           <div className="gv-navbar-links">

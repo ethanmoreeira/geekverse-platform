@@ -85,10 +85,10 @@
   cursor: pointer;
   transition: all var(--sw-transition);
   backdrop-filter: blur(8px);
-  position: absolute;
-  top: 50px;
-  left: calc(5% - 40px);
-  z-index: 50;
+  position: fixed;
+  top: 85px;
+  left: 16px;
+  z-index: 999;
 }
 
 .sw-btn-back:hover {

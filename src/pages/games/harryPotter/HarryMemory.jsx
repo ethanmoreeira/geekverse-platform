@@ -6,6 +6,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MemoryBoard from '../../../components/game/memory/MemoryBoard';
+import FloatingMemoryCards from '../../../components/game/memory/FloatingMemoryCards';
 import MemoryStats from '../../../components/game/memory/MemoryStats';
 import DifficultySelector from '../../../components/ui/DifficultySelector';
 import JsonViewer from '../../../components/feedback/JsonViewer';
@@ -46,7 +47,7 @@ const HarryMemory = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntroLoader(false);
-    }, 4000);
+    }, 1800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -103,6 +104,7 @@ const HarryMemory = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [hasGameStarted, setHasGameStarted] = useState(false);
+  const [finalTime, setFinalTime] = useState(0);
 
   // Zoom temporário no card revelado
   const [zoomedCardId, setZoomedCardId] = useState(null);
@@ -121,6 +123,7 @@ const HarryMemory = () => {
     setElapsedTime(0);
     setIsTimerRunning(false);
     setHasGameStarted(false);
+    setFinalTime(0);
     setZoomedCardId(null);
     if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
   }, []);
@@ -307,7 +310,7 @@ const HarryMemory = () => {
     setIsLeaving(true);
     setTimeout(() => {
       navigate('/app');
-    }, 4000);
+    }, 1800);
   };
 
   // Intervalo do timer — inicia/para com isTimerRunning
@@ -319,12 +322,13 @@ const HarryMemory = () => {
     return () => clearInterval(interval);
   }, [isTimerRunning]);
 
-  // Para o timer quando o jogo termina
+  // Para o timer e salva o tempo final quando o jogo termina
   useEffect(() => {
     if (gameStatus === GAME_STATUS.FINISHED) {
       setIsTimerRunning(false);
+      setFinalTime(elapsedTime);
     }
-  }, [gameStatus]);
+  }, [gameStatus, elapsedTime]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -363,9 +367,6 @@ const HarryMemory = () => {
 
       <div className="gv-harry-header">
         <h1 className="gv-magic-title">Memória dos Bruxos</h1>
-        <p className="gv-magic-subtitle">
-          Encontre os pares de personagens e complete o desafio mágico.
-        </p>
       </div>
 
       <div className="gv-game-content gv-harry-content">
@@ -388,6 +389,11 @@ const HarryMemory = () => {
             elapsedTime={elapsedTime}
             formatTime={formatTime}
           />
+        )}
+
+        {/* Cartas decorativas flutuantes — somente na tela inicial */}
+        {gameStatus === GAME_STATUS.IDLE && !loading && !error && (
+          <FloatingMemoryCards />
         )}
 
         {/* Botão de recarregar */}
@@ -471,6 +477,10 @@ const HarryMemory = () => {
               <h2 className="gv-victory-title">Parabéns, Bruxo!</h2>
               <p className="gv-victory-subtitle">Você encontrou todos os pares mágicos!</p>
               <div className="gv-victory-stats">
+                <div className="gv-victory-stat">
+                  <span className="gv-victory-stat-value">{formatTime(finalTime)}</span>
+                  <span className="gv-victory-stat-label">Tempo</span>
+                </div>
                 <div className="gv-victory-stat">
                   <span className="gv-victory-stat-value">{attempts}</span>
                   <span className="gv-victory-stat-label">Tentativas</span>

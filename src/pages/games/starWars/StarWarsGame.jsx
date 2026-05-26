@@ -292,7 +292,6 @@ const StarWarsGame = () => {
           className="sw-btn-back"
           onClick={handleExit}
           type="button"
-          style={(activeBuilderStep === BUILDER_STEPS.PILOT || activeBuilderStep === BUILDER_STEPS.DIFFICULTY) ? { marginLeft: '-75px' } : {}}
         >
           <FaArrowLeft /> Voltar
         </button>
