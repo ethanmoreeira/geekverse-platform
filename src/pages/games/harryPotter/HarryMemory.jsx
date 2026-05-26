@@ -426,25 +426,7 @@ const HarryMemory = () => {
           </div>
         )}
 
-        {/* Efeito de feitiço durante embaralhamento */}
-        {isShuffling && (
-          <div className="gv-spell-overlay" id="shuffle-spell">
-            <div className="gv-spell-wand">
-              <FaMagic className="gv-wand-icon" />
-            </div>
-            <div className="gv-spell-particles">
-              <span className="gv-particle"></span>
-              <span className="gv-particle"></span>
-              <span className="gv-particle"></span>
-              <span className="gv-particle"></span>
-              <span className="gv-particle"></span>
-              <span className="gv-particle"></span>
-              <span className="gv-particle"></span>
-              <span className="gv-particle"></span>
-            </div>
-            <p className="gv-spell-text">Embaralhando cartas...</p>
-          </div>
-        )}
+
 
         {/* Tela de Vitória */}
         {isFinished && (

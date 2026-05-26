@@ -14,6 +14,7 @@ import {
   FaSignOutAlt,
 } from 'react-icons/fa';
 import { GiJoystick } from 'react-icons/gi';
+import g8LogoV10 from '../../assets/backgrounds/dashboard/g8_logo_v10.png';
 import ThemedLogoutScreen from '../feedback/ThemedLogoutScreen';
 
 const AppNavbar = () => {
@@ -42,55 +43,55 @@ const AppNavbar = () => {
     <>
       {isLoggingOut && <ThemedLogoutScreen />}
       <nav className="gv-navbar">
-      <div className="gv-navbar-inner">
-        <Link to="/app" className="gv-navbar-brand">
-          <GiJoystick className="gv-navbar-brand-icon" />
-          <span>GeekVerse G8</span>
-        </Link>
+        <div className="gv-navbar-inner">
+          <Link to="/app" className="gv-navbar-brand">
+            <img src={g8LogoV10} alt="G8 Logo" style={{ height: '24px', width: 'auto' }} />
+            <span>GeekVerse G8</span>
+          </Link>
 
-        <div className="gv-navbar-links">
-          <Link
-            to="/app"
-            className={`gv-nav-link ${isActive('/app') ? 'active' : ''}`}
-          >
-            <FaGamepad />
-            <span>Jogos</span>
-          </Link>
-          <Link
-            to="/app/ranking"
-            className={`gv-nav-link ${isActive('/app/ranking') ? 'active' : ''}`}
-          >
-            <FaTrophy />
-            <span>Ranking</span>
-          </Link>
-          <Link
-            to="/app/exportar"
-            className={`gv-nav-link ${isActive('/app/exportar') ? 'active' : ''}`}
-          >
-            <FaFileExport />
-            <span>Exportar</span>
-          </Link>
-          <Link
-            to="/app/sobre"
-            className={`gv-nav-link ${isActive('/app/sobre') ? 'active' : ''}`}
-          >
-            <FaInfoCircle />
-            <span>Sobre</span>
-          </Link>
-        </div>
+          <div className="gv-navbar-links">
+            <Link
+              to="/app"
+              className={`gv-nav-link ${isActive('/app') ? 'active' : ''}`}
+            >
+              <FaGamepad />
+              <span>Jogos</span>
+            </Link>
+            <Link
+              to="/app/ranking"
+              className={`gv-nav-link ${isActive('/app/ranking') ? 'active' : ''}`}
+            >
+              <FaTrophy />
+              <span>Ranking</span>
+            </Link>
+            <Link
+              to="/app/exportar"
+              className={`gv-nav-link ${isActive('/app/exportar') ? 'active' : ''}`}
+            >
+              <FaFileExport />
+              <span>Exportar</span>
+            </Link>
+            <Link
+              to="/app/sobre"
+              className={`gv-nav-link ${isActive('/app/sobre') ? 'active' : ''}`}
+            >
+              <FaInfoCircle />
+              <span>Sobre</span>
+            </Link>
+          </div>
 
-        <div className="gv-navbar-user">
-          <button
-            className="gv-btn-logout"
-            onClick={handleLogout}
-            title="Sair do sistema"
-          >
-            <FaSignOutAlt />
-            <span>Sair</span>
-          </button>
+          <div className="gv-navbar-user">
+            <button
+              className="gv-btn-logout"
+              onClick={handleLogout}
+              title="Sair do sistema"
+            >
+              <FaSignOutAlt />
+              <span>Sair</span>
+            </button>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
     </>
   );
 };

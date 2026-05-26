@@ -4,12 +4,6 @@
 
 import { DIFFICULTIES } from '../../utils/difficultyConfig';
 
-const DIFFICULTY_ICONS = {
-  easy: '⭐',
-  medium: '⚡',
-  challenge: '🔥',
-};
-
 const DIFFICULTY_DESCRIPTIONS = {
   easy: '15 pares · 30 cartas',
   medium: '20 pares · 40 cartas',
@@ -19,7 +13,6 @@ const DIFFICULTY_DESCRIPTIONS = {
 const DifficultySelector = ({ onSelect, currentDifficulty, disabled }) => {
   return (
     <div className="gv-difficulty-selector" id="difficulty-selector">
-      <h3 className="gv-difficulty-label">Escolha a Dificuldade</h3>
       <div className="gv-difficulty-options">
         {Object.entries(DIFFICULTIES).map(([key, config]) => (
           <button
@@ -31,7 +24,6 @@ const DifficultySelector = ({ onSelect, currentDifficulty, disabled }) => {
             onClick={() => onSelect(key)}
             disabled={disabled}
           >
-            <span className="gv-difficulty-icon">{DIFFICULTY_ICONS[key]}</span>
             <span className="gv-difficulty-name">{config.label}</span>
             <span className="gv-difficulty-desc">{DIFFICULTY_DESCRIPTIONS[key]}</span>
           </button>

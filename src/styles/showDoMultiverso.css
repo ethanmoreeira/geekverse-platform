@@ -66,9 +66,9 @@
   /* ---- Top Bar — padrão Harry Potter ---- */
   .smv-top-bar {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 40px;
+    left: 20px;
+    right: 20px;
     z-index: 10;
     display: flex;
     align-items: center;
@@ -120,26 +120,25 @@
  .smv-btn-top-back {
    display: flex;
    align-items: center;
-   gap: 8px;
-   background: rgba(16, 28, 16, 0.65);
-   border: 1px solid rgba(34, 197, 94, 0.4);
-   color: #22c55e;
-   padding: 6px 14px;
-   border-radius: 20px;
+   gap: 6px;
+   background: transparent;
+   border: 1px solid rgba(34, 197, 94, 0.15);
+   color: rgba(34, 197, 94, 0.7);
+   padding: 4px 10px;
+   border-radius: 16px;
    font-family: var(--gv-font);
-   font-size: 13px;
-   font-weight: 600;
+   font-size: 11px;
+   font-weight: 500;
    cursor: pointer;
    transition: all 0.25s ease;
-   backdrop-filter: blur(6px);
+   backdrop-filter: blur(2px);
  }
 
  .smv-btn-top-back:hover {
-   background: rgba(34, 197, 94, 0.15);
-   border-color: #22c55e;
-   color: #fff;
+   background: rgba(34, 197, 94, 0.1);
+   border-color: rgba(34, 197, 94, 0.4);
+   color: #22c55e;
    transform: translateY(-1px);
-   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
  }
 
  .smv-game-layout {
@@ -264,7 +263,7 @@
    z-index: 2;
    display: flex;
    align-items: center;
-   padding: 10px 0 0;
+   padding: 40px 0 0;
  }
 
  .smv-menu-screen {

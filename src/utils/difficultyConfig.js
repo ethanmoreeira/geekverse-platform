@@ -18,7 +18,7 @@ export const DIFFICULTIES = {
     gridColumns: { desktop: 8, tablet: 6, mobile: 4 },
   },
   challenge: {
-    label: 'Desafio',
+    label: 'Difícil',
     pairs: 25,
     totalCards: 50,
     timeMultiplier: 0.6,

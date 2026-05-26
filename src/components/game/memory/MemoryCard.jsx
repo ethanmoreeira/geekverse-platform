@@ -2,6 +2,8 @@
 // Carta individual do jogo da memória.
 // Contém efeito de flip, imagem do personagem e estado (virada/oculta/encontrada).
 
+import cardBackImg from '../../../assets/backgrounds/harry-potter/golden_snitch_background.png';
+
 const MemoryCard = ({ card, onClick, isFlipped, isMatched, isShuffling, shuffleIndex, isZoomed }) => {
   const handleClick = () => {
     if (isShuffling) return; // Bloquear durante embaralhamento
@@ -36,10 +38,7 @@ const MemoryCard = ({ card, onClick, isFlipped, isMatched, isShuffling, shuffleI
       <div className="gv-memory-card-flipper">
         {/* VERSO (parte de trás) — visível quando NÃO virada */}
         <div className="gv-memory-card-back">
-          <div className="gv-card-back-design">
-            <span className="gv-card-back-icon">⚡</span>
-            <span className="gv-card-back-text">HP</span>
-          </div>
+          <img src={cardBackImg} alt="Card Back" className="gv-card-back-img" />
         </div>
 
         {/* FRENTE — visível quando virada */}

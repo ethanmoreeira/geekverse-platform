@@ -111,9 +111,12 @@ body {
   flex-shrink: 0;
 }
 
+
 .gv-navbar-brand-icon {
-  font-size: 26px;
-  color: var(--gv-accent);
+  height: 26px;
+  width: auto;
+  object-fit: contain;
+  mix-blend-mode: screen;
 }
 
 .gv-navbar-links {
@@ -215,7 +218,7 @@ body {
   max-width: 100%;
   /* Permite ocupar a tela inteira (Dashboard e Jogos) */
   margin: 0 auto;
-  padding: 32px 5% 48px;
+  padding: 12px 5% 48px;
   /* Padding percentual para manter o conteúdo centralizado e responsivo */
   display: flex;
   flex-direction: column;
@@ -445,24 +448,34 @@ body {
 .gv-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 28px;
 }
 
 .gv-dashboard-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  padding: 24px 0 8px;
+  padding: 0;
 }
 
-.gv-dashboard-header-icon {
-  font-size: 42px;
-  color: var(--gv-accent);
-  margin-bottom: 8px;
+.gv-dashboard-header-logo {
+  height: 120px;
+  width: auto;
+  margin-bottom: -10px;
+  object-fit: contain;
+  mix-blend-mode: screen;
 }
 
 .gv-dashboard-title {
   font-size: 36px;
   font-weight: 800;
-  color: var(--gv-text-primary);
+  background: linear-gradient(90deg, #00ffff 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  margin-top: 0;
   margin-bottom: 6px;
   letter-spacing: -0.5px;
 }
@@ -511,8 +524,8 @@ body {
 /* Game Cards Grid */
 .gv-games-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
 }
 
 .gv-game-card {
@@ -525,7 +538,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  min-height: 220px;
+  min-height: 240px;
 }
 
 .gv-game-card:hover {
@@ -559,9 +572,13 @@ body {
 }
 
 .gv-game-card-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  color: var(--gv-text-primary);
+  background: linear-gradient(90deg, #00ffff 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
 }
 
 .gv-game-card-api {
@@ -1252,6 +1269,10 @@ body {
 }
 
 @media (max-width: 640px) {
+  .gv-dashboard-header-logo {
+    height: 56px;
+  }
+
   .gv-games-grid {
     grid-template-columns: 1fr;
   }

@@ -1,6 +1,6 @@
 // Dashboard.jsx
 // Painel principal do GeekVerse G8.
-// Exibe cards dos 6 jogos + links para Ranking, Exportar e Sobre.
+// Exibe cards dos 4 jogos oficiais.
 // Estilo arcade geek com grid responsivo.
 
 import { useNavigate } from 'react-router-dom';
@@ -9,17 +9,16 @@ import {
   GiSwordsPower,
   GiPortal,
   GiSpaceship,
-  GiCastle,
-  GiGalaxy,
+  GiJoystick,
 } from 'react-icons/gi';
 import harryCardBg from '../../assets/backgrounds/harry-potter/harry-logout-bg.png';
 import rickCardBg from '../../assets/backgrounds/rick-morty/image.png';
 import pokemonCardBg from '../../assets/backgrounds/pokemon/pokemon_trainer_classic_dark.png';
 import starWarsBg from '../../assets/backgrounds/star-wars/star_wars_space_wallpaper.png';
+import dashboardBg from '../../assets/backgrounds/dashboard/geekverse_g8_dashboard_background.png';
+import g8LogoV10 from '../../assets/backgrounds/dashboard/g8_logo_v10.png';
+import geekverseLogoFinal from '../../assets/backgrounds/dashboard/geekverse_logo_final.png';
 import {
-  FaTrophy,
-  FaFileExport,
-  FaInfoCircle,
   FaGamepad,
   FaRocket,
   FaCode,
@@ -71,57 +70,14 @@ const GAMES = [
     color: '#3b82f6',
     bgImage: starWarsBg,
   },
-  {
-    id: 'ice-fire',
-    name: 'Guerra dos Reinos',
-    api: 'An API of Ice and Fire',
-    description: 'Dispute batalhas entre casas e reinos.',
-    route: '/app/ice-fire',
-    icon: GiCastle,
-    color: '#8b5cf6',
-  },
-  {
-    id: 'multiverse-hunt',
-    name: 'Caçada Multiverso',
-    api: 'Todas as APIs',
-    description: 'Encontre personagens misturados de vários universos.',
-    route: '/app/multiverse-hunt',
-    icon: GiGalaxy,
-    color: '#ec4899',
-  },
 ];
 
-const QUICK_LINKS = [
-  {
-    id: 'ranking',
-    name: 'Ranking Local',
-    description: 'Melhores pontuações salvas localmente.',
-    route: '/app/ranking',
-    icon: FaTrophy,
-    color: '#f59e0b',
-  },
-  {
-    id: 'exportar',
-    name: 'Exportar Resultados',
-    description: 'Envie resultados por e-mail via EmailJS.',
-    route: '/app/exportar',
-    icon: FaFileExport,
-    color: '#06b6d4',
-  },
-  {
-    id: 'sobre',
-    name: 'Sobre o Projeto',
-    description: 'Informações do grupo e formulário de contato.',
-    route: '/app/sobre',
-    icon: FaInfoCircle,
-    color: '#a855f7',
-  },
-];
+
 
 const TECH_BADGES = [
   { label: 'React', icon: FaCode },
   { label: 'Rotas Privadas', icon: FaRoute },
-  { label: '5 APIs Públicas', icon: FaRocket },
+  { label: '4 APIs Públicas', icon: FaRocket },
   { label: 'EmailJS', icon: FaEnvelope },
 ];
 
@@ -130,28 +86,32 @@ const Dashboard = () => {
 
   return (
     <div className="gv-dashboard">
+      {/* Background */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundImage: `url(${dashboardBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        zIndex: -1,
+      }} />
+
       {/* Header */}
-      <header className="gv-dashboard-header">
-        <FaGamepad className="gv-dashboard-header-icon" />
-        <h1 className="gv-dashboard-title">GeekVerse G8</h1>
-        <p className="gv-dashboard-subtitle">
-          Arcade geek com jogos baseados em APIs públicas
+      <header className="gv-dashboard-header" style={{ marginTop: '-80px' }}>
+        <img src={g8LogoV10} alt="GeekVerse G8 Logo" className="gv-dashboard-header-logo" style={{ height: '100px', marginTop: '55px', marginBottom: '-85px' }} />
+        <img src={geekverseLogoFinal} alt="GeekVerse Title" style={{ height: '180px', objectFit: 'contain', marginBottom: '0px', mixBlendMode: 'screen' }} />
+        <p className="gv-dashboard-subtitle" style={{ marginTop: '-60px', color: '#d8b4fe' }}>
+          Quatro universos. Quatro desafios. Um ranking lendário.
         </p>
-        <div className="gv-tech-badges">
-          {TECH_BADGES.map((badge) => (
-            <span key={badge.label} className="gv-tech-badge">
-              <badge.icon />
-              {badge.label}
-            </span>
-          ))}
-        </div>
+
       </header>
 
       {/* Game Cards Grid */}
       <section className="gv-section">
-        <h2 className="gv-section-title">
-          <FaGamepad /> Jogos Disponíveis
-        </h2>
+
         <div className="gv-games-grid">
           {GAMES.map((game) => (
             <div
@@ -164,9 +124,7 @@ const Dashboard = () => {
               style={
                 game.bgImage
                   ? {
-                    backgroundImage: game.id === 'star-wars' 
-                      ? `url(${game.bgImage})` 
-                      : `linear-gradient(rgba(10, 6, 25, 0), rgba(10, 6, 25, 0.15)), url(${game.bgImage})`,
+                    backgroundImage: `url(${game.bgImage})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                   }

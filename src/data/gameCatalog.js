@@ -35,20 +35,4 @@ export const GAME_CATALOG = [
     description: 'Monte sua missão e escape do campo de asteroides com dados reais da SWAPI.',
     icon: 'GiSpaceship',
   },
-  {
-    id: 'ice-fire',
-    name: 'Guerra dos Reinos',
-    route: '/app/ice-fire',
-    api: 'An API of Ice and Fire',
-    description: 'Batalha épica entre casas e reinos.',
-    icon: 'GiCastle',
-  },
-  {
-    id: 'multiverse-hunt',
-    name: 'Caçada Multiverso',
-    route: '/app/multiverse-hunt',
-    api: 'Todas as APIs',
-    description: 'Jogo final: encontre personagens de vários universos.',
-    icon: 'GiGalaxy',
-  },
 ];
