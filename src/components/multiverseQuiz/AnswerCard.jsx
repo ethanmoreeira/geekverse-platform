@@ -35,13 +35,16 @@ const AnswerCard = ({
   onClick,
   index,
   questionFocus,
+  isEliminated,
 }) => {
   const letter = String.fromCharCode(65 + index); // A, B, C, D
   const isCharacter = option && typeof option === 'object' && option.image;
 
   // Estado visual
   let stateClass = '';
-  if (showResult && isCorrect) {
+  if (isEliminated && !showResult) {
+    stateClass = 'smv-answer-eliminated';
+  } else if (showResult && isCorrect) {
     stateClass = 'smv-answer-correct';
   } else if (showResult && isSelected && !isCorrect) {
     stateClass = 'smv-answer-wrong';
@@ -59,7 +62,9 @@ const AnswerCard = ({
     >
       <span className="smv-answer-letter">{letter}</span>
 
-      {isCharacter ? (
+      {isEliminated && !showResult ? (
+        <span className="smv-answer-eliminated-text">Eliminada</span>
+      ) : isCharacter ? (
         <div className="smv-answer-character">
           <img
             className="smv-answer-character-img"

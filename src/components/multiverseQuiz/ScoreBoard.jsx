@@ -1,13 +1,11 @@
 // ScoreBoard.jsx
-// Painel de prêmios estilo "Show do Milhão" para o Show do Multiverso.
-// Adapta-se aos valores de prêmio de cada modo.
+// Painel de pontuação estilo escada para o Show do Multiverso.
+// Adapta-se aos valores de pontuação de cada modo.
 
-import { FaTrophy, FaCheck, FaArrowRight } from 'react-icons/fa';
+import { FaCheck, FaArrowRight } from 'react-icons/fa';
 
-const formatCurrency = (value) =>
+const formatNumber = (value) =>
   new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -18,13 +16,12 @@ const ScoreBoard = ({ prizeValues, currentQuestionIndex, score, gameOver }) => {
   return (
     <div className="smv-scoreboard">
       <div className="smv-scoreboard-header">
-        <FaTrophy className="smv-scoreboard-icon" />
-        <span className="smv-scoreboard-title">Prêmios</span>
+        <span className="smv-scoreboard-title">Pontuação</span>
       </div>
       <div className="smv-scoreboard-current">
         <span className="smv-scoreboard-current-label">Acumulado</span>
         <span className="smv-scoreboard-current-value">
-          {formatCurrency(score)}
+          {formatNumber(score)}
         </span>
       </div>
       <ul className="smv-prize-list">
@@ -40,7 +37,7 @@ const ScoreBoard = ({ prizeValues, currentQuestionIndex, score, gameOver }) => {
           return (
             <li key={idx} className={itemClass}>
               <span className="smv-prize-number">{idx + 1}</span>
-              <span className="smv-prize-value">{formatCurrency(value)}</span>
+              <span className="smv-prize-value">{formatNumber(value)}</span>
               <span className="smv-prize-status">
                 {isCompleted && <FaCheck />}
                 {isCurrent && <FaArrowRight />}

@@ -1,0 +1,944 @@
+/* ============================================ */
+/* RANKING — Hall dos Campeões GeekVerse        */
+/* Estilos para RankingHome e RankingGameDetails */
+/* ============================================ */
+
+/* ---- Page Container ---- */
+.rk-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 0 48px;
+}
+
+/* ---- Header ---- */
+.rk-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.rk-header-icon {
+  font-size: 40px;
+  color: #f59e0b;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.4));
+}
+
+.rk-title-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 180px;
+  overflow: hidden;
+  margin: -23px auto -40px auto;
+}
+
+.rk-title-img {
+  width: 100%;
+  max-width: 850px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.rk-title {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 800;
+  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 40%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.rk-subtitle {
+  font-size: 15px;
+  color: var(--gv-text-secondary);
+  margin-top: -12px;
+  margin-bottom: 16px;
+}
+
+/* ---- Games Grid (RankingHome) ---- */
+.rk-games-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  max-width: 880px;
+  margin: 0 auto;
+  transform: translateY(42px);
+}
+
+.rk-game-card {
+  position: relative;
+  background: var(--gv-bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--gv-radius);
+  padding: 22px 24px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  min-height: 200px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.03);
+}
+
+/* Overlay translúcido escuro para garantir contraste e legibilidade das letras */
+.rk-game-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(10, 10, 15, 0.22) 0%, rgba(5, 5, 8, 0.45) 100%);
+  z-index: 1;
+  transition: background 0.3s ease;
+}
+
+.rk-game-card:hover {
+  border-color: var(--card-accent);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 15px var(--card-accent), inset 0 0 20px rgba(255, 255, 255, 0.05);
+  transform: translateY(-4px);
+}
+
+.rk-game-card:hover::after {
+  background: linear-gradient(135deg, rgba(10, 10, 15, 0.12) 0%, rgba(5, 5, 8, 0.32) 100%);
+}
+
+.rk-game-card-top,
+.rk-game-criterion,
+.rk-btn-view {
+  position: relative;
+  z-index: 2;
+}
+
+.rk-game-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rk-game-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--gv-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.rk-game-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gv-text-primary);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.rk-game-api {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--card-accent, var(--gv-accent));
+}
+
+.rk-game-criterion {
+  font-size: 13px;
+  color: var(--gv-text-secondary);
+  line-height: 1.5;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+}
+
+.rk-game-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.rk-game-stat {
+  font-size: 12px;
+  color: var(--gv-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.rk-game-stat strong {
+  color: var(--gv-text-primary);
+}
+
+.rk-btn-view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--gv-border);
+  border-radius: var(--gv-radius-xs);
+  color: var(--gv-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--gv-font);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.rk-btn-view:hover {
+  border-color: var(--card-accent, var(--gv-accent));
+  color: var(--card-accent, var(--gv-accent));
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ---- Back Button ---- */
+.rk-back-bar {
+  margin-bottom: 20px;
+}
+
+.rk-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--gv-border);
+  border-radius: var(--gv-radius-xs);
+  color: var(--gv-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--gv-font);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rk-btn-back:hover {
+  border-color: var(--gv-accent);
+  color: var(--gv-accent);
+  background: var(--gv-accent-glow);
+}
+
+/* ---- Game Details Header ---- */
+.rk-detail-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.rk-detail-title {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-weight: 800;
+  color: var(--gv-text-primary);
+  margin-bottom: 4px;
+}
+
+.rk-detail-api {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.rk-criterion-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(14, 15, 23, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.rk-criterion-main {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 2px;
+}
+
+.rk-criterion-tie {
+  font-size: 11px;
+  font-weight: 400;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rk-detail-criterion {
+  font-size: 14px;
+  color: var(--gv-text-secondary);
+}
+
+/* Cores específicas do cabeçalho por jogo */
+.rk-page[data-game-id="harry-memory"] .rk-detail-api { color: #d8b4fe; }
+.rk-page[data-game-id="harry-memory"] .rk-criterion-card { border-color: rgba(168, 85, 247, 0.3); box-shadow: 0 0 12px rgba(168, 85, 247, 0.15); }
+
+.rk-page[data-game-id="pokesombra"] .rk-detail-api { color: #f87171; }
+.rk-page[data-game-id="pokesombra"] .rk-criterion-card { border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 0 12px rgba(239, 68, 68, 0.15); }
+
+.rk-page[data-game-id="show-multiverso"] .rk-detail-api { color: #4ade80; }
+.rk-page[data-game-id="show-multiverso"] .rk-criterion-card { border-color: rgba(34, 197, 94, 0.3); box-shadow: 0 0 12px rgba(34, 197, 94, 0.15); }
+
+.rk-page[data-game-id="fuga-hiperespaco"] .rk-detail-api { color: #38bdf8; }
+.rk-page[data-game-id="fuga-hiperespaco"] .rk-criterion-card { border-color: rgba(56, 189, 248, 0.3); box-shadow: 0 0 12px rgba(56, 189, 248, 0.15); }
+
+/* ---- Difficulty Cards Grid ---- */
+.rk-difficulties-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ---- Difficulty Card ---- */
+.rk-diff-card {
+  position: relative;
+  background: rgba(14, 15, 23, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--gv-radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.rk-diff-card[data-game-id="harry-memory"] {
+  border-color: rgba(168, 85, 247, 0.25);
+  background-image: linear-gradient(135deg, rgba(12, 13, 20, 0.45) 0%, rgba(6, 6, 10, 0.62) 100%),
+    url('../assets/backgrounds/harry-potter/f087384f-df83-4ea0-bcbc-63a9473ae699.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.rk-diff-card[data-game-id="harry-memory"]:hover {
+  border-color: rgba(168, 85, 247, 0.6);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 14px rgba(168, 85, 247, 0.35);
+  transform: translateY(-3px);
+}
+
+/* Identidade roxa específica para as fontes do Harry Potter */
+.rk-diff-card[data-game-id="harry-memory"] .rk-podium-name,
+.rk-diff-card[data-game-id="harry-memory"] .rk-list-name {
+  color: #e9d5ff !important;
+}
+
+.rk-diff-card[data-game-id="harry-memory"] .rk-podium-metric,
+.rk-diff-card[data-game-id="harry-memory"] .rk-list-metric {
+  color: #c084fc !important;
+}
+
+.rk-diff-card[data-game-id="harry-memory"] .rk-podium-position,
+.rk-diff-card[data-game-id="harry-memory"] .rk-list-pos {
+  color: #d8b4fe !important;
+  text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+}
+
+/* Botões do Harry Potter em Roxo */
+.rk-diff-card[data-game-id="harry-memory"] .rk-btn-action {
+  border-color: rgba(168, 85, 247, 0.35);
+  color: #d8b4fe;
+}
+
+.rk-diff-card[data-game-id="harry-memory"] .rk-btn-action:hover {
+  border-color: #a855f7;
+  background: #a855f7;
+  color: #121216;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.65);
+}
+
+.rk-diff-card[data-game-id="pokesombra"] {
+  border-color: rgba(239, 68, 68, 0.25);
+  background-image: linear-gradient(135deg, rgba(12, 12, 18, 0.28) 0%, rgba(6, 6, 9, 0.45) 100%),
+    url('../assets/backgrounds/pokemon/pokemon_dark_throw.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.rk-diff-card[data-game-id="pokesombra"]:hover {
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 14px rgba(239, 68, 68, 0.35);
+  transform: translateY(-3px);
+}
+
+/* Identidade vermelha específica para as fontes do Pokémon */
+.rk-diff-card[data-game-id="pokesombra"] .rk-podium-name,
+.rk-diff-card[data-game-id="pokesombra"] .rk-list-name {
+  color: #fee2e2 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.rk-diff-card[data-game-id="pokesombra"] .rk-podium-metric,
+.rk-diff-card[data-game-id="pokesombra"] .rk-list-metric {
+  color: #fca5a5 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.rk-diff-card[data-game-id="pokesombra"] .rk-podium-position,
+.rk-diff-card[data-game-id="pokesombra"] .rk-list-pos {
+  color: #f87171 !important;
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.rk-diff-card[data-game-id="pokesombra"] .rk-diff-label {
+  color: #fca5a5 !important;
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+/* Botões do Pokémon em Vermelho */
+.rk-diff-card[data-game-id="pokesombra"] .rk-btn-action {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.rk-diff-card[data-game-id="pokesombra"] .rk-btn-action:hover {
+  border-color: #ef4444;
+  background: #ef4444;
+  color: #121216;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.65);
+}
+
+.rk-diff-card[data-game-id="show-multiverso"] {
+  border-color: rgba(34, 197, 94, 0.25);
+  background-image: linear-gradient(135deg, rgba(12, 12, 18, 0.55) 0%, rgba(6, 6, 9, 0.72) 100%),
+    url('../assets/backgrounds/rick-morty/rick_trophy_winner.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.rk-diff-card[data-game-id="show-multiverso"]:hover {
+  border-color: rgba(34, 197, 94, 0.6);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 14px rgba(34, 197, 94, 0.35);
+  transform: translateY(-3px);
+}
+
+/* Identidade verde específica para as fontes do Rick e Morty */
+.rk-diff-card[data-game-id="show-multiverso"] .rk-podium-name,
+.rk-diff-card[data-game-id="show-multiverso"] .rk-list-name {
+  color: #dcfce7 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.rk-diff-card[data-game-id="show-multiverso"] .rk-podium-metric,
+.rk-diff-card[data-game-id="show-multiverso"] .rk-list-metric {
+  color: #a7f3d0 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.rk-diff-card[data-game-id="show-multiverso"] .rk-podium-position,
+.rk-diff-card[data-game-id="show-multiverso"] .rk-list-pos {
+  color: #4ade80 !important;
+  text-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+
+.rk-diff-card[data-game-id="show-multiverso"] .rk-diff-label {
+  color: #a7f3d0 !important;
+  text-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+/* Botões do Rick e Morty em Verde */
+.rk-diff-card[data-game-id="show-multiverso"] .rk-btn-action {
+  border-color: rgba(34, 197, 94, 0.35);
+  color: #a7f3d0;
+}
+
+.rk-diff-card[data-game-id="show-multiverso"] .rk-btn-action:hover {
+  border-color: #22c55e;
+  background: #22c55e;
+  color: #121216;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.65);
+}
+
+.rk-diff-card[data-game-id="fuga-hiperespaco"] {
+  border-color: rgba(56, 189, 248, 0.25);
+  background-image: linear-gradient(135deg, rgba(12, 12, 18, 0.55) 0%, rgba(6, 6, 9, 0.75) 100%),
+    url('../assets/backgrounds/star-wars/star_wars_victory_scene.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.rk-diff-card[data-game-id="fuga-hiperespaco"]:hover {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 14px rgba(56, 189, 248, 0.35);
+  transform: translateY(-3px);
+}
+
+/* Identidade azul específica para as fontes do Star Wars */
+.rk-diff-card[data-game-id="fuga-hiperespaco"] .rk-podium-name,
+.rk-diff-card[data-game-id="fuga-hiperespaco"] .rk-list-name {
+  color: #e0f2fe !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.rk-diff-card[data-game-id="fuga-hiperespaco"] .rk-podium-metric,
+.rk-diff-card[data-game-id="fuga-hiperespaco"] .rk-list-metric {
+  color: #bae6fd !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.rk-diff-card[data-game-id="fuga-hiperespaco"] .rk-podium-position,
+.rk-diff-card[data-game-id="fuga-hiperespaco"] .rk-list-pos {
+  color: #38bdf8 !important;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+
+.rk-diff-card[data-game-id="fuga-hiperespaco"] .rk-diff-label {
+  color: #bae6fd !important;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+/* Botões do Star Wars em Azul */
+.rk-diff-card[data-game-id="fuga-hiperespaco"] .rk-btn-action {
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #bae6fd;
+}
+
+.rk-diff-card[data-game-id="fuga-hiperespaco"] .rk-btn-action:hover {
+  border-color: #38bdf8;
+  background: #38bdf8;
+  color: #121216;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.65);
+}
+
+.rk-diff-header {
+  text-align: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--gv-border);
+}
+
+.rk-diff-label {
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.rk-diff-easy .rk-diff-label {
+  color: #22c55e;
+}
+
+.rk-diff-medium .rk-diff-label {
+  color: #fbbf24;
+}
+
+.rk-diff-challenge .rk-diff-label {
+  color: #ef4444;
+}
+
+.rk-diff-card[data-game-id="harry-memory"] .rk-diff-label {
+  color: #d8b4fe !important;
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+}
+
+.rk-diff-badge {
+  display: none;
+}
+
+/* ---- Podium ---- */
+.rk-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 0;
+  min-height: 160px;
+}
+
+.rk-podium-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  flex: 1;
+  max-width: 110px;
+}
+
+.rk-podium-pedestal {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  position: relative;
+}
+
+.rk-podium-1st .rk-podium-pedestal {
+  height: 90px;
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.25) 0%, rgba(251, 191, 36, 0.08) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-bottom: 3px solid #fbbf24;
+}
+
+.rk-podium-2nd .rk-podium-pedestal {
+  height: 68px;
+  background: linear-gradient(180deg, rgba(192, 192, 210, 0.2) 0%, rgba(192, 192, 210, 0.06) 100%);
+  border: 1px solid rgba(192, 192, 210, 0.25);
+  border-bottom: 3px solid #c0c0d2;
+}
+
+.rk-podium-3rd .rk-podium-pedestal {
+  height: 52px;
+  background: linear-gradient(180deg, rgba(205, 127, 50, 0.2) 0%, rgba(205, 127, 50, 0.06) 100%);
+  border: 1px solid rgba(205, 127, 50, 0.25);
+  border-bottom: 3px solid #cd7f32;
+}
+
+.rk-podium-position {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.rk-podium-1st .rk-podium-position {
+  color: #fbbf24;
+}
+
+.rk-podium-2nd .rk-podium-position {
+  color: #c0c0d2;
+}
+
+.rk-podium-3rd .rk-podium-position {
+  color: #cd7f32;
+}
+
+.rk-podium-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gv-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.rk-podium-metric {
+  font-size: 11px;
+  color: var(--gv-text-muted);
+}
+
+.rk-podium-empty {
+  font-size: 11px;
+  color: var(--gv-text-muted);
+  font-style: italic;
+}
+
+/* ---- Ranking List (4th–10th) ---- */
+.rk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.rk-list-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--gv-radius-xs);
+  transition: background 0.15s ease;
+}
+
+.rk-list-row:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.rk-list-row:hover {
+  background: rgba(168, 85, 247, 0.06);
+}
+
+.rk-list-pos {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gv-text-muted);
+  min-width: 24px;
+  text-align: right;
+}
+
+.rk-list-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gv-text-primary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rk-list-metric {
+  font-size: 12px;
+  color: var(--gv-text-muted);
+  white-space: nowrap;
+}
+
+/* ---- "Você" badge ---- */
+.rk-you-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px;
+  background: var(--gv-accent-glow);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gv-accent);
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.rk-list-row.rk-is-you {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.15);
+}
+
+/* ---- User Position Card ---- */
+.rk-user-pos {
+  background: rgba(168, 85, 247, 0.06);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: var(--gv-radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rk-user-pos-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gv-accent);
+  flex-shrink: 0;
+}
+
+.rk-user-pos-pos {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gv-text-primary);
+  min-width: 28px;
+  text-align: center;
+}
+
+.rk-user-pos-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gv-text-primary);
+  flex: 1;
+}
+
+.rk-user-pos-metric {
+  font-size: 12px;
+  color: var(--gv-text-muted);
+}
+
+/* ---- Action Buttons Row ---- */
+.rk-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--gv-border);
+}
+
+.rk-btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--gv-radius-xs);
+  color: var(--gv-text-primary);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--gv-font);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  flex: 1;
+}
+
+.rk-btn-action:hover {
+  border-color: var(--gv-accent);
+  color: #121216;
+  background: var(--gv-accent);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+/* ---- Empty State ---- */
+.rk-empty {
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.rk-empty-icon {
+  font-size: 36px;
+  color: var(--gv-text-muted);
+  margin-bottom: 10px;
+  opacity: 0.4;
+}
+
+.rk-empty h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gv-text-secondary);
+  margin-bottom: 6px;
+}
+
+.rk-empty p {
+  font-size: 12px;
+  color: var(--gv-text-muted);
+  line-height: 1.5;
+}
+
+/* ---- Full Ranking Modal ---- */
+.rk-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.rk-modal {
+  background: var(--gv-bg-secondary);
+  border: 1px solid var(--gv-border);
+  border-radius: var(--gv-radius);
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.rk-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.rk-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gv-text-primary);
+}
+
+.rk-modal-close {
+  background: transparent;
+  border: 1px solid var(--gv-border);
+  border-radius: var(--gv-radius-xs);
+  color: var(--gv-text-secondary);
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--gv-font);
+  transition: all 0.2s ease;
+}
+
+.rk-modal-close:hover {
+  border-color: var(--gv-danger);
+  color: var(--gv-danger);
+}
+
+/* ---- Error State ---- */
+.rk-error {
+  text-align: center;
+  padding: 60px 24px;
+}
+
+.rk-error-icon {
+  font-size: 48px;
+  color: var(--gv-danger);
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.rk-error h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gv-text-primary);
+  margin-bottom: 8px;
+}
+
+.rk-error p {
+  font-size: 14px;
+  color: var(--gv-text-secondary);
+  margin-bottom: 20px;
+}
+
+/* ---- Toast Feedback ---- */
+.rk-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gv-bg-card);
+  border: 1px solid var(--gv-border-light);
+  border-radius: var(--gv-radius-sm);
+  padding: 12px 24px;
+  color: var(--gv-text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 2000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: rk-toast-in 0.3s ease forwards;
+}
+
+@keyframes rk-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ============================================ */
+/* RESPONSIVO                                   */
+/* ============================================ */
+
+@media (max-width: 900px) {
+  .rk-difficulties-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .rk-games-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rk-difficulties-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rk-podium {
+    min-height: 130px;
+  }
+}

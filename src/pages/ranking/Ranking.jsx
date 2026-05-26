@@ -1,109 +1,66 @@
-// Ranking.jsx
-// Página de ranking local do GeekVerse G8.
-// Ranking separado por jogo + aba geral.
-// Dados armazenados em localStorage (sem backend/banco de dados).
-// Não há ranking global entre computadores.
+// Ranking.jsx — RankingHome
+// Página principal do Ranking: Hall dos Campeões GeekVerse.
+// Rota: /app/ranking
+// Mostra 4 cards, um para cada jogo oficial.
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { FaTrophy } from 'react-icons/fa';
+import RankingGameCard from '../../components/ranking/RankingGameCard';
+import titleImg from '../../assets/backgrounds/ranking/ChatGPT Image 26 de mai. de 2026, 15_21_31.png';
+import bgImg from '../../assets/backgrounds/ranking/geekverse_g8_multiverse_dashboard.png';
 import {
-  FaTrophy,
-  FaArrowLeft,
-  FaListUl,
-  FaDatabase,
-  FaClock,
-  FaStar,
-} from 'react-icons/fa';
-import {
-  GiMagicSwirl,
-  GiSwordsPower,
-  GiPortal,
-  GiSpaceship,
-} from 'react-icons/gi';
-
-const TABS = [
-  { id: 'all', label: 'Todos', icon: FaListUl },
-  { id: 'harry-potter', label: 'Memória dos Bruxos', icon: GiMagicSwirl, color: '#f59e0b' },
-  { id: 'pokemon', label: 'PokeSombra', icon: GiSwordsPower, color: '#ef4444' },
-  { id: 'rick-morty', label: 'Show do Multiverso', icon: GiPortal, color: '#22c55e' },
-  { id: 'star-wars', label: 'Fuga do Hiperespaço', icon: GiSpaceship, color: '#3b82f6' },
-];
+  RANKING_GAMES,
+  getGameSummary,
+  seedMockData,
+} from '../../services/rankingService';
+import '../../styles/ranking.css';
 
 const Ranking = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('all');
+  // Semeia dados simulados na primeira vez (não sobrescreve dados existentes)
+  // Dados temporários para visualização. Remover quando os jogos salvarem resultados reais.
+  useEffect(() => {
+    seedMockData();
+  }, []);
 
-  const activeInfo = TABS.find((t) => t.id === activeTab);
+  const games = Object.values(RANKING_GAMES);
 
   return (
-    <div className="gv-page-container">
-      {/* Header */}
-      <div className="gv-page-header">
-        <div
-          className="gv-placeholder-icon-wrapper"
-          style={{ background: '#f59e0b20', color: '#f59e0b' }}
-        >
-          <FaTrophy />
-        </div>
-        <h1 className="gv-page-title">Ranking Local</h1>
-        <p className="gv-page-subtitle">
-          Melhores pontuações salvas localmente no navegador via localStorage.
-          Cada jogo possui seu ranking independente.
-        </p>
-        <div className="gv-info-chips">
-          <span className="gv-info-chip">
-            <FaDatabase /> localStorage
-          </span>
-          <span className="gv-info-chip">
-            <FaStar /> Separado por jogo
-          </span>
-          <span className="gv-info-chip">
-            <FaClock /> Ordenado por pontuação
-          </span>
-        </div>
-      </div>
-
-      {/* Tabs de jogos */}
-      <div className="gv-tabs">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            className={`gv-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-            style={activeTab === tab.id && tab.color ? { borderColor: tab.color, color: tab.color } : {}}
-          >
-            <tab.icon />
-            <span className="gv-tab-label">{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Conteúdo */}
-      <div className="gv-ranking-content">
-        <div className="gv-empty-ranking">
-          <FaTrophy className="gv-empty-icon" />
-          <h3>
-            {activeTab === 'all'
-              ? 'Nenhum resultado registrado ainda'
-              : `Nenhum resultado em ${activeInfo?.label}`}
-          </h3>
-          <p>
-            Jogue os jogos do GeekVerse para que suas pontuações apareçam no ranking.
-            Cada partida finalizada salva automaticamente o resultado.
+    <>
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundImage: `url(${bgImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          zIndex: -1,
+          pointerEvents: 'none'
+        }}
+      />
+      <div className="rk-page">
+        <div className="rk-header">
+          <div className="rk-title-wrapper">
+            <img src={titleImg} alt="Hall dos Campeões GeekVerse" className="rk-title-img" />
+          </div>
+          <p className="rk-subtitle">
+            Escolha um universo e veja quem domina cada desafio.
           </p>
-          <span className="gv-status-badge gv-status-dev">
-            🚧 Ranking será populado conforme você joga
-          </span>
+        </div>
+
+        <div className="rk-games-grid">
+          {games.map((game) => (
+            <RankingGameCard
+              key={game.id}
+              game={game}
+            />
+          ))}
         </div>
       </div>
-
-      {/* Botão voltar */}
-      <div className="gv-page-actions">
-        <button className="gv-btn-back" onClick={() => navigate('/app')}>
-          <FaArrowLeft /> Voltar ao Dashboard
-        </button>
-      </div>
-    </div>
+    </>
   );
 };
 

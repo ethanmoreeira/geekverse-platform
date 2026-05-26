@@ -1,8 +1,6 @@
 // QuestionCard.jsx
-// Exibe a pergunta, número da rodada, dificuldade, prêmio e imagem quando disponível.
+// Exibe a pergunta, número da rodada, dificuldade, valor e imagem quando disponível.
 // Suporta visualType: "question-image" e "question-and-answer-cards".
-
-import { FaStar, FaBolt, FaSkull, FaTrophy } from 'react-icons/fa';
 
 const DIFFICULTY_CONFIG = {
   easy: { label: 'Fácil', color: '#22c55e' },
@@ -10,10 +8,8 @@ const DIFFICULTY_CONFIG = {
   hard: { label: 'Difícil', color: '#22c55e' },
 };
 
-const formatCurrency = (value) =>
+const formatNumber = (value) =>
   new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -40,7 +36,7 @@ const QuestionCard = ({
         <div className="smv-question-meta">
           {prizeValue != null && (
             <span className="smv-question-prize">
-              <FaTrophy aria-hidden="true" className="smv-icon smv-prize-icon" /> {formatCurrency(prizeValue)}
+              Vale {formatNumber(prizeValue)}
             </span>
           )}
           <span

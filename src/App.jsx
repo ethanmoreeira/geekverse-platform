@@ -21,6 +21,7 @@ import StarWarsGame from './pages/games/starWars/StarWarsGame';
 import IceFireWar from './pages/games/iceFire/IceFireWar';
 import MultiverseHunt from './pages/games/multiverseHunt/MultiverseHunt';
 import Ranking from './pages/ranking/Ranking';
+import RankingGameDetails from './pages/ranking/RankingGameDetails';
 import Exportar from './pages/exportar/Exportar';
 import Sobre from './pages/sobre/Sobre';
 import NotFound from './pages/NotFound';
@@ -55,7 +56,10 @@ function App() {
             <Route path="star-wars" element={<StarWarsGame />} />
             <Route path="ice-fire" element={<IceFireWar />} />
             <Route path="multiverse-hunt" element={<MultiverseHunt />} />
-            <Route path="ranking" element={<Ranking />} />
+            <Route path="ranking">
+              <Route index element={<Ranking />} />
+              <Route path=":gameId" element={<RankingGameDetails />} />
+            </Route>
             <Route path="exportar" element={<Exportar />} />
             <Route path="sobre" element={<Sobre />} />
           </Route>

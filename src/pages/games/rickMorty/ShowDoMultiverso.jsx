@@ -64,10 +64,11 @@ const GAME_MODES = {
   },
 };
 
-const formatCurrency = (value) =>
+const INITIAL_HINTS = 3;
+const HINT_PENALTY_PERCENT = 0.2;
+
+const formatNumber = (value) =>
   new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -143,6 +144,13 @@ const ShowDoMultiverso = () => {
   const [gameWon, setGameWon] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
 
+  // Estado das dicas
+  const [hintsRemaining, setHintsRemaining] = useState(INITIAL_HINTS);
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [eliminatedOptions, setEliminatedOptions] = useState([]);
+  const [hintPenaltyTotal, setHintPenaltyTotal] = useState(0);
+  const [scoreBeforeHints, setScoreBeforeHints] = useState(0);
+
   // API / Dados
   const [apiData, setApiData] = useState(null);
   const [loadError, setLoadError] = useState(null);
@@ -152,6 +160,8 @@ const ShowDoMultiverso = () => {
   const currentQuestion = questions[currentQuestionIndex] || null;
   const prizeValues = modeConfig?.prizes || [];
   const currentFocus = currentQuestion?.questionFocus || null;
+  const currentPrizeValue = prizeValues[currentQuestionIndex] || 0;
+  const currentHintPenalty = Math.floor(currentPrizeValue * HINT_PENALTY_PERCENT);
 
   // ─── Iniciar Jogo ───────────────────────────────────────────────
   const startGame = useCallback(async (mode) => {
@@ -166,6 +176,12 @@ const ShowDoMultiverso = () => {
     setGameWon(false);
     setCorrectCount(0);
     setApiData(null);
+    // Reset dicas
+    setHintsRemaining(INITIAL_HINTS);
+    setHintsUsed(0);
+    setEliminatedOptions([]);
+    setHintPenaltyTotal(0);
+    setScoreBeforeHints(0);
 
     try {
       const config = GAME_MODES[mode];
@@ -196,9 +212,42 @@ const ShowDoMultiverso = () => {
     }
   }, []);
 
+  // ─── Handler de Dica ──────────────────────────────────────────────
+  const handleUseHint = (hintIndex) => {
+    // Verificações de segurança
+    if (hintsRemaining <= 0) return;
+    if (showResult) return;
+    if (!currentQuestion) return;
+
+    // Encontrar alternativas erradas que ainda não foram eliminadas
+    const wrongOptions = currentQuestion.options.filter((option) => {
+      const optionId = typeof option === 'object' ? option.id : option;
+      return optionId !== currentQuestion.correctId && !eliminatedOptions.includes(optionId);
+    });
+
+    if (wrongOptions.length === 0) return;
+
+    // Escolher uma alternativa errada aleatória para eliminar
+    const randomIndex = Math.floor(Math.random() * wrongOptions.length);
+    const optionToEliminate = wrongOptions[randomIndex];
+    const eliminatedId = typeof optionToEliminate === 'object' ? optionToEliminate.id : optionToEliminate;
+
+    // Se a alternativa selecionada foi eliminada, limpar seleção
+    if (selectedOptionId === eliminatedId) {
+      setSelectedOptionId(null);
+    }
+
+    // Atualizar estados
+    setEliminatedOptions((prev) => [...prev, eliminatedId]);
+    setHintsRemaining((prev) => prev - 1);
+    setHintsUsed((prev) => prev + 1);
+    setHintPenaltyTotal((prev) => prev + currentHintPenalty);
+  };
+
   // ─── Handlers do Jogo ──────────────────────────────────────────
   const handleSelectOption = (optionId) => {
     if (showResult) return;
+    if (eliminatedOptions.includes(optionId)) return;
     setSelectedOptionId(optionId);
   };
 
@@ -227,6 +276,7 @@ const ShowDoMultiverso = () => {
 
     if (isCorrect) {
       const prize = prizeValues[currentQuestionIndex] || 0;
+      setScoreBeforeHints((prev) => prev + prize);
       setScore((prev) => prev + prize);
       setCorrectCount((prev) => prev + 1);
 
@@ -248,6 +298,8 @@ const ShowDoMultiverso = () => {
       setSelectedOptionId(null);
       setShowResult(false);
       setApiData(null);
+      // Limpar alternativas eliminadas para a próxima pergunta
+      setEliminatedOptions([]);
     }
   };
 
@@ -288,6 +340,12 @@ const ShowDoMultiverso = () => {
     setScore(0);
     setCorrectCount(0);
     setApiData(null);
+    // Reset dicas
+    setHintsRemaining(INITIAL_HINTS);
+    setHintsUsed(0);
+    setEliminatedOptions([]);
+    setHintPenaltyTotal(0);
+    setScoreBeforeHints(0);
   };
 
   const handleBackToDashboard = () => {
@@ -306,6 +364,9 @@ const ShowDoMultiverso = () => {
       navigate('/app');
     }, 2000);
   };
+
+  // Pontuação final com desconto de dicas (nunca negativa)
+  const finalScore = Math.max(0, score - hintPenaltyTotal);
 
   const renderScreen = () => {
     if (isEntering) {
@@ -443,10 +504,9 @@ const ShowDoMultiverso = () => {
           >
             {gameWon ? (
               <>
-                <FaTrophy className="smv-gameover-icon smv-gameover-win" />
                 <h1 className="smv-brand-title smv-final-title">Parabéns!</h1>
                 <p className="smv-brand-subtitle" style={{marginBottom: 20}}>
-                  Você completou o modo <strong>{modeConfig?.name}</strong> e conquistou o prêmio máximo!
+                  Você completou o modo <strong>{modeConfig?.name}</strong> e registrou sua pontuação final.
                 </p>
               </>
             ) : (
@@ -472,7 +532,7 @@ const ShowDoMultiverso = () => {
             <div className="smv-gameover-score">
               <span className="smv-gameover-score-label">Pontuação Final</span>
               <span className="smv-gameover-score-value">
-                {formatCurrency(score)}
+                {formatNumber(finalScore)}
               </span>
             </div>
 
@@ -484,6 +544,14 @@ const ShowDoMultiverso = () => {
               <div className="smv-gameover-stat">
                 <span className="smv-gameover-stat-value">{gameWon ? 0 : 1}</span>
                 <span className="smv-gameover-stat-label">Erros</span>
+              </div>
+              <div className="smv-gameover-stat">
+                <span className="smv-gameover-stat-value">{hintsUsed}</span>
+                <span className="smv-gameover-stat-label">Dicas usadas</span>
+              </div>
+              <div className="smv-gameover-stat">
+                <span className="smv-gameover-stat-value">{hintPenaltyTotal > 0 ? `-${formatNumber(hintPenaltyTotal)}` : '0'}</span>
+                <span className="smv-gameover-stat-label">Penalidade por dicas</span>
               </div>
               <div className="smv-gameover-stat">
                 <span className="smv-gameover-stat-value">{modeConfig?.name || '?'}</span>
@@ -543,12 +611,12 @@ const ShowDoMultiverso = () => {
           <ScoreBoard
             prizeValues={prizeValues}
             currentQuestionIndex={currentQuestionIndex}
-            score={score}
+            score={Math.max(0, score - hintPenaltyTotal)}
             gameOver={false}
           />
           <GameFooter
             difficulty={selectedMode}
-            score={score}
+            score={Math.max(0, score - hintPenaltyTotal)}
             showResult={showResult}
             gameOver={false}
             onNextQuestion={handleNextQuestion}
@@ -575,6 +643,7 @@ const ShowDoMultiverso = () => {
           <div className="smv-answers-grid">
             {currentQuestion.options.map((option, idx) => {
               const optionId = typeof option === 'object' ? option.id : option;
+              const isEliminated = eliminatedOptions.includes(optionId);
               return (
                 <AnswerCard
                   key={`q${currentQuestion.id}-opt${idx}`}
@@ -582,14 +651,38 @@ const ShowDoMultiverso = () => {
                   isSelected={selectedOptionId === optionId}
                   isCorrect={optionId === currentQuestion.correctId}
                   showResult={showResult}
-                  disabled={showResult}
+                  disabled={showResult || isEliminated}
                   onClick={() => handleSelectOption(optionId)}
                   index={idx}
                   questionFocus={currentFocus}
+                  isEliminated={isEliminated}
                 />
               );
             })}
           </div>
+
+          {/* Cards de dica */}
+          {!showResult && (
+            <div className="smv-hints-row">
+              {[0, 1, 2].map((hintIdx) => {
+                const isUsed = hintIdx < hintsUsed;
+                const isDisabled = isUsed || hintsRemaining <= 0 || showResult;
+                return (
+                  <button
+                    key={hintIdx}
+                    className={`smv-hint-card ${isUsed ? 'smv-hint-used' : ''} ${isDisabled && !isUsed ? 'smv-hint-disabled' : ''}`}
+                    onClick={() => handleUseHint(hintIdx)}
+                    disabled={isDisabled}
+                    type="button"
+                    id={`hint-btn-${hintIdx}`}
+                  >
+                    <span className="smv-hint-label">Dica {hintIdx + 1}</span>
+                    <span className="smv-hint-cost">-{formatNumber(currentHintPenalty)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Botão Confirmar */}
           {selectedOptionId !== null && !showResult && (
