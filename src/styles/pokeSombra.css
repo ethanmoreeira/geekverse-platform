@@ -477,11 +477,11 @@ body.pks-body-intro-bg .pks-page {
 
 /* ─── GAME HEADER ─────────────────────────────────────────────────── */
 .pks-header {
-  background: rgba(35, 10, 15, 0.85);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.15), 0 6px 16px rgba(0, 0, 0, 0.4);
-  border-radius: 12px;
-  padding: 6px 10px;
+  background: rgba(30, 8, 12, 0.9);
+  border: 1px solid rgba(139, 0, 0, 0.3);
+  box-shadow: inset 0 0 15px rgba(200, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  padding: 6px 12px;
   margin: 0 auto 12px auto;
   width: max-content;
   max-width: 95vw;
@@ -508,43 +508,49 @@ body.pks-body-intro-bg .pks-page {
 .pks-header-stat {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(20, 5, 8, 0.6);
-  border: 1px solid rgba(239, 68, 68, 0.15);
-  padding: 3px 8px;
-  border-radius: 7px;
-  font-size: 0.76rem;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(50, 10, 15, 0.5);
+  border: 1px solid rgba(139, 20, 20, 0.4);
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
   white-space: nowrap;
+  height: 28px;
+}
+
+.pks-stat-primary {
+  background: rgba(80, 15, 20, 0.6);
+  border-color: rgba(200, 40, 40, 0.5);
+}
+
+.pks-stat-primary .pks-header-value {
+  color: #ffcccc;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.pks-stat-secondary {
+  background: rgba(30, 8, 12, 0.5);
+  border-color: rgba(100, 15, 15, 0.3);
+  opacity: 0.9;
+}
+
+.pks-stat-secondary .pks-header-value {
+  color: #fca5a5;
+  font-weight: 600;
 }
 
 .pks-header-stat-target {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
-  padding: 4px 14px;
-  animation: pks-target-glow 2.5s infinite ease-in-out;
-}
-
-@keyframes pks-target-glow {
-  0% {
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.35);
-  }
-
-  50% {
-    box-shadow: 0 0 22px rgba(239, 68, 68, 0.65);
-    border-color: rgba(239, 68, 68, 0.65);
-  }
-
-  100% {
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.35);
-  }
+  background: rgba(120, 20, 25, 0.6);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+  padding: 2px 14px;
 }
 
 .pks-header-icon {
-  color: #fca5a5;
-  font-size: 0.82rem;
+  color: #e08585;
+  font-size: 0.8rem;
   flex-shrink: 0;
 }
 
@@ -561,11 +567,10 @@ body.pks-body-intro-bg .pks-page {
 }
 
 .pks-header-label {
-  color: #fca5a5;
-  opacity: 0.7;
-  font-size: 0.7rem;
+  color: #c97c7c;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .pks-header-value {
@@ -587,25 +592,6 @@ body.pks-body-intro-bg .pks-page {
   font-weight: 800;
   text-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
   letter-spacing: 0.02em;
-}
-
-/* Status Cores */
-.pks-stat-danger {
-  border-color: rgba(248, 113, 113, 0.3);
-}
-
-.pks-stat-danger .pks-header-label,
-.pks-stat-danger .pks-header-value {
-  color: #fca5a5;
-}
-
-.pks-stat-warning {
-  border-color: rgba(251, 191, 36, 0.3);
-}
-
-.pks-stat-warning .pks-header-label,
-.pks-stat-warning .pks-header-value {
-  color: #fde047;
 }
 
 .pks-header-future-actions {
@@ -955,6 +941,117 @@ body.pks-body-intro-bg .pks-page {
   background: linear-gradient(160deg,
       rgba(100, 100, 100, 0.1) 0%,
       transparent 40%);
+}
+
+/* ─── HINT PANEL WRAPPER & INFO ──────────────────────────────────── */
+/* Wrapper que agrupa a legenda + o card mosaico */
+.pks-hint-panel-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  max-width: 220px;
+}
+
+/* Legenda compacta acima do mosaico */
+.pks-hint-panel-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: 100%;
+  background: rgba(25, 5, 8, 0.75);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  padding: 5px 10px 4px;
+  text-align: center;
+}
+
+/* Titulo: Painel de Dicas */
+.pks-hint-panel-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(248, 113, 113, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+/* Descricao: Clique nos blocos... */
+.pks-hint-panel-desc {
+  font-size: 0.52rem;
+  color: rgba(203, 213, 225, 0.45);
+  font-weight: 400;
+  line-height: 1.2;
+  max-width: 180px;
+}
+
+/* Meta: proxima dica */
+.pks-hint-panel-meta {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 1px;
+}
+
+.pks-hint-panel-next-penalty {
+  font-size: 0.54rem;
+  font-weight: 600;
+  color: rgba(252, 165, 165, 0.7);
+  letter-spacing: 0.02em;
+}
+
+.pks-hint-panel-maxed {
+  font-size: 0.54rem;
+  font-weight: 600;
+  color: rgba(248, 113, 113, 0.65);
+  letter-spacing: 0.03em;
+}
+
+/* Conectar visualmente a legenda com o card mosaico abaixo */
+.pks-hint-panel-wrapper .pks-mosaic-card {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top: none;
+}
+
+/* ─── ENHANCED TILE INTERACTIVITY ────────────────────────────────── */
+/* Bordas mais evidentes nos tiles clicáveis */
+.pks-mosaic-tile-clickable {
+  border: 1.5px solid rgba(239, 68, 68, 0.28);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6),
+    0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.pks-mosaic-tile-clickable:hover {
+  border-color: rgba(248, 113, 113, 0.55);
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.35),
+    0 0 14px rgba(239, 68, 68, 0.35),
+    0 0 4px rgba(248, 113, 113, 0.2);
+  filter: brightness(1.2);
+}
+
+/* Feedback visual sutil no clique (ripple) */
+@keyframes pks-tile-click-ripple {
+  0% {
+    box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: inset 0 0 20px 4px rgba(239, 68, 68, 0.3);
+  }
+  100% {
+    box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.pks-mosaic-tile-clickable:active {
+  animation: pks-tile-click-ripple 0.35s ease-out;
+}
+
+/* Tile revelado: borda escurece discretamente */
+.pks-mosaic-tile-revealed {
+  border-color: rgba(239, 68, 68, 0.06);
 }
 
 .pks-hint-action {
@@ -1617,6 +1714,28 @@ body.pks-body-intro-bg .pks-page {
     padding: 5px 10px;
     font-size: 0.72rem;
   }
+
+  /* Hint panel responsivo 768px */
+  .pks-hint-panel-wrapper {
+    max-width: 200px;
+  }
+
+  .pks-hint-panel-info {
+    padding: 4px 8px 3px;
+  }
+
+  .pks-hint-panel-title {
+    font-size: 0.56rem;
+  }
+
+  .pks-hint-panel-desc {
+    font-size: 0.48rem;
+    max-width: 160px;
+  }
+
+  .pks-hint-panel-next-penalty {
+    font-size: 0.48rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1652,6 +1771,29 @@ body.pks-body-intro-bg .pks-page {
 
   .pks-mosaic-image {
     padding: 8px;
+  }
+
+  /* Hint panel responsivo 480px */
+  .pks-hint-panel-wrapper {
+    max-width: 175px;
+  }
+
+  .pks-hint-panel-info {
+    padding: 3px 6px 3px;
+  }
+
+  .pks-hint-panel-title {
+    font-size: 0.52rem;
+  }
+
+  .pks-hint-panel-desc {
+    font-size: 0.44rem;
+    max-width: 145px;
+  }
+
+  .pks-hint-panel-next-penalty,
+  .pks-hint-panel-maxed {
+    font-size: 0.44rem;
   }
 }
 

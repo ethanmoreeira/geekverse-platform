@@ -318,13 +318,15 @@ const StarWarsGame = () => {
       )}
 
       {/* Hero */}
-      <div className="sw-hero sw-hero-compact">
-        <h1 className="sw-hero-title">Fuga do Hiperespaço</h1>
-        <p className="sw-hero-subtitle">
-          Monte sua missão com dados reais da SWAPI e prepare sua nave para
-          escapar do campo de asteroides.
-        </p>
-      </div>
+      {gamePhase === GAME_PHASES.BUILDER && (
+        <div className="sw-hero sw-hero-compact">
+          <h1 className="sw-hero-title">Fuga do Hiperespaço</h1>
+          <p className="sw-hero-subtitle">
+            Monte sua missão com dados reais da SWAPI e prepare sua nave para
+            escapar do campo de asteroides.
+          </p>
+        </div>
+      )}
 
       {/* ── LOADING ── */}
       {loading && (

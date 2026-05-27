@@ -33,13 +33,13 @@ const PokemonGameHeader = ({
         {/* Lado Esquerdo: Nivel, Alvo */}
         <div className="pks-header-group pks-header-left">
           {/* Nivel */}
-          <div className="pks-header-stat">
+          <div className="pks-header-stat pks-stat-secondary">
             <FaLayerGroup className="pks-header-icon" />
             <span className="pks-header-value">{levelLabel}</span>
           </div>
 
           {/* Alvo atual */}
-          <div className="pks-header-stat pks-header-stat-target">
+          <div className="pks-header-stat pks-header-stat-target pks-stat-primary">
             <FaBullseye className="pks-header-icon" />
             <span className="pks-header-label pks-target-label">ALVO</span>
             <span className="pks-header-value pks-target-value">
@@ -51,7 +51,7 @@ const PokemonGameHeader = ({
         {/* Lado Direito: Indicadores de Status e Espaco Futuro */}
         <div className="pks-header-group pks-header-right">
           {/* Progresso */}
-          <div className="pks-header-stat">
+          <div className="pks-header-stat pks-stat-primary">
             <span className="pks-header-label">Progresso</span>
             <span className="pks-header-value">
               {currentTargetIndex}/{targetsCount}
@@ -59,32 +59,26 @@ const PokemonGameHeader = ({
           </div>
 
           {/* Tempo final (cronometro + penalidade) */}
-          <div className="pks-header-stat">
+          <div className="pks-header-stat pks-stat-primary">
             <span className="pks-header-label">Tempo</span>
             <span className="pks-header-value">{formatTime(finalTime)}</span>
           </div>
 
-          {/* Tempo puro */}
-          <div className="pks-header-stat">
-            <span className="pks-header-label">Decorrido</span>
-            <span className="pks-header-value">{formatTime(elapsedSeconds)}</span>
-          </div>
-
           {/* Penalidade acumulada */}
-          <div className="pks-header-stat pks-stat-danger">
+          <div className="pks-header-stat pks-stat-secondary">
             <span className="pks-header-label">Penalidade</span>
             <span className="pks-header-value">+{penaltySeconds}s</span>
           </div>
 
           {/* Erros */}
-          <div className="pks-header-stat pks-stat-danger">
+          <div className="pks-header-stat pks-stat-secondary">
             <span className="pks-header-label">Erros</span>
             <span className="pks-header-value">{mistakes}</span>
           </div>
 
           {/* Contador de dicas do alvo atual */}
-          <div className="pks-header-stat pks-stat-warning">
-            <span className="pks-header-label">Dicas</span>
+          <div className="pks-header-stat pks-stat-secondary">
+            <span className="pks-header-label">Dicas usadas</span>
             <span className="pks-header-value">
               {currentHintIndex}/{MAX_HINTS_PER_TARGET}
             </span>

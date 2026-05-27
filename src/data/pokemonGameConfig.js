@@ -11,7 +11,6 @@ export const POKEMON_LEVELS = {
     maxPokemonId: 151,
     mistakePenalty: 3,
     hintPenalty: 5,
-    baseScore: 5000,
   },
   medium: {
     id: 'medium',
@@ -21,7 +20,6 @@ export const POKEMON_LEVELS = {
     maxPokemonId: 251,
     mistakePenalty: 4,
     hintPenalty: 5,
-    baseScore: 12000,
   },
   hard: {
     id: 'hard',
@@ -31,7 +29,6 @@ export const POKEMON_LEVELS = {
     maxPokemonId: 386,
     mistakePenalty: 5,
     hintPenalty: 5,
-    baseScore: 25000,
   },
 };
 

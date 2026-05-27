@@ -239,6 +239,12 @@ const getVehicleEffects = (vehicle) => {
   return effects;
 };
 
+// ─── Helper Seguro ───────────────────────────────────────────────────
+const safeNumber = (value, fallback = 0) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+};
+
 // ─── Cálculo dos Stats da Missão ────────────────────────────────────
 
 /**
@@ -254,32 +260,32 @@ export const calculateMissionStats = ({ starship, pilot, planet, vehicle, diffic
   // ── Velocidade final ──
   let finalSpeed = Math.max(
     1,
-    (starship?.gameSpeed || 5) +
-    (pilot?.speedBonus || 0) +
-    (vehicle?.equipmentSpeedBonus || 0)
+    safeNumber(starship?.gameSpeed, 5) +
+    safeNumber(pilot?.speedBonus, 0) +
+    safeNumber(vehicle?.equipmentSpeedBonus, 0)
   );
 
   // ── Aceleração (derivada de speed + handling) ──
   let finalAcceleration = Math.max(
     0.3,
-    ((starship?.gameSpeed || 5) * 0.12) + ((starship?.handling || 5) * 0.08)
+    (safeNumber(starship?.gameSpeed, 5) * 0.12) + (safeNumber(starship?.handling, 5) * 0.08)
   );
 
   // ── Escudo final ──
   let finalShield = Math.max(
     1,
-    (starship?.baseShield || 5) +
-    (pilot?.shieldBonus || 0) +
-    (vehicle?.equipmentShieldBonus || 0)
+    safeNumber(starship?.baseShield, 5) +
+    safeNumber(pilot?.shieldBonus, 0) +
+    safeNumber(vehicle?.equipmentShieldBonus, 0)
   );
 
   // ── Controle final ──
   let finalHandling = Math.max(
     1,
-    (starship?.handling || 5) +
-    (pilot?.handlingBonus || 0) +
-    (vehicle?.equipmentHandlingBonus || 0) -
-    (planet?.handlingPenalty || 0)
+    safeNumber(starship?.handling, 5) +
+    safeNumber(pilot?.handlingBonus, 0) +
+    safeNumber(vehicle?.equipmentHandlingBonus, 0) -
+    safeNumber(planet?.handlingPenalty, 0)
   );
 
   // ── Vidas finais ──

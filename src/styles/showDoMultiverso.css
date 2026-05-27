@@ -66,8 +66,8 @@
  /* ---- Top Bar — padrão Harry Potter ---- */
  .smv-top-bar {
    position: absolute;
-   top: 20px;
-   left: 20px;
+   top: 12px;
+   left: 12px;
    right: 20px;
    z-index: 10;
    display: flex;
@@ -1154,10 +1154,10 @@
    gap: 10px;
    width: 100%;
    padding: 12px 16px;
-   background: var(--gv-bg-card);
-   border: 1px solid var(--gv-border);
+   background: rgba(34, 197, 94, 0.08);
+   border: 1px solid rgba(34, 197, 94, 0.2);
    border-radius: var(--gv-radius-sm);
-   color: var(--gv-text-secondary);
+   color: #86efac;
    font-size: 13px;
    font-weight: 600;
    font-family: var(--gv-font);
@@ -1166,9 +1166,10 @@
  }
 
  .smv-json-toggle:hover {
-   background: var(--gv-bg-card-hover);
-   color: var(--gv-text-primary);
-   border-color: var(--gv-border-light);
+   background: rgba(34, 197, 94, 0.15);
+   color: #4ade80;
+   border-color: rgba(34, 197, 94, 0.4);
+   box-shadow: 0 0 10px rgba(34, 197, 94, 0.15);
  }
 
  .smv-json-toggle-icon {
@@ -1351,7 +1352,7 @@
 
  .smv-gameover-card {
    width: 100%;
-   max-width: 480px;
+   max-width: 420px;
    background-color: var(--gv-bg-card);
    background-image:
      linear-gradient(rgba(10, 10, 24, 0.35), rgba(10, 10, 24, 0.50)),
@@ -1361,7 +1362,7 @@
    background-repeat: no-repeat;
    border: 1px solid var(--gv-border);
    border-radius: var(--gv-radius);
-   padding: 32px 28px;
+   padding: 24px;
    display: flex;
    flex-direction: column;
    align-items: center;
@@ -1380,8 +1381,9 @@
  }
 
  .smv-gameover-lose-card {
-   box-shadow: 0 0 24px rgba(239, 68, 68, 0.15);
-   border-color: rgba(239, 68, 68, 0.3);
+   box-shadow: 0 0 24px rgba(34, 197, 94, 0.15);
+   border-color: rgba(34, 197, 94, 0.3);
+   margin-top: 8vh;
  }
 
  .smv-gameover-icon {
@@ -1687,15 +1689,27 @@
    }
  }
 
- .smv-feedback-block {
-   margin: 4px auto 0;
-   max-width: 640px;
-   width: 100%;
-   padding: 16px 20px;
-   border-radius: 12px;
-   border: 1.5px solid transparent;
-   animation: smv-feedback-enter 0.35s ease-out forwards;
- }
+  .smv-feedback-block {
+    margin: 4px auto 0;
+    max-width: 800px;
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: 1.5px solid transparent;
+    animation: smv-feedback-enter 0.35s ease-out forwards;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .smv-feedback-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    text-align: left;
+  }
 
  .smv-feedback-block-correct {
    background: rgba(34, 197, 94, 0.1);
@@ -1709,14 +1723,14 @@
    box-shadow: 0 0 18px rgba(239, 68, 68, 0.12), 0 0 6px rgba(239, 68, 68, 0.08);
  }
 
- .smv-feedback-title {
-   font-weight: 700;
-   font-size: 1.05rem;
-   margin: 0 0 6px;
-   display: flex;
-   align-items: center;
-   gap: 6px;
- }
+  .smv-feedback-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
  .smv-feedback-block-correct .smv-feedback-title {
    color: #22c55e;
@@ -1726,21 +1740,18 @@
    color: #ef4444;
  }
 
- .smv-feedback-explanation {
-   color: #b0b8c4;
-   font-size: 0.88rem;
-   line-height: 1.55;
-   margin: 0 0 12px;
-   display: flex;
-   align-items: baseline;
-   gap: 6px;
- }
+  .smv-feedback-explanation {
+    color: #86efac;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+  }
 
- .smv-feedback-actions {
-   display: flex;
-   justify-content: flex-end;
-   margin-top: 4px;
- }
+  .smv-feedback-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+  }
 
  .smv-btn-next {
    display: inline-flex;
@@ -1764,15 +1775,25 @@
    box-shadow: 0 0 20px rgba(34, 197, 94, 0.35);
  }
 
- @media (max-width: 768px) {
-   .smv-feedback-block {
-     max-width: 100%;
-     padding: 14px 16px;
-   }
+  @media (max-width: 768px) {
+    .smv-feedback-block {
+      max-width: 100%;
+      padding: 16px;
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+      gap: 16px;
+    }
 
-   .smv-feedback-actions {
-     justify-content: center;
-   }
+    .smv-feedback-content {
+      text-align: center;
+      align-items: center;
+    }
+
+    .smv-feedback-actions {
+      justify-content: center;
+      width: 100%;
+    }
  }
 
  /* ============================================ */

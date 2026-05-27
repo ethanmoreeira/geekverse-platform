@@ -67,56 +67,79 @@ const PokemonHintBox = ({
   // ─── So o card mosaico (vai para o centro da arena) ──────────────────────
   if (variant === 'mosaic') {
     return (
-      <div className="pks-mosaic-card">
-        <div className="pks-mosaic-image-container">
-          {currentTarget.image ? (
-            <img
-              className="pks-mosaic-image"
-              src={currentTarget.image}
-              alt="Imagem oculta do alvo"
-              draggable="false"
-            />
-          ) : (
-            <div className="pks-shadow-fallback">?</div>
-          )}
-          <div className="pks-mosaic-overlay">
-            {mosaicTiles.map((tile) => {
-              if (tile.isRevealed) {
-                // Tile ja revelado: sem interacao
+      <div className="pks-hint-panel-wrapper">
+        {/* Legenda compacta acima do mosaico */}
+        <div className="pks-hint-panel-info">
+          <div className="pks-hint-panel-title">Painel de Dicas</div>
+          <div className="pks-hint-panel-desc">
+            Clique nos blocos para revelar a sombra
+          </div>
+          <div className="pks-hint-panel-meta">
+            {!hintsMaxed && (
+              <span className="pks-hint-panel-next-penalty">
+                Próxima dica: +{nextPenalty}s
+              </span>
+            )}
+            {hintsMaxed && (
+              <span className="pks-hint-panel-maxed">
+                Dicas esgotadas
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Card mosaico */}
+        <div className="pks-mosaic-card">
+          <div className="pks-mosaic-image-container">
+            {currentTarget.image ? (
+              <img
+                className="pks-mosaic-image"
+                src={currentTarget.image}
+                alt="Imagem oculta do alvo"
+                draggable="false"
+              />
+            ) : (
+              <div className="pks-shadow-fallback">?</div>
+            )}
+            <div className="pks-mosaic-overlay">
+              {mosaicTiles.map((tile) => {
+                if (tile.isRevealed) {
+                  // Tile ja revelado: sem interacao
+                  return (
+                    <div
+                      key={tile.index}
+                      className="pks-mosaic-tile pks-mosaic-tile-revealed"
+                      aria-hidden="true"
+                    />
+                  );
+                }
+
+                if (tile.isBlocked) {
+                  // Tile bloqueado (10/10 dicas): sem interacao
+                  return (
+                    <div
+                      key={tile.index}
+                      className="pks-mosaic-tile pks-mosaic-tile-blocked"
+                      aria-label="Dicas esgotadas"
+                      role="presentation"
+                    />
+                  );
+                }
+
+                // Tile fechado e clicavel
                 return (
-                  <div
+                  <button
                     key={tile.index}
-                    className="pks-mosaic-tile pks-mosaic-tile-revealed"
-                    aria-hidden="true"
+                    type="button"
+                    className="pks-mosaic-tile pks-mosaic-tile-clickable"
+                    onClick={() => handleTileClick(tile.index)}
+                    disabled={disabled}
+                    aria-label={`Revelar dica, penalidade de ${nextPenalty} segundos`}
+                    title={`Revelar dica (+${nextPenalty}s)`}
                   />
                 );
-              }
-
-              if (tile.isBlocked) {
-                // Tile bloqueado (10/10 dicas): sem interacao
-                return (
-                  <div
-                    key={tile.index}
-                    className="pks-mosaic-tile pks-mosaic-tile-blocked"
-                    aria-label="Dicas esgotadas"
-                    role="presentation"
-                  />
-                );
-              }
-
-              // Tile fechado e clicavel
-              return (
-                <button
-                  key={tile.index}
-                  type="button"
-                  className="pks-mosaic-tile pks-mosaic-tile-clickable"
-                  onClick={() => handleTileClick(tile.index)}
-                  disabled={disabled}
-                  aria-label={`Revelar dica, penalidade de ${nextPenalty} segundos`}
-                  title={`Revelar dica (+${nextPenalty}s)`}
-                />
-              );
-            })}
+              })}
+            </div>
           </div>
         </div>
       </div>

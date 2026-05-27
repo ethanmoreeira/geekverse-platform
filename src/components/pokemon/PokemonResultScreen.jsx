@@ -20,7 +20,6 @@ const PokemonResultScreen = ({
   penaltySeconds,
   mistakes,
   hintsUsed,
-  score,
   onPlayAgain,
   onChooseLevel,
   onBack,
@@ -39,7 +38,6 @@ const PokemonResultScreen = ({
     finalTime,
     mistakes,
     hintsUsed,
-    score,
     result: 'completed',
     foundPokemon: foundPokemon.map((p) => ({
       id: p.id,
@@ -112,11 +110,6 @@ const PokemonResultScreen = ({
             <FaLightbulb className="pks-result-stat-icon pks-icon-hint" />
             <span className="pks-result-stat-value">{hintsUsed}</span>
             <span className="pks-result-stat-label">Dicas totais</span>
-          </div>
-          <div className="pks-result-stat">
-            <GiPodiumWinner className="pks-result-stat-icon pks-icon-score" />
-            <span className="pks-result-stat-value">{score}</span>
-            <span className="pks-result-stat-label">Score</span>
           </div>
         </div>
 

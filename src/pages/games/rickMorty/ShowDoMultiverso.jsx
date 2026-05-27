@@ -10,7 +10,6 @@ import QuestionCard from '../../../components/multiverseQuiz/QuestionCard';
 import AnswerCard from '../../../components/multiverseQuiz/AnswerCard';
 import ScoreBoard from '../../../components/multiverseQuiz/ScoreBoard';
 import JsonViewer from '../../../components/multiverseQuiz/JsonViewer';
-import GameFooter from '../../../components/multiverseQuiz/GameFooter';
 import RickMortyLoader from '../../../components/multiverseQuiz/RickMortyLoader';
 import RickMortyAudioControl from '../../../components/multiverseQuiz/RickMortyAudioControl';
 import { GiPortal } from 'react-icons/gi';
@@ -276,8 +275,8 @@ const ShowDoMultiverso = () => {
 
     if (isCorrect) {
       const prize = prizeValues[currentQuestionIndex] || 0;
-      setScoreBeforeHints((prev) => prev + prize);
-      setScore((prev) => prev + prize);
+      setScoreBeforeHints(prize);
+      setScore(prize);
       setCorrectCount((prev) => prev + 1);
 
       // Última pergunta?
@@ -504,28 +503,28 @@ const ShowDoMultiverso = () => {
           >
             {gameWon ? (
               <>
-                <h1 className="smv-brand-title smv-final-title">Parabéns!</h1>
-                <p className="smv-brand-subtitle" style={{marginBottom: 20}}>
-                  Você completou o modo <strong>{modeConfig?.name}</strong> e registrou sua pontuação final.
-                </p>
+                <h1 className="smv-brand-title smv-final-title" style={{ color: '#4ade80', textShadow: '0 0 16px rgba(74, 222, 128, 0.4)' }}>Parabéns!</h1>
+                <div className="smv-brand-subtitle" style={{marginBottom: 20}}>
+                  <p style={{ color: '#e2e8f0', marginBottom: '8px' }}>Você completou o modo <strong>{modeConfig?.name}</strong>.</p>
+                  <p style={{ color: '#e2e8f0' }}>Sua pontuação final foi registrada.</p>
+                </div>
               </>
             ) : (
               <>
-                <FaTimesCircle className="smv-gameover-icon smv-gameover-lose" />
-                <h1 className="smv-brand-title smv-final-title">Fim de Jogo</h1>
-                <p className="smv-brand-subtitle" style={{marginBottom: 20}}>
-                  Você errou na pergunta {currentQuestionIndex + 1}.
+                <h1 className="smv-brand-title smv-final-title" style={{ color: '#4ade80', textShadow: '0 0 16px rgba(74, 222, 128, 0.4)' }}>Fim de Jogo</h1>
+                <div className="smv-brand-subtitle" style={{marginBottom: 20}}>
+                  <p style={{ color: '#e2e8f0', marginBottom: '8px' }}>Você caiu em uma armadilha dimensional.</p>
                   {currentQuestion && (
-                    <>
-                      {' '}A resposta correta era:{' '}
-                      <strong>
+                    <p style={{ color: '#e2e8f0', marginBottom: '8px' }}>
+                      Resposta correta:{' '}
+                      <strong style={{ color: '#22c55e', textShadow: '0 0 8px rgba(34, 197, 94, 0.3)' }}>
                         {currentQuestion.options.find(
                           (o) => (typeof o === 'object' ? o.id : o) === currentQuestion.correctId
                         )?.name || currentQuestion.correctId}
                       </strong>
-                    </>
+                    </p>
                   )}
-                </p>
+                </div>
               </>
             )}
 
@@ -547,11 +546,11 @@ const ShowDoMultiverso = () => {
               </div>
               <div className="smv-gameover-stat">
                 <span className="smv-gameover-stat-value">{hintsUsed}</span>
-                <span className="smv-gameover-stat-label">Dicas usadas</span>
+                <span className="smv-gameover-stat-label">Ajudas usadas</span>
               </div>
               <div className="smv-gameover-stat">
                 <span className="smv-gameover-stat-value">{hintPenaltyTotal > 0 ? `-${formatNumber(hintPenaltyTotal)}` : '0'}</span>
-                <span className="smv-gameover-stat-label">Penalidade por dicas</span>
+                <span className="smv-gameover-stat-label">Penalidade por ajudas</span>
               </div>
               <div className="smv-gameover-stat">
                 <span className="smv-gameover-stat-value">{modeConfig?.name || '?'}</span>
@@ -593,18 +592,6 @@ const ShowDoMultiverso = () => {
 
   return (
     <div className="smv-page smv-bg-game" style={{ '--smv-rick-bg': `url(${quizBg})` }}>
-      {/* Top bar — padrão Harry Potter */}
-      <div className="smv-top-bar">
-        <button
-          className="smv-btn-top-back"
-          onClick={handleBackToMenu}
-          type="button"
-          id="btn-back-dashboard-playing"
-        >
-          <FaArrowLeft /> Voltar aos portais
-        </button>
-      </div>
-
       <div className="smv-game-layout">
         {/* Sidebar — ScoreBoard + Footer */}
         <aside className="smv-sidebar">
@@ -613,14 +600,6 @@ const ShowDoMultiverso = () => {
             currentQuestionIndex={currentQuestionIndex}
             score={Math.max(0, score - hintPenaltyTotal)}
             gameOver={false}
-          />
-          <GameFooter
-            difficulty={selectedMode}
-            score={Math.max(0, score - hintPenaltyTotal)}
-            showResult={showResult}
-            gameOver={false}
-            onNextQuestion={handleNextQuestion}
-            onRestart={handleRestart}
             onBack={handleBackToMenu}
           />
         </aside>
@@ -663,24 +642,30 @@ const ShowDoMultiverso = () => {
 
           {/* Cards de dica */}
           {!showResult && (
-            <div className="smv-hints-row">
-              {[0, 1, 2].map((hintIdx) => {
-                const isUsed = hintIdx < hintsUsed;
-                const isDisabled = isUsed || hintsRemaining <= 0 || showResult;
-                return (
-                  <button
-                    key={hintIdx}
-                    className={`smv-hint-card ${isUsed ? 'smv-hint-used' : ''} ${isDisabled && !isUsed ? 'smv-hint-disabled' : ''}`}
-                    onClick={() => handleUseHint(hintIdx)}
-                    disabled={isDisabled}
-                    type="button"
-                    id={`hint-btn-${hintIdx}`}
-                  >
-                    <span className="smv-hint-label">Dica {hintIdx + 1}</span>
-                    <span className="smv-hint-cost">-{formatNumber(currentHintPenalty)}</span>
-                  </button>
-                );
-              })}
+            <div className="smv-hints-container" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+              <div className="smv-hints-row">
+                {[0, 1, 2].map((hintIdx) => {
+                  const isUsed = hintIdx < hintsUsed;
+                  const isDisabled = isUsed || hintsRemaining <= 0 || showResult;
+                  return (
+                    <button
+                      key={hintIdx}
+                      className={`smv-hint-card ${isUsed ? 'smv-hint-used' : ''} ${isDisabled && !isUsed ? 'smv-hint-disabled' : ''}`}
+                      onClick={() => handleUseHint(hintIdx)}
+                      disabled={isDisabled}
+                      type="button"
+                      id={`hint-btn-${hintIdx}`}
+                      title="Remove uma alternativa errada. Custo: -20% do prêmio atual."
+                    >
+                      <span className="smv-hint-label">Ajuda</span>
+                      <span className="smv-hint-cost">-{formatNumber(currentHintPenalty)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <span style={{ fontSize: '12px', color: '#4ade80', textAlign: 'center', fontWeight: '500' }}>
+                Cada ajuda remove uma alternativa errada. (Custo: -20% do prêmio)
+              </span>
             </div>
           )}
 
@@ -705,16 +690,18 @@ const ShowDoMultiverso = () => {
                 ? 'smv-feedback-block-correct'
                 : 'smv-feedback-block-wrong'
             }`}>
-              <p className="smv-feedback-title">
-                {selectedOptionId === currentQuestion.correctId
-                  ? <><FaCheckCircle aria-hidden="true" className="smv-icon smv-feedback-icon smv-feedback-correct" /> Resposta Correta!</>
-                  : <><FaTimesCircle aria-hidden="true" className="smv-icon smv-feedback-icon smv-feedback-wrong" /> Resposta Errada!</>}
-              </p>
-              {currentQuestion.explanation && (
-                <p className="smv-feedback-explanation">
-                  <FaLightbulb aria-hidden="true" className="smv-icon smv-icon-hint" /> {currentQuestion.explanation}
+              <div className="smv-feedback-content">
+                <p className="smv-feedback-title">
+                  {selectedOptionId === currentQuestion.correctId
+                    ? <><FaCheckCircle aria-hidden="true" className="smv-icon smv-feedback-icon smv-feedback-correct" /> Resposta Correta!</>
+                    : <><FaTimesCircle aria-hidden="true" className="smv-icon smv-feedback-icon smv-feedback-wrong" /> Resposta Errada!</>}
                 </p>
-              )}
+                {currentQuestion.explanation && (
+                  <p className="smv-feedback-explanation">
+                    {currentQuestion.explanation}
+                  </p>
+                )}
+              </div>
               <div className="smv-feedback-actions">
                 <button
                   className="smv-btn-next"

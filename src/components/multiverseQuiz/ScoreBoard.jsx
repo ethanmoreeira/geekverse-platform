@@ -2,7 +2,7 @@
 // Painel de pontuação estilo escada para o Show do Multiverso.
 // Adapta-se aos valores de pontuação de cada modo.
 
-import { FaCheck, FaArrowRight } from 'react-icons/fa';
+import { FaCheck, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 
 const formatNumber = (value) =>
   new Intl.NumberFormat('pt-BR', {
@@ -10,16 +10,23 @@ const formatNumber = (value) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-const ScoreBoard = ({ prizeValues, currentQuestionIndex, score, gameOver }) => {
+const ScoreBoard = ({ prizeValues, currentQuestionIndex, score, gameOver, onBack }) => {
   if (!prizeValues || prizeValues.length === 0) return null;
 
   return (
     <div className="smv-scoreboard">
-      <div className="smv-scoreboard-header">
-        <span className="smv-scoreboard-title">Pontuação</span>
+      <div className="smv-scoreboard-header" style={{ paddingBottom: '0', borderBottom: 'none' }}>
+        <button
+          className="smv-btn-top-back"
+          onClick={onBack}
+          type="button"
+          id="btn-back-dashboard-playing"
+        >
+          <FaArrowLeft /> Voltar aos portais
+        </button>
       </div>
       <div className="smv-scoreboard-current">
-        <span className="smv-scoreboard-current-label">Acumulado</span>
+        <span className="smv-scoreboard-current-label">Prêmio atual</span>
         <span className="smv-scoreboard-current-value">
           {formatNumber(score)}
         </span>

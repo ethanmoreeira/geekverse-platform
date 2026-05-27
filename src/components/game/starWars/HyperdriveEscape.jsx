@@ -531,22 +531,19 @@ const HyperdriveEscape = ({
 
   if (gameStatus === GAME_STATUS.READY) {
     return (
-      <div className="sw-arena-preview">
-        <div className="sw-playable-arena sw-game-field">
-          <StarField />
-          <div className="sw-arena-ready-overlay">
-            <img src={spaceshipSpriteImg} alt="Nave" className="sw-arena-ready-icon" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
-            <h2 className="sw-arena-ready-title" style={{ color: '#38d9ff' }}>Pronto para a fuga?</h2>
-            <p className="sw-arena-ready-sub" style={{ color: '#38d9ff' }}>
-              Nave: {starship?.name || 'Nave Estelar'} | Dificuldade: {difficultyLabel}
-            </p>
-            <p className="sw-arena-ready-sub" style={{ fontSize: '0.72rem', color: '#38d9ff' }}>
-              Use WASD ou setas para mover em 4 direcoes
-            </p>
-            <button className="sw-btn sw-btn-primary sw-btn-glow" onClick={startGame} type="button">
-              Iniciar Fuga
-            </button>
-          </div>
+      <div className="sw-ready-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '40px' }}>
+        <div className="sw-arena-ready-overlay">
+          <img src={spaceshipSpriteImg} alt="Nave" className="sw-arena-ready-icon" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+          <h2 className="sw-arena-ready-title" style={{ color: '#38d9ff' }}>Pronto para a fuga?</h2>
+          <p className="sw-arena-ready-sub" style={{ color: '#38d9ff' }}>
+            Nave: {starship?.name || 'Nave Estelar'} | Dificuldade: {difficultyLabel}
+          </p>
+          <p className="sw-arena-ready-sub" style={{ fontSize: '0.72rem', color: '#38d9ff' }}>
+            Use WASD ou setas para mover em 4 direcoes
+          </p>
+          <button className="sw-btn sw-btn-primary sw-btn-glow" onClick={startGame} type="button">
+            Iniciar Fuga
+          </button>
         </div>
         <div className="sw-arena-actions">
           <button className="sw-btn sw-btn-secondary" onClick={onBackToBuilder} type="button">
@@ -564,9 +561,9 @@ const HyperdriveEscape = ({
   const showFlash = g.flashUntil > performance.now();
 
   return (
-    <div className="sw-arena-preview">
+    <div className="sw-arena-screen">
       <div
-        className="sw-playable-arena sw-game-field"
+        className="sw-arena-shell"
         ref={arenaRef}
         tabIndex={0}
       >

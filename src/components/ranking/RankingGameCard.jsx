@@ -74,7 +74,6 @@ const RankingGameCard = ({ game }) => {
         </div>
       </div>
 
-      <p className="rk-game-criterion">{criterion}</p>
 
       <button
         className="rk-btn-view"

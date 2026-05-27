@@ -294,18 +294,6 @@ const PokeSombra = () => {
   }, [selectedLevel, currentHintIndex, gameStatus, revealedTiles]);
 
   /**
-   * Calcular score.
-   */
-  const calculateScore = () => {
-    if (!selectedLevel) return 0;
-    const raw =
-      selectedLevel.baseScore -
-      mistakes * 150 -
-      penaltySeconds * 20;
-    return Math.max(raw, 0);
-  };
-
-  /**
    * Jogar novamente (mesmo nivel).
    */
   const handlePlayAgain = () => {
@@ -451,7 +439,6 @@ const PokeSombra = () => {
           penaltySeconds={penaltySeconds}
           mistakes={mistakes}
           hintsUsed={hintsUsed}
-          score={calculateScore()}
           onPlayAgain={handlePlayAgain}
           onChooseLevel={handleChooseLevel}
           onBack={handleBack}

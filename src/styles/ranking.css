@@ -277,17 +277,41 @@
 }
 
 /* Cores específicas do cabeçalho por jogo */
-.rk-page[data-game-id="harry-memory"] .rk-detail-api { color: #d8b4fe; }
-.rk-page[data-game-id="harry-memory"] .rk-criterion-card { border-color: rgba(168, 85, 247, 0.3); box-shadow: 0 0 12px rgba(168, 85, 247, 0.15); }
+.rk-page[data-game-id="harry-memory"] .rk-detail-api {
+  color: #d8b4fe;
+}
 
-.rk-page[data-game-id="pokesombra"] .rk-detail-api { color: #f87171; }
-.rk-page[data-game-id="pokesombra"] .rk-criterion-card { border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 0 12px rgba(239, 68, 68, 0.15); }
+.rk-page[data-game-id="harry-memory"] .rk-criterion-card {
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.15);
+}
 
-.rk-page[data-game-id="show-multiverso"] .rk-detail-api { color: #4ade80; }
-.rk-page[data-game-id="show-multiverso"] .rk-criterion-card { border-color: rgba(34, 197, 94, 0.3); box-shadow: 0 0 12px rgba(34, 197, 94, 0.15); }
+.rk-page[data-game-id="pokesombra"] .rk-detail-api {
+  color: #f87171;
+}
 
-.rk-page[data-game-id="fuga-hiperespaco"] .rk-detail-api { color: #38bdf8; }
-.rk-page[data-game-id="fuga-hiperespaco"] .rk-criterion-card { border-color: rgba(56, 189, 248, 0.3); box-shadow: 0 0 12px rgba(56, 189, 248, 0.15); }
+.rk-page[data-game-id="pokesombra"] .rk-criterion-card {
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.15);
+}
+
+.rk-page[data-game-id="show-multiverso"] .rk-detail-api {
+  color: #4ade80;
+}
+
+.rk-page[data-game-id="show-multiverso"] .rk-criterion-card {
+  border-color: rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.15);
+}
+
+.rk-page[data-game-id="fuga-hiperespaco"] .rk-detail-api {
+  color: #38bdf8;
+}
+
+.rk-page[data-game-id="fuga-hiperespaco"] .rk-criterion-card {
+  border-color: rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+}
 
 /* ---- Difficulty Cards Grid ---- */
 .rk-difficulties-grid {
