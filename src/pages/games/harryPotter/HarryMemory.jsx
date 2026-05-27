@@ -12,6 +12,8 @@ import DifficultySelector from '../../../components/ui/DifficultySelector';
 import JsonViewer from '../../../components/feedback/JsonViewer';
 import { fetchCharactersForGame } from '../../../services/apis/harryPotterApi';
 import { DIFFICULTIES } from '../../../utils/difficultyConfig';
+import { useAuth } from '../../../hooks/useAuth';
+import { saveResult } from '../../../services/rankingService';
 import { FaArrowLeft, FaSyncAlt, FaMagic, FaTrophy, FaRedoAlt, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import ThemedGameLoader from '../../../components/feedback/ThemedGameLoader';
 import ThemedLogoutScreen from '../../../components/feedback/ThemedLogoutScreen';
@@ -32,6 +34,8 @@ const GAME_STATUS = {
 
 const HarryMemory = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const hasSavedRankingRef = useRef(false);
 
   // Estados de carregamento e API
   const [showIntroLoader, setShowIntroLoader] = useState(true);
@@ -138,6 +142,7 @@ const HarryMemory = () => {
     setCards([]);
     setApiMetadata(null);
     resetGameState();
+    hasSavedRankingRef.current = false;
     setGameStatus(GAME_STATUS.IDLE);
 
     try {
@@ -327,8 +332,43 @@ const HarryMemory = () => {
     if (gameStatus === GAME_STATUS.FINISHED) {
       setIsTimerRunning(false);
       setFinalTime(elapsedTime);
+
+      // ── Salvar resultado no Ranking (uma única vez) ──
+      if (!hasSavedRankingRef.current && difficulty) {
+        hasSavedRankingRef.current = true;
+
+        const difficultyKey = difficulty === 'hard' ? 'challenge' : difficulty;
+        const fmtTime = (s) => {
+          const m = Math.floor(s / 60);
+          const r = s % 60;
+          return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+        };
+
+        const payload = {
+          gameId: 'harry-memory',
+          gameName: 'Memória dos Bruxos',
+          playerName: user?.nome || 'Jogador GeekVerse',
+          playerEmail: user?.email || '',
+          difficulty: difficultyKey,
+          status: 'completed',
+          score: null,
+          timeInSeconds: elapsedTime,
+          formattedTime: fmtTime(elapsedTime),
+          attempts,
+          hits: pairsFound,
+          errors: 0,
+          hintsUsed: 0,
+          rankingEligible: true,
+        };
+
+        saveResult(payload);
+
+        if (import.meta.env.DEV) {
+          console.log('[HarryMemory] Resultado salvo no ranking:', payload);
+        }
+      }
     }
-  }, [gameStatus, elapsedTime]);
+  }, [gameStatus, elapsedTime, difficulty, attempts, pairsFound, user]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);

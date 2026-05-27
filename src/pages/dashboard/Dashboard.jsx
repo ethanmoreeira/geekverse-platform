@@ -81,8 +81,17 @@ const TECH_BADGES = [
   { label: 'EmailJS', icon: FaEnvelope },
 ];
 
+import { playFugaMusic } from '../../services/audioService';
+
 const Dashboard = () => {
   const navigate = useNavigate();
+
+  const handleGameClick = (game) => {
+    if (game.id === 'star-wars') {
+      playFugaMusic();
+    }
+    navigate(game.route);
+  };
 
   return (
     <div className="gv-dashboard">
@@ -117,10 +126,10 @@ const Dashboard = () => {
             <div
               key={game.id}
               className="gv-game-card"
-              onClick={() => navigate(game.route)}
+              onClick={() => handleGameClick(game)}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate(game.route)}
+              onKeyDown={(e) => e.key === 'Enter' && handleGameClick(game)}
               style={
                 game.bgImage
                   ? {

@@ -117,7 +117,7 @@ function getSortFn(gameId) {
 }
 
 // ============================================
-// CRUD — localStorage
+// CRUD — localStorage (fallback / offline)
 // ============================================
 
 export function getAllResults() {
@@ -129,7 +129,110 @@ export function getAllResults() {
   }
 }
 
+// ============================================
+// LIMPEZA AUTOMÁTICA DE MOCKS ANTIGOS
+// ============================================
+// Remove entradas mockadas que usam o domínio @geekverse.com
+// (gerado exclusivamente pelo seedMockData). Resultados reais
+// usam o e-mail real do jogador, nunca @geekverse.com.
+// Roda uma vez por carregamento do módulo; só grava se houve remoção.
+
+function purgeLegacyMockData() {
+  try {
+    const all = getAllResults();
+    if (all.length === 0) return;
+    const clean = all.filter(
+      (r) => !r.playerEmail || !r.playerEmail.endsWith('@geekverse.com')
+    );
+    if (clean.length < all.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+      if (import.meta.env.DEV) {
+        console.log(
+          `[rankingService] ${all.length - clean.length} registro(s) mock removido(s) do localStorage.`
+        );
+      }
+    }
+  } catch {
+    // Falha silenciosa — não impede o funcionamento do ranking
+  }
+}
+
+// Executa a limpeza automaticamente ao importar o módulo
+purgeLegacyMockData();
+
+// ============================================
+// SUPABASE — integração global
+// ============================================
+
+import { supabase, isSupabaseConfigured } from './supabaseClient';
+
+// Converte objeto camelCase da app para snake_case do Supabase
+function toSnakeCase(obj) {
+  return {
+    game_id: obj.gameId,
+    game_name: obj.gameName,
+    player_name: obj.playerName,
+    player_email: obj.playerEmail,
+    difficulty: obj.difficulty,
+    status: obj.status,
+    score: obj.score ?? null,
+    time_in_seconds: obj.timeInSeconds ?? null,
+    formatted_time: obj.formattedTime ?? null,
+    attempts: obj.attempts ?? null,
+    hits: obj.hits ?? null,
+    errors: obj.errors ?? null,
+    hints_used: obj.hintsUsed ?? null,
+    hint_penalty_total: obj.hintPenaltyTotal ?? null,
+    penalties: obj.penalties ?? null,
+    crystals: obj.crystals ?? null,
+    hyper_crystals_collected: obj.hyperCrystalsCollected ?? null,
+    obstacles_dodged: obj.obstaclesDodged ?? null,
+    collisions: obj.collisions ?? null,
+    survival_bonus: obj.survivalBonus ?? null,
+    ranking_eligible: obj.rankingEligible ?? true,
+    game_version: obj.gameVersion ?? null,
+    payload: obj,
+  };
+}
+
+// Converte objeto snake_case do Supabase para camelCase da app
+function toCamelCase(row) {
+  return {
+    id: row.id,
+    gameId: row.game_id,
+    gameName: row.game_name,
+    playerName: row.player_name,
+    playerEmail: row.player_email,
+    difficulty: row.difficulty,
+    status: row.status,
+    score: row.score,
+    timeInSeconds: row.time_in_seconds,
+    formattedTime: row.formatted_time,
+    attempts: row.attempts,
+    hits: row.hits,
+    errors: row.errors,
+    hintsUsed: row.hints_used,
+    hintPenaltyTotal: row.hint_penalty_total,
+    penalties: row.penalties,
+    crystals: row.crystals,
+    hyperCrystalsCollected: row.hyper_crystals_collected,
+    obstaclesDodged: row.obstacles_dodged,
+    collisions: row.collisions,
+    survivalBonus: row.survival_bonus,
+    rankingEligible: row.ranking_eligible,
+    gameVersion: row.game_version,
+    createdAt: row.created_at,
+    // Preserva campos extras que possam vir no payload
+    ...(row.payload && typeof row.payload === 'object' ? row.payload : {}),
+  };
+}
+
+// ============================================
+// SAVE — salva no Supabase e/ou localStorage
+// ============================================
+
 export function saveResult(result) {
+  // 1. Sempre salva no localStorage (fallback + offline)
   const results = getAllResults();
   const entry = {
     id: generateId(),
@@ -138,8 +241,32 @@ export function saveResult(result) {
   };
   results.push(entry);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+
+  // 2. Se Supabase configurado, insere em background (fire-and-forget)
+  if (isSupabaseConfigured && supabase) {
+    const row = toSnakeCase(entry);
+    supabase
+      .from('rankings')
+      .insert([row])
+      .then(({ error }) => {
+        if (error) {
+          if (import.meta.env.DEV) {
+            console.warn('[rankingService] Supabase insert falhou:', error.message);
+          }
+        } else {
+          if (import.meta.env.DEV) {
+            console.log('[rankingService] Resultado salvo no Supabase ✓');
+          }
+        }
+      });
+  }
+
   return entry;
 }
+
+// ============================================
+// QUERIES — locais (síncronas, para fallback)
+// ============================================
 
 export function getResultsByGame(gameId) {
   return getAllResults().filter((r) => r.gameId === gameId);
@@ -147,7 +274,7 @@ export function getResultsByGame(gameId) {
 
 export function getResultsByGameAndDifficulty(gameId, difficulty) {
   return getAllResults().filter(
-    (r) => r.gameId === gameId && r.difficulty === difficulty
+    (r) => r.gameId === gameId && r.difficulty === difficulty && r.rankingEligible !== false
   );
 }
 
@@ -191,6 +318,75 @@ export function getGameSummary(gameId) {
     bestPlayer: sorted[0]?.playerName || null,
     bestResult: sorted[0] || null,
   };
+}
+
+// ============================================
+// QUERIES ASYNC — Supabase (global)
+// ============================================
+// Usadas pelo DifficultyRankingCard para buscar dados globais.
+// Se Supabase não estiver configurado ou falhar, retorna dados do localStorage.
+
+export async function fetchTopTen(gameId, difficulty) {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('rankings')
+        .select('*')
+        .eq('game_id', gameId)
+        .eq('difficulty', difficulty)
+        .neq('ranking_eligible', false);
+
+      if (!error && data) {
+        const camel = data.map(toCamelCase);
+        return sortResults(gameId, camel).slice(0, 10);
+      }
+
+      if (import.meta.env.DEV) {
+        console.warn('[rankingService] Supabase fetchTopTen falhou, usando localStorage:', error?.message);
+      }
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn('[rankingService] Supabase fetchTopTen erro:', err);
+      }
+    }
+  }
+  return getTopTen(gameId, difficulty);
+}
+
+export async function fetchRankedResults(gameId, difficulty) {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('rankings')
+        .select('*')
+        .eq('game_id', gameId)
+        .eq('difficulty', difficulty)
+        .neq('ranking_eligible', false);
+
+      if (!error && data) {
+        return sortResults(gameId, data.map(toCamelCase));
+      }
+
+      if (import.meta.env.DEV) {
+        console.warn('[rankingService] Supabase fetchRankedResults falhou:', error?.message);
+      }
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn('[rankingService] Supabase fetchRankedResults erro:', err);
+      }
+    }
+  }
+  return getRankedResults(gameId, difficulty);
+}
+
+export async function fetchUserPosition(gameId, difficulty, playerEmail) {
+  if (!playerEmail) return null;
+  const sorted = await fetchRankedResults(gameId, difficulty);
+  const index = sorted.findIndex(
+    (r) => r.playerEmail?.toLowerCase() === playerEmail.toLowerCase()
+  );
+  if (index === -1) return null;
+  return { position: index + 1, result: sorted[index] };
 }
 
 // ============================================

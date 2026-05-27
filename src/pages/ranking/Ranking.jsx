@@ -2,25 +2,15 @@
 // Página principal do Ranking: Hall dos Campeões GeekVerse.
 // Rota: /app/ranking
 // Mostra 4 cards, um para cada jogo oficial.
+// Dados reais são salvos pelos jogos via rankingService.saveResult().
 
-import { useEffect } from 'react';
-import { FaTrophy } from 'react-icons/fa';
 import RankingGameCard from '../../components/ranking/RankingGameCard';
 import titleImg from '../../assets/backgrounds/ranking/ChatGPT Image 26 de mai. de 2026, 15_21_31.png';
 import bgImg from '../../assets/backgrounds/ranking/geekverse_g8_multiverse_dashboard.png';
-import {
-  RANKING_GAMES,
-  getGameSummary,
-  seedMockData,
-} from '../../services/rankingService';
+import { RANKING_GAMES } from '../../services/rankingService';
 import '../../styles/ranking.css';
 
 const Ranking = () => {
-  // Semeia dados simulados na primeira vez (não sobrescreve dados existentes)
-  // Dados temporários para visualização. Remover quando os jogos salvarem resultados reais.
-  useEffect(() => {
-    seedMockData();
-  }, []);
 
   const games = Object.values(RANKING_GAMES);
 

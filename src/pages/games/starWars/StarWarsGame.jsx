@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchStarWarsMissionData } from '../../../services/apis/starWarsApi';
 import { calculateMissionStats } from '../../../utils/starWarsMission';
+import { stopAllFugaMusic, toggleActiveFugaMusic, playFugaMusic, switchToFugaIntroMusic } from '../../../services/audioService';
 
 // Componentes
 import StarshipCard from '../../../components/game/starWars/StarshipCard';
@@ -24,6 +25,7 @@ import {
   FaRocket,
   FaExclamationTriangle,
   FaRedo,
+  FaPause,
 } from 'react-icons/fa';
 import {
   GiSpaceship,
@@ -38,6 +40,7 @@ import '../../../styles/starWars.css';
 
 // Imagens
 import exitImage from '../../../assets/backgrounds/star-wars/capital_ship_exit_screen_8k.png';
+import warsShipSobria from '../../../assets/backgrounds/star-wars/wars_ship_sobria.png';
 
 // ─── Fases do Jogo ──────────────────────────────────────────────────
 
@@ -107,6 +110,15 @@ const StarWarsGame = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    // Garante que a música toque caso o React StrictMode ou um reload cancele o play do Dashboard
+    playFugaMusic();
+    
+    return () => {
+      stopAllFugaMusic();
+    };
+  }, []);
+
   // Dados da API
   const [missionData, setMissionData] = useState(null);
 
@@ -128,6 +140,7 @@ const StarWarsGame = () => {
     if (gamePhase !== GAME_PHASES.BUILDER) {
       setGamePhase(GAME_PHASES.BUILDER);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      switchToFugaIntroMusic();
       return;
     }
 
@@ -182,7 +195,7 @@ const StarWarsGame = () => {
 
   // ── Navegação do Stepper ──
   const currentStepIndex = STEP_ORDER.indexOf(activeBuilderStep);
-  
+
   const getStepSelection = (step) => {
     switch (step) {
       case BUILDER_STEPS.STARSHIP: return selectedStarship;
@@ -295,26 +308,32 @@ const StarWarsGame = () => {
         >
           <FaArrowLeft /> Voltar
         </button>
+
+        {gamePhase !== GAME_PHASES.ARENA && (
+          <button
+            className="fuga-audio-button"
+            onClick={toggleActiveFugaMusic}
+            type="button"
+            title="Pausar/Retomar música"
+          >
+            <FaPause /> Pausar
+          </button>
+        )}
       </div>
 
       {/* ── EXIT LOADING ── */}
       {isExiting && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9999,
-          backgroundImage: `linear-gradient(rgba(3, 7, 18, 0.05), rgba(3, 7, 18, 0.2)), url(${exitImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '24px'
-        }}>
-          <div className="sw-loading-spinner" />
-          <span className="sw-loading-text" style={{ fontSize: '1.2rem', color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Saindo da órbita...</span>
-        </div>
+        <section 
+          className="starwars-transition-screen" 
+          style={{ 
+            backgroundImage: `linear-gradient(rgba(3, 7, 18, 0.4), rgba(3, 7, 18, 0.7)), url(${exitImage})`,
+            backgroundSize: 'cover', 
+            backgroundPosition: 'center' 
+          }}
+        >
+          <span className="starwars-transition-kicker">FUGA DO HIPERESPAÇO</span>
+          <h1>Saindo do Hiperespaço</h1>
+        </section>
       )}
 
       {/* Hero */}
@@ -330,10 +349,17 @@ const StarWarsGame = () => {
 
       {/* ── LOADING ── */}
       {loading && (
-        <div className="sw-loading">
-          <div className="sw-loading-spinner" />
-          <span className="sw-loading-text">Conectando com a SWAPI...</span>
-        </div>
+        <section 
+          className="starwars-transition-screen"
+          style={{ 
+            backgroundImage: `linear-gradient(rgba(2, 6, 23, 0.75), rgba(2, 6, 23, 0.85)), url(${warsShipSobria})`,
+            backgroundSize: 'cover', 
+            backgroundPosition: 'center' 
+          }}
+        >
+          <span className="starwars-transition-kicker">FUGA DO HIPERESPAÇO</span>
+          <h1>Entrando no Salto Hiperespacial</h1>
+        </section>
       )}
 
       {/* ── ERROR ── */}
@@ -350,7 +376,7 @@ const StarWarsGame = () => {
       {/* ── BUILDER PHASE ── */}
       {!loading && !error && missionData && gamePhase === GAME_PHASES.BUILDER && (
         <div className="sw-builder-layout">
-          
+
           <div className="sw-builder-main">
             {/* Stepper Header */}
             <div className="sw-stepper">
@@ -358,10 +384,10 @@ const StarWarsGame = () => {
                 const isActive = step === activeBuilderStep;
                 const isCompleted = !!getStepSelection(step);
                 const isClickable = index <= currentStepIndex || !!getStepSelection(STEP_ORDER[index - 1]);
-                
+
                 return (
-                  <div 
-                    key={step} 
+                  <div
+                    key={step}
                     className={`sw-step ${isActive ? 'sw-step-active' : ''} ${isCompleted ? 'sw-step-completed' : ''} ${isClickable ? 'sw-step-clickable' : ''}`}
                     onClick={() => isClickable && handleStepClick(step)}
                     role="button"
@@ -382,7 +408,7 @@ const StarWarsGame = () => {
               {activeBuilderStep === BUILDER_STEPS.STARSHIP && (
                 <section className="sw-section">
                   <h2 className="sw-section-title">
-                    <GiSpaceship className="sw-section-title-icon" /> Escolha sua Nave
+                    Escolha sua Nave
                   </h2>
                   <div className="sw-cards-grid sw-cards-grid-compact">
                     {missionData.starships.map((ship) => (
@@ -395,7 +421,7 @@ const StarWarsGame = () => {
               {activeBuilderStep === BUILDER_STEPS.PILOT && (
                 <section className="sw-section">
                   <h2 className="sw-section-title">
-                    <GiPerson className="sw-section-title-icon" /> Escolha seu Piloto
+                    Escolha seu Piloto
                   </h2>
                   <div className="sw-cards-grid sw-cards-grid-compact">
                     {missionData.pilots.map((pilot) => (
@@ -408,7 +434,7 @@ const StarWarsGame = () => {
               {activeBuilderStep === BUILDER_STEPS.PLANET && (
                 <section className="sw-section">
                   <h2 className="sw-section-title">
-                    <GiPlanetCore className="sw-section-title-icon" /> Escolha o Planeta de Destino
+                    Escolha o Planeta de Destino
                   </h2>
                   <div className="sw-cards-grid sw-cards-grid-compact">
                     {missionData.planets.map((planet) => (
@@ -421,7 +447,7 @@ const StarWarsGame = () => {
               {activeBuilderStep === BUILDER_STEPS.EQUIPMENT && (
                 <section className="sw-section">
                   <h2 className="sw-section-title">
-                    <GiCartwheel className="sw-section-title-icon" /> Escolha o Equipamento Auxiliar
+                    Escolha o Equipamento Auxiliar
                   </h2>
                   <div className="sw-cards-grid sw-cards-grid-compact">
                     {missionData.vehicles.map((vehicle) => (
@@ -434,7 +460,7 @@ const StarWarsGame = () => {
               {activeBuilderStep === BUILDER_STEPS.DIFFICULTY && (
                 <section className="sw-section">
                   <h2 className="sw-section-title">
-                    <GiCrossedSwords className="sw-section-title-icon" /> Escolha a Dificuldade
+                    Escolha a Dificuldade
                   </h2>
                   <DifficultySelector selected={selectedDifficulty} onSelect={handleSelectDifficulty} />
                 </section>
@@ -460,7 +486,7 @@ const StarWarsGame = () => {
                   disabled={!isMissionComplete}
                   type="button"
                 >
-                  <FaRocket /> Preparar Missão
+                  Preparar Missão
                 </button>
               )}
             </div>

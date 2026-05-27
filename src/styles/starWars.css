@@ -98,6 +98,34 @@
   text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
 }
 
+.fuga-audio-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--sw-primary);
+  opacity: 0.6;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--sw-transition);
+  backdrop-filter: blur(8px);
+  position: fixed;
+  top: 85px;
+  right: 16px;
+  z-index: 999;
+}
+
+.fuga-audio-button:hover {
+  background: transparent;
+  opacity: 1;
+  transform: translateY(-1px);
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
 /* ============================================ */
 /* HERO                                         */
 /* ============================================ */
@@ -468,6 +496,18 @@
   text-align: center;
 }
 
+@keyframes sw-crystalFloat {
+  from {
+    transform: translateY(-2px) scale(0.95);
+    filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.7));
+  }
+
+  to {
+    transform: translateY(2px) scale(1.05);
+    filter: drop-shadow(0 0 35px rgba(56, 189, 248, 1));
+  }
+}
+
 .sw-difficulty-btn:hover {
   background: rgba(30, 41, 59, 0.7);
   border-color: rgba(56, 189, 248, 0.5);
@@ -634,14 +674,25 @@
 }
 
 .sw-btn-primary {
-  background: linear-gradient(135deg, var(--sw-primary) 0%, #0ea5e9 100%);
-  color: #030712;
-  border-color: var(--sw-primary);
+  background: linear-gradient(135deg, rgba(3, 105, 161, 0.6) 0%, rgba(2, 132, 199, 0.6) 100%);
+  color: #e0f2fe;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 800;
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.4), inset 0 0 5px rgba(255, 255, 255, 0.1);
+  padding: 8px 24px;
+  font-size: 0.85rem;
+  backdrop-filter: blur(4px);
 }
 
 .sw-btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.8) 0%, rgba(14, 165, 233, 0.8) 100%);
+  border-color: rgba(125, 211, 252, 0.8);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .sw-btn-primary:disabled {
@@ -671,11 +722,11 @@
 
   0%,
   100% {
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
   }
 
   50% {
-    box-shadow: 0 0 25px rgba(56, 189, 248, 0.4), 0 0 50px rgba(56, 189, 248, 0.15);
+    filter: drop-shadow(0 0 25px rgba(56, 189, 248, 1));
   }
 }
 
@@ -821,7 +872,7 @@
 .sw-summary-selection-label {
   display: block;
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: #38bdf8;
   margin-bottom: 2px;
 }
 
@@ -829,7 +880,7 @@
   display: block;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #eaf7ff;
+  color: #e0f2fe;
   text-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
 }
 
@@ -887,18 +938,18 @@
 .sw-summary-stat-label {
   flex: 1;
   font-size: 0.78rem;
-  color: var(--sw-muted);
+  color: #7dd3fc;
 }
 
 .sw-summary-stat-value {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--sw-text);
+  color: #bae6fd;
 }
 
 .sw-summary-stat-value small {
   font-weight: 400;
-  color: var(--sw-muted);
+  color: #0ea5e9;
   font-size: 0.7rem;
 }
 
@@ -947,13 +998,13 @@
 }
 
 .sw-effects-attr-label {
-  color: var(--sw-muted);
+  color: #7dd3fc;
   margin-right: 6px;
 }
 
 .sw-effects-attr-value {
   font-weight: 700;
-  color: var(--sw-text);
+  color: #bae6fd;
 }
 
 .sw-effects-list {
@@ -967,7 +1018,7 @@
 
 .sw-effect-item {
   font-size: 0.75rem;
-  color: var(--sw-muted);
+  color: #38bdf8;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -975,7 +1026,7 @@
 
 .sw-effect-item::before {
   content: "•";
-  color: var(--sw-muted);
+  color: #0ea5e9;
 }
 
 .sw-effect-synergy {
@@ -1186,11 +1237,14 @@
   z-index: 3;
 }
 
-.sw-arena-ship-icon {
-  font-size: 3rem;
-  color: var(--sw-primary);
-  filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.5));
-  animation: sw-shipFloat 3s ease-in-out infinite;
+.sw-crystal-sprite {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  /* Recorte mais agressivo para eliminar de vez qualquer borda branca da imagem */
+  clip-path: polygon(50% 20%, 80% 50%, 50% 80%, 20% 50%);
+  filter: drop-shadow(0 0 25px rgba(56, 189, 248, 1));
+  animation: sw-crystalFloat 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes sw-shipFloat {
@@ -1281,83 +1335,217 @@
 .sw-result-preview {
   display: flex;
   justify-content: center;
-  padding: 40px 0;
+  padding: 24px 0;
 }
 
 .sw-result-card {
   background: var(--sw-surface-strong);
   border: 1px solid var(--sw-border);
   border-radius: var(--sw-radius-lg);
-  padding: 24px 20px;
-  max-width: 600px;
+  padding: 16px 20px;
+  max-width: 750px;
   width: 100%;
   text-align: center;
 }
 
-.sw-result-header {
-  margin-bottom: 32px;
+.sw-result-card.sw-result-card-victory {
+  background-image:
+    linear-gradient(rgba(3, 7, 18, 0.40), rgba(3, 7, 18, 0.75)),
+    url('../assets/backgrounds/star-wars/star_wars_victory_scene.png') !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.15) !important;
 }
 
-.sw-result-trophy {
-  font-size: 3rem;
-  color: var(--sw-accent);
-  filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.4));
-  margin-bottom: 12px;
+.sw-result-card.sw-result-card-defeat {
+  background-image:
+    linear-gradient(rgba(3, 7, 18, 0.10), rgba(3, 7, 18, 0.50)),
+    url('../assets/backgrounds/star-wars/spaceship_collision_impact.png') !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.15) !important;
+}
+
+.sw-result-header {
+  margin-bottom: 8px;
 }
 
 .sw-result-title {
-  font-size: 1.6rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--sw-accent) 0%, var(--sw-primary) 100%);
+  background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
 }
 
 .sw-result-subtitle {
   color: var(--sw-muted);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   margin: 0;
+}
+
+.sw-result-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 650px) {
+  .sw-result-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.sw-result-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.sw-result-column-title {
+  font-size: 0.8rem;
+  color: #38bdf8;
+  text-transform: uppercase;
+  margin: 0 0 8px 0;
+  text-align: left;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  padding-bottom: 4px;
 }
 
 .sw-result-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .sw-result-stat {
-  background: var(--sw-surface);
-  border: 1px solid var(--sw-border);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(56, 189, 248, 0.15);
   border-radius: var(--sw-radius);
-  padding: 14px;
+  padding: 6px 10px;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .sw-result-stat-label {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--sw-muted);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .sw-result-stat-value {
   display: block;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: var(--sw-text);
 }
 
 .sw-result-stat-highlight {
-  grid-column: 1 / -1;
-  background: rgba(250, 204, 21, 0.06);
-  border-color: rgba(250, 204, 21, 0.2);
+  background: rgba(14, 165, 233, 0.2);
+  border: 1px solid rgba(14, 165, 233, 0.4);
+  border-radius: var(--sw-radius);
+  padding: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.sw-result-stat-highlight .sw-result-stat-label {
+  margin-bottom: 0;
 }
 
 .sw-result-stat-highlight .sw-result-stat-value {
-  color: var(--sw-accent);
-  font-size: 1.2rem;
+  color: #38bdf8;
+  font-size: 1.1rem;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.sw-result-breakdown {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: var(--sw-radius);
+  border: 1px dashed rgba(56, 189, 248, 0.2);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.sw-result-breakdown-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--sw-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.sw-result-breakdown-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  text-align: left;
+}
+
+.sw-result-breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--sw-text-secondary);
+}
+
+.sw-text-cyan {
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.sw-text-cyan-bright {
+  color: #7dd3fc;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(125, 211, 252, 0.5);
+}
+
+.sw-text-cyan-dim {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.sw-result-effects-details {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.sw-result-effects-summary {
+  font-size: 0.7rem;
+  color: #38bdf8;
+  cursor: pointer;
+  outline: none;
+  font-weight: 600;
+}
+
+.sw-result-effects-summary:hover {
+  color: #7dd3fc;
+  text-decoration: underline;
+}
+
+.sw-result-effects-content {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
 }
 
 .sw-result-actions {
@@ -1365,7 +1553,7 @@
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 /* ============================================ */
@@ -1378,8 +1566,8 @@
   margin: 0 auto;
   width: min(1280px, 96vw);
   max-width: 1280px;
-  min-height: clamp(740px, 82vh, 900px);
-  height: clamp(740px, 82vh, 900px);
+  min-height: clamp(760px, 85vh, 960px);
+  height: clamp(760px, 85vh, 960px);
   background:
     linear-gradient(rgba(3, 7, 18, 0.08), rgba(3, 7, 18, 0.25)),
     url('../assets/backgrounds/star-wars/star_wars_selection_screen_v2 (1).png') center/cover no-repeat;
@@ -1416,8 +1604,8 @@
 .sw-player-ship {
   position: absolute;
   bottom: 20px;
-  width: 64px;
-  height: 64px;
+  width: 110px;
+  height: 110px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1458,7 +1646,7 @@
 .sw-game-result {
   display: flex;
   justify-content: center;
-  padding: 40px 0;
+  padding: 140px 0 20px 0;
 }
 
 /* Ready overlay */
@@ -1472,22 +1660,14 @@
   justify-content: center;
   gap: 16px;
   z-index: 20;
-  background-image: url('../assets/backgrounds/star-wars/capital_ship_8k_ultra_quality.png');
-  background-size: cover;
-  background-position: center;
+  background: transparent;
   padding: 40px 20px;
-  border-radius: var(--sw-radius-lg);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.15);
+  border: none;
+  box-shadow: none;
 }
 
 .sw-arena-ready-overlay::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(3, 7, 18, 0.7) 0%, rgba(3, 7, 18, 0.95) 100%);
-  z-index: -1;
-  border-radius: var(--sw-radius-lg);
+  display: none;
 }
 
 .sw-arena-ready-icon {
@@ -1573,8 +1753,8 @@
   }
 
   .sw-player-ship {
-    width: 56px;
-    height: 56px;
+    width: 86px;
+    height: 86px;
   }
 
   .sw-game-ship-icon {
@@ -1894,50 +2074,90 @@
 }
 
 .sw-obstacle-small {
-  width: 30px;
-  height: 30px;
+  width: 60px;
+  height: 60px;
   background: url('../assets/backgrounds/star-wars/single_meteor_sprite (1).png') center/contain no-repeat;
-  border-radius: 50%;
   border: none;
-  box-shadow: 0 0 6px rgba(56, 217, 255, 0.3);
+  filter: drop-shadow(0 0 12px rgba(255, 100, 50, 0.7)) brightness(1.3);
+  animation: sw-spin 10s linear infinite;
 }
 
 .sw-obstacle-medium {
-  width: 48px;
-  height: 48px;
+  width: 80px;
+  height: 80px;
   background: url('../assets/backgrounds/star-wars/single_meteor_sprite (1).png') center/contain no-repeat;
-  border-radius: 50%;
   border: none;
-  box-shadow: 0 0 10px rgba(56, 217, 255, 0.35);
+  filter: drop-shadow(0 0 18px rgba(255, 100, 50, 0.8)) brightness(1.4);
+  animation: sw-spin 14s linear infinite reverse;
 }
 
 .sw-obstacle-large {
-  width: 65px;
-  height: 65px;
+  width: 110px;
+  height: 110px;
   background: url('../assets/backgrounds/star-wars/single_meteor_sprite (1).png') center/contain no-repeat;
-  border-radius: 50%;
   border: none;
-  box-shadow: 0 0 14px rgba(56, 217, 255, 0.4);
+  filter: drop-shadow(0 0 24px rgba(255, 100, 50, 0.9)) brightness(1.5);
+  animation: sw-spin 18s linear infinite;
 }
 
 .sw-obstacle-debris {
-  width: 40px;
-  height: 34px;
+  width: 65px;
+  height: 55px;
   background: url('../assets/backgrounds/star-wars/single_meteor_sprite (1).png') center/contain no-repeat;
-  border-radius: 40%;
   border: none;
-  box-shadow: 0 0 8px rgba(56, 217, 255, 0.3);
+  filter: drop-shadow(0 0 15px rgba(255, 100, 50, 0.7)) brightness(1.35);
+  animation: sw-spin 8s linear infinite;
+}
+
+@keyframes sw-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 /* ============================================ */
 /* ARENA — HYPERSPACE CRYSTALS                  */
 /* ============================================ */
 
-.sw-crystal {
+.sw-crystal,
+.sw-hypercrystal {
   position: absolute;
   z-index: 9;
   pointer-events: none;
   will-change: transform, opacity;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sw-hypercrystal {
+  z-index: 10;
+}
+
+.sw-hypercrystal-sprite {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  /* Recorte mais agressivo para eliminar bordas do arquivo de imagem */
+  clip-path: polygon(50% 20%, 80% 50%, 50% 80%, 20% 50%);
+  filter: drop-shadow(0 0 35px rgba(234, 179, 8, 1));
+  animation: sw-hyperPulse 1s infinite alternate;
+}
+
+@keyframes sw-hyperPulse {
+  from {
+    transform: scale(0.95);
+    filter: drop-shadow(0 0 20px rgba(234, 179, 8, 0.8)) brightness(1);
+  }
+
+  to {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 45px rgba(234, 179, 8, 1)) brightness(1.3);
+  }
 }
 
 .sw-crystal-inner {
@@ -2037,8 +2257,8 @@
 
 .sw-player-ship {
   position: absolute;
-  width: 54px;
-  height: 54px;
+  width: 68px;
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2302,42 +2522,35 @@
 
 /* Result — effects section */
 .sw-result-effects {
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid var(--sw-border);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
 }
 
 .sw-result-effects-title {
-  font-size: 0.75rem;
+  width: 100%;
+  font-size: 0.65rem;
   font-weight: 700;
   color: var(--sw-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
 }
 
 .sw-result-effect-item {
-  font-size: 0.78rem;
+  font-size: 0.65rem;
   color: var(--sw-text-secondary, rgba(226, 232, 240, 0.7));
-  padding: 3px 0;
-  padding-left: 12px;
-  position: relative;
-}
-
-.sw-result-effect-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--sw-primary);
+  padding: 2px 8px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 12px;
 }
 
 .sw-result-effect-item.sw-effect-synergy {
-  color: var(--sw-accent);
   font-weight: 600;
 }
 
@@ -2443,8 +2656,8 @@
   }
 
   .sw-player-ship {
-    width: 44px;
-    height: 44px;
+    width: 54px;
+    height: 54px;
   }
 
   .sw-game-ship-icon {
@@ -2503,5 +2716,62 @@
 
   .sw-effects-attrs {
     grid-template-columns: 1fr 1fr;
+  }
+} 
+
+/* ============================================ */
+/* CINEMATIC TRANSITION SCREEN                  */
+/* ============================================ */
+
+.starwars-transition-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(3, 7, 18, 0.3); /* Transparent to let the vivid background show */
+  backdrop-filter: blur(3px); /* Gentle blur to maintain focus on text but keep image visible */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.starwars-transition-kicker {
+  color: #38d9ff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+
+.starwars-transition-screen h1 {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 
+    0 0 10px rgba(56, 217, 255, 0.4),
+    0 0 20px rgba(255, 255, 255, 0.2);
+  letter-spacing: 2px;
+  animation: cinematic-pulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes cinematic-pulse {
+  0% {
+    opacity: 0.8;
+    text-shadow: 
+      0 0 10px rgba(56, 217, 255, 0.4),
+      0 0 20px rgba(255, 255, 255, 0.2);
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 
+      0 0 15px rgba(56, 217, 255, 0.8),
+      0 0 30px rgba(255, 255, 255, 0.5);
+    transform: scale(1);
   }
 }

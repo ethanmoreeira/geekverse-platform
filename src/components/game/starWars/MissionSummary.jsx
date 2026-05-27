@@ -155,7 +155,7 @@ const MissionSummary = ({
           onClick={onStartArena}
           type="button"
         >
-          <FaRocket /> Iniciar Fuga
+          Iniciar Fuga
         </button>
       </div>
     </div>

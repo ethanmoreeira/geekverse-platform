@@ -8,10 +8,13 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   FaArrowLeft, FaRedo, FaTrophy, FaSkullCrossbones,
-  FaChevronLeft, FaChevronRight, FaChevronUp, FaChevronDown,
+  FaChevronLeft, FaChevronRight, FaChevronUp, FaChevronDown, FaShare
 } from 'react-icons/fa';
 import { GiSpaceship } from 'react-icons/gi';
+import { useAuth } from '../../../hooks/useAuth';
+import { saveResult } from '../../../services/rankingService';
 import spaceshipSpriteImg from '../../../assets/backgrounds/star-wars/spaceship_sprite_topdown.png';
+import { stopAllFugaMusic, switchToFugaArenaMusic } from '../../../services/audioService';
 
 // ─── Constantes ─────────────────────────────────────────────────────
 
@@ -27,9 +30,9 @@ const ARENA_H = 100;
 
 // Tipos de obstáculo
 const OBSTACLE_TYPES = [
-  { type: 'small',  css: 'sw-obstacle-small',  w: 3, h: 3, speedMult: 1.3, weight: 35 },
+  { type: 'small', css: 'sw-obstacle-small', w: 3, h: 3, speedMult: 1.3, weight: 35 },
   { type: 'medium', css: 'sw-obstacle-medium', w: 4.5, h: 4.5, speedMult: 1.0, weight: 35 },
-  { type: 'large',  css: 'sw-obstacle-large',  w: 6, h: 6, speedMult: 0.7, weight: 15 },
+  { type: 'large', css: 'sw-obstacle-large', w: 6, h: 6, speedMult: 0.7, weight: 15 },
   { type: 'debris', css: 'sw-obstacle-debris', w: 4, h: 2.2, speedMult: 1.15, weight: 15 },
 ];
 
@@ -106,6 +109,10 @@ const HyperdriveEscape = ({
   const [gameStatus, setGameStatus] = useState(GAME_STATUS.READY);
   const [renderTick, setRenderTick] = useState(0);
 
+  // ── Auth & Ranking ──
+  const { user } = useAuth();
+  const hasSavedRankingRef = useRef(false);
+
   // ── Refs mutáveis (dados de frame, nunca causam re-render) ──
   const gameRef = useRef(null);
   const arenaRef = useRef(null);
@@ -133,11 +140,29 @@ const HyperdriveEscape = ({
   const combinationSummary = ms.combinationSummary || {};
   const difficultyLabel = ms.difficultyLabel || 'Fácil';
 
-  // Ship movement params derived from stats
-  const maxMoveSpeed = 0.35 + finalSpeed * 0.035; // px/frame in %
-  const accel = 0.04 + finalAcceleration * 0.025;
-  const friction = 0.85 + finalHandling * 0.005; // higher handling = less friction (more control)
+  // Ship movement params derived from stats (suavizado)
+  const diffFactor = planetDanger >= 3 ? 1.0 : (planetDanger >= 2 ? 0.70 : 0.60);
+  const maxMoveSpeed = (0.35 + finalSpeed * 0.035) * diffFactor; // px/frame in %
+  const accel = (0.025 + finalAcceleration * 0.015) * diffFactor;
+  const friction = 0.80 + finalHandling * 0.003; // menor = para mais rápido = mais controle
   const hitboxHalf = shipHitboxSize / 2;
+
+  // ── Hypercrystal Schedule Helper ──
+  const generateHyperCrystalSchedule = (totalDuration, diffLabel) => {
+    const l = diffLabel.toLowerCase();
+    let quota = 2; // Default for easy
+    if (l.includes('médio') || l.includes('medio')) quota = 4;
+    if (l.includes('difícil') || l.includes('dificil')) quota = 6;
+    
+    const schedule = [];
+    const blockTime = totalDuration / quota;
+    for (let i = 0; i < quota; i++) {
+       const minTime = i * blockTime + (blockTime * 0.15); // avoid exact borders
+       const maxTime = (i + 1) * blockTime - (blockTime * 0.15); 
+       schedule.push(minTime + Math.random() * (maxTime - minTime));
+    }
+    return schedule.sort((a, b) => a - b);
+  };
 
   // ── Init game ref ──
   const initGameState = () => ({
@@ -152,6 +177,7 @@ const HyperdriveEscape = ({
     lives: finalLives,
     score: 0,
     crystalsCollected: 0,
+    hyperCrystalsCollected: 0,
     obstaclesDodged: 0,
     collisions: 0,
     startTime: 0,
@@ -163,6 +189,8 @@ const HyperdriveEscape = ({
     frameId: null,
     mounted: true,
     flashUntil: 0,
+    hyperCrystalsSpawned: 0,
+    hyperCrystalSchedule: generateHyperCrystalSchedule(duration, difficultyLabel),
   });
 
   if (!gameRef.current) {
@@ -175,7 +203,7 @@ const HyperdriveEscape = ({
 
   useEffect(() => {
     const onDown = (e) => {
-      if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','a','d','w','s','A','D','W','S'].includes(e.key)) {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'a', 'd', 'w', 's', 'A', 'D', 'W', 'S'].includes(e.key)) {
         e.preventDefault();
         gameRef.current.keysDown[e.key] = true;
       }
@@ -219,12 +247,12 @@ const HyperdriveEscape = ({
     if (dirX !== 0) {
       g.velX += dirX * accel;
     } else {
-      g.velX *= (1 - (1 - friction) * 3); // apply friction when no input
+      g.velX *= (1 - (1 - friction) * 4); // drag mais forte (para mais rápido)
     }
     if (dirY !== 0) {
       g.velY += dirY * accel;
     } else {
-      g.velY *= (1 - (1 - friction) * 3);
+      g.velY *= (1 - (1 - friction) * 4);
     }
 
     // Clamp velocity
@@ -236,7 +264,9 @@ const HyperdriveEscape = ({
     g.shipY = clamp(g.shipY + g.velY, 15, ARENA_H - 5);
 
     // ── Spawn obstacles ──
-    if (now - g.lastObstacleSpawn > obstacleSpawnRate) {
+    const spawnMult = planetDanger >= 3 ? 0.65 : (planetDanger >= 2 ? 0.75 : 0.85);
+    const finalSpawnRate = obstacleSpawnRate * spawnMult;
+    if (now - g.lastObstacleSpawn > finalSpawnRate) {
       g.lastObstacleSpawn = now;
       const oType = pickObstacleType(planetDanger);
       const x = 10 + Math.random() * 80; // spawn across width
@@ -250,17 +280,35 @@ const HyperdriveEscape = ({
       });
     }
 
-    // ── Spawn crystals ──
-    if (now - g.lastCrystalSpawn > crystalSpawnRate) {
-      g.lastCrystalSpawn = now;
-      const x = 10 + Math.random() * 80;
+    // ── Spawn crystals and hypercrystals ──
+    
+    // Independent Hypercrystal spawn
+    if (g.hyperCrystalSchedule.length > 0 && elapsed >= g.hyperCrystalSchedule[0]) {
+      g.hyperCrystalSchedule.shift(); // Remove da fila
+      g.hyperCrystalsSpawned += 1;
+      
+      if (import.meta.env.DEV) {
+        console.log(`[HyperdriveEscape] Hipercristal gerado ${g.hyperCrystalsSpawned}`);
+      }
+
       g.crystals.push({
         id: now + Math.random(),
-        x,
+        x: 10 + Math.random() * 80,
         y: -2,
-        speed: obstacleSpeed * 0.85,
-        w: 2.5,
-        h: 2.5,
+        speed: obstacleSpeed * 1.0,
+        isHyper: true
+      });
+    }
+
+    // Common Crystal spawn
+    if (now - g.lastCrystalSpawn > crystalSpawnRate) {
+      g.lastCrystalSpawn = now;
+      g.crystals.push({
+        id: now + Math.random(),
+        x: 10 + Math.random() * 80,
+        y: -2,
+        speed: obstacleSpeed * 0.8,
+        isHyper: false
       });
     }
 
@@ -299,36 +347,35 @@ const HyperdriveEscape = ({
     g.obstacles = aliveObstacles;
 
     // ── Move crystals & check collection ──
-    const collectRadiusPct = collectionRadius / 10; // convert to % units
-    const aliveCrystals = [];
-    for (const c of g.crystals) {
+    g.crystals = g.crystals.filter(c => {
       c.y += c.speed * 0.14;
-
       if (c.y > 105) {
-        continue; // missed
+        if (c.isHyper && import.meta.env.DEV) {
+           console.log('[HyperdriveEscape] Hipercristal saiu da arena sem coleta');
+        }
+        return false;
       }
 
-      // Collection check (more generous radius)
       const dx = c.x - g.shipX;
       const dy = c.y - g.shipY;
       const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist < collectRadiusPct) {
-        g.crystalsCollected += 1;
-        g.score += Math.round(crystalValue * scoreMultiplier);
-        // Add floating feedback
-        g.feedbacks.push({
-          id: now + Math.random(),
-          x: c.x,
-          y: c.y,
-          text: `+${Math.round(crystalValue * scoreMultiplier)}`,
-          created: now,
-        });
-        continue;
+      if (dist < collectionRadius / 10) {
+        if (c.isHyper) {
+          g.score += 300 * scoreMultiplier;
+          g.hyperCrystalsCollected += 1;
+          g.feedbacks.push({ id: Date.now(), x: c.x, y: c.y, text: `+${300 * scoreMultiplier} Hipercristal!`, created: now });
+          if (import.meta.env.DEV) {
+            console.log(`[HyperdriveEscape] Hipercristal coletado ${g.hyperCrystalsCollected}`);
+          }
+        } else {
+          g.score += crystalValue * scoreMultiplier;
+          g.crystalsCollected += 1;
+          g.feedbacks.push({ id: Date.now(), x: c.x, y: c.y, text: `+${crystalValue * scoreMultiplier}`, created: now });
+        }
+        return false;
       }
-      aliveCrystals.push(c);
-    }
-    g.crystals = aliveCrystals;
+      return true;
+    });
 
     // Clean old feedbacks
     g.feedbacks = g.feedbacks.filter(f => now - f.created < 800);
@@ -383,6 +430,7 @@ const HyperdriveEscape = ({
       lives: finalLives,
       score: 0,
       crystalsCollected: 0,
+      hyperCrystalsCollected: 0,
       obstaclesDodged: 0,
       collisions: 0,
       timeLeft: duration,
@@ -392,10 +440,15 @@ const HyperdriveEscape = ({
       lastObstacleSpawn: performance.now(),
       lastCrystalSpawn: performance.now(),
       flashUntil: 0,
+      hyperCrystalsSpawned: 0,
+      hyperCrystalSchedule: generateHyperCrystalSchedule(duration, difficultyLabel),
     });
 
     setGameStatus(GAME_STATUS.PLAYING);
     setRenderTick(0);
+    hasSavedRankingRef.current = false;
+
+    switchToFugaArenaMusic();
 
     g.frameId = requestAnimationFrame(tickRef.current);
   };
@@ -412,6 +465,53 @@ const HyperdriveEscape = ({
       }
     };
   }, []);
+
+  // ── Salvar resultado no Ranking quando o jogo terminar (fora do rAF) ──
+  useEffect(() => {
+    if (gameStatus !== GAME_STATUS.WON && gameStatus !== GAME_STATUS.LOST) return;
+    if (hasSavedRankingRef.current) return;
+
+    hasSavedRankingRef.current = true;
+    const g = gameRef.current;
+    const isWin = gameStatus === GAME_STATUS.WON;
+
+    // Map label back to ranking key
+    const labelToKey = { 'fácil': 'easy', 'médio': 'medium', 'difícil': 'challenge' };
+    const diffKey = labelToKey[difficultyLabel.toLowerCase()] || 'easy';
+    const survived = duration - (g.timeLeft || 0);
+    const fmtTime = (s) => {
+      const m = Math.floor(s / 60);
+      const r = Math.round(s % 60);
+      return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+    };
+    const survBonus = isWin ? Math.round((500 + synergyBonus) * scoreMultiplier) : 0;
+
+    const payload = {
+      gameId: 'fuga-hiperespaco',
+      gameName: 'Fuga do Hiperespaço',
+      playerName: user?.nome || 'Jogador GeekVerse',
+      playerEmail: user?.email || '',
+      difficulty: diffKey,
+      status: isWin ? 'completed' : 'failed',
+      score: Math.max(0, g.score),
+      timeInSeconds: Math.round(survived),
+      formattedTime: fmtTime(survived),
+      crystals: g.crystalsCollected,
+      hyperCrystalsCollected: g.hyperCrystalsCollected,
+      obstaclesDodged: g.obstaclesDodged,
+      collisions: g.collisions,
+      survivalBonus: survBonus,
+      rankingEligible: isWin,
+    };
+
+    saveResult(payload);
+    
+    stopAllFugaMusic();
+
+    if (import.meta.env.DEV) {
+      console.log('[HyperdriveEscape] Resultado salvo no ranking:', payload);
+    }
+  }, [gameStatus, difficultyLabel, duration, scoreMultiplier, synergyBonus, user]);
 
   // ── Mobile controls ──
   const handleMobileDown = (dx, dy) => {
@@ -432,84 +532,104 @@ const HyperdriveEscape = ({
   if (gameStatus === GAME_STATUS.WON || gameStatus === GAME_STATUS.LOST) {
     const isWin = gameStatus === GAME_STATUS.WON;
     const finalScore = Math.max(0, g.score);
+    const mult = isWin ? scoreMultiplier : 1;
+
+    // Calcula o detalhamento invertendo as multiplicações do final (com arredondamentos seguros)
+    const crystalsPts = Math.round(g.crystalsCollected * crystalValue * scoreMultiplier * mult);
+    const hyperPts = Math.round(g.hyperCrystalsCollected * 300 * scoreMultiplier * mult);
+    const dodgePts = Math.round(g.obstaclesDodged * 30 * mult);
+    const colPts = Math.round(g.collisions * collisionPenalty * mult);
+    const survPts = isWin ? Math.round((500 + synergyBonus) * mult) : 0;
 
     return (
       <div className="sw-game-result">
-        <div className="sw-result-card">
+        <div className={`sw-result-card ${isWin ? 'sw-result-card-victory' : 'sw-result-card-defeat'}`}>
           <div className="sw-result-header">
-            {isWin ? (
-              <FaTrophy className="sw-result-trophy" />
-            ) : (
-              <FaSkullCrossbones className="sw-result-trophy" style={{ color: 'var(--sw-danger)' }} />
-            )}
             <h2 className="sw-result-title">
               {isWin ? 'Fuga concluida com sucesso' : 'Nave destruida'}
             </h2>
-            <p className="sw-result-subtitle">
-              {isWin
-                ? 'A missao escapou do campo de asteroides.'
-                : 'A missao falhou antes do salto final.'}
-            </p>
           </div>
 
-          <div className="sw-result-stats">
-            <div className="sw-result-stat">
-              <span className="sw-result-stat-label">Nave</span>
-              <span className="sw-result-stat-value">{combinationSummary.shipName || starship?.name || '—'}</span>
-            </div>
-            <div className="sw-result-stat">
-              <span className="sw-result-stat-label">Piloto</span>
-              <span className="sw-result-stat-value">{combinationSummary.pilotName || pilot?.name || '—'}</span>
-            </div>
-            <div className="sw-result-stat">
-              <span className="sw-result-stat-label">Destino</span>
-              <span className="sw-result-stat-value">{combinationSummary.planetName || planet?.name || '—'}</span>
-            </div>
-            <div className="sw-result-stat">
-              <span className="sw-result-stat-label">Equipamento</span>
-              <span className="sw-result-stat-value">{combinationSummary.vehicleName || vehicle?.name || '—'}</span>
-            </div>
-            <div className="sw-result-stat">
-              <span className="sw-result-stat-label">Dificuldade</span>
-              <span className="sw-result-stat-value">{difficultyLabel}</span>
-            </div>
-            <div className="sw-result-stat">
-              <span className="sw-result-stat-label">Tempo sobrevivido</span>
-              <span className="sw-result-stat-value">{timeSurvived}s / {duration}s</span>
-            </div>
-            <div className="sw-result-stat">
-              <span className="sw-result-stat-label">Cristais coletados</span>
-              <span className="sw-result-stat-value">{g.crystalsCollected}</span>
-            </div>
-            <div className="sw-result-stat">
-              <span className="sw-result-stat-label">Obstaculos desviados</span>
-              <span className="sw-result-stat-value">{g.obstaclesDodged}</span>
-            </div>
-            <div className="sw-result-stat">
-              <span className="sw-result-stat-label">Colisoes</span>
-              <span className="sw-result-stat-value">{g.collisions}</span>
-            </div>
-            <div className="sw-result-stat sw-result-stat-highlight">
-              <span className="sw-result-stat-label">Pontuacao final</span>
-              <span className="sw-result-stat-value">
-                {finalScore.toLocaleString('pt-BR')} pts
-              </span>
+          <div className="sw-result-body" style={{ display: 'flex', justifyContent: 'center' }}>
+            {/* Coluna Única: Resultado */}
+            <div className="sw-result-column" style={{ width: '100%', maxWidth: '450px' }}>
+              <h3 className="sw-result-column-title">Resultado da Partida</h3>
+              <div className="sw-result-stat sw-result-stat-highlight">
+                <span className="sw-result-stat-label">Pontuacao final</span>
+                <span className="sw-result-stat-value">
+                  {finalScore.toLocaleString('pt-BR')} pts
+                </span>
+              </div>
+              <div className="sw-result-stats">
+                <div className="sw-result-stat">
+                  <span className="sw-result-stat-label">Cristais</span>
+                  <span className="sw-result-stat-value">{g.crystalsCollected}</span>
+                </div>
+                {g.hyperCrystalsCollected > 0 && (
+                  <div className="sw-result-stat">
+                    <span className="sw-result-stat-label">Hipercristais</span>
+                    <span className="sw-result-stat-value sw-text-cyan-bright">{g.hyperCrystalsCollected}</span>
+                  </div>
+                )}
+                <div className="sw-result-stat">
+                  <span className="sw-result-stat-label">Desvios</span>
+                  <span className="sw-result-stat-value">{g.obstaclesDodged}</span>
+                </div>
+                <div className="sw-result-stat">
+                  <span className="sw-result-stat-label">Colisoes</span>
+                  <span className="sw-result-stat-value">{g.collisions}</span>
+                </div>
+              </div>
+
+              <div className="sw-result-breakdown">
+                <div className="sw-result-breakdown-title">Detalhamento</div>
+                <div className="sw-result-breakdown-grid">
+                  <div className="sw-result-breakdown-item">
+                    <span>Cristais ({g.crystalsCollected}):</span>
+                    <span className="sw-text-cyan">+{crystalsPts}</span>
+                  </div>
+                  {g.hyperCrystalsCollected > 0 && (
+                    <div className="sw-result-breakdown-item">
+                      <span>Hipercristais ({g.hyperCrystalsCollected}):</span>
+                      <span className="sw-text-cyan-bright">+{hyperPts}</span>
+                    </div>
+                  )}
+                  <div className="sw-result-breakdown-item">
+                    <span>Desvios ({g.obstaclesDodged}):</span>
+                    <span className="sw-text-cyan">+{dodgePts}</span>
+                  </div>
+                  {g.collisions > 0 && (
+                    <div className="sw-result-breakdown-item">
+                      <span>Colisoes ({g.collisions}):</span>
+                      <span className="sw-text-cyan-dim">-{colPts}</span>
+                    </div>
+                  )}
+                  {isWin && (
+                    <div className="sw-result-breakdown-item">
+                      <span>Sobrevivencia:</span>
+                      <span className="sw-text-cyan">+{survPts}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Effects & Synergies */}
           {activeEffects.length > 0 && (
-            <div className="sw-result-effects">
-              <div className="sw-result-effects-title">Efeitos ativos</div>
-              {activeEffects.map((e, i) => (
-                <div
-                  key={i}
-                  className={`sw-result-effect-item ${e.type === 'synergy' ? 'sw-effect-synergy' : ''}`}
-                >
-                  {e.text}
-                </div>
-              ))}
-            </div>
+            <details className="sw-result-effects-details">
+              <summary className="sw-result-effects-summary">Ver efeitos da build</summary>
+              <div className="sw-result-effects-content">
+                {activeEffects.map((e, i) => (
+                  <div
+                    key={i}
+                    className={`sw-result-effect-item ${e.type === 'synergy' ? 'sw-effect-synergy' : ''}`}
+                  >
+                    {e.text}
+                  </div>
+                ))}
+              </div>
+            </details>
           )}
 
           <div className="sw-result-actions">
@@ -518,6 +638,9 @@ const HyperdriveEscape = ({
             </button>
             <button className="sw-btn sw-btn-secondary" onClick={onBackToBuilder} type="button">
               <FaArrowLeft /> Editar missao
+            </button>
+            <button className="sw-btn sw-btn-secondary" onClick={() => alert('A exportação por e-mail será ativada na etapa final do projeto.')} type="button">
+              <FaShare /> Exportar meu resultado
             </button>
           </div>
         </div>
@@ -531,13 +654,11 @@ const HyperdriveEscape = ({
 
   if (gameStatus === GAME_STATUS.READY) {
     return (
-      <div className="sw-ready-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '40px' }}>
+      <div className="sw-ready-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '150px' }}>
         <div className="sw-arena-ready-overlay">
           <img src={spaceshipSpriteImg} alt="Nave" className="sw-arena-ready-icon" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
           <h2 className="sw-arena-ready-title" style={{ color: '#38d9ff' }}>Pronto para a fuga?</h2>
-          <p className="sw-arena-ready-sub" style={{ color: '#38d9ff' }}>
-            Nave: {starship?.name || 'Nave Estelar'} | Dificuldade: {difficultyLabel}
-          </p>
+
           <p className="sw-arena-ready-sub" style={{ fontSize: '0.72rem', color: '#38d9ff' }}>
             Use WASD ou setas para mover em 4 direcoes
           </p>
@@ -545,11 +666,7 @@ const HyperdriveEscape = ({
             Iniciar Fuga
           </button>
         </div>
-        <div className="sw-arena-actions">
-          <button className="sw-btn sw-btn-secondary" onClick={onBackToBuilder} type="button">
-            <FaArrowLeft /> Editar missao
-          </button>
-        </div>
+
       </div>
     );
   }
@@ -594,8 +711,8 @@ const HyperdriveEscape = ({
           </div>
           <div className="sw-hud-row">
             <div className="sw-hud-item">
-              <span className="sw-hud-label">NAVE</span>
-              <span className="sw-hud-value sw-hud-value-sm">{starship?.name || '—'}</span>
+              <span className="sw-hud-label">HIPERCRISTAIS</span>
+              <span className="sw-hud-value" style={{ color: '#7dd3fc', textShadow: '0 0 5px rgba(125,211,252,0.5)' }}>{g.hyperCrystalsCollected}</span>
             </div>
             <div className="sw-hud-item">
               <span className="sw-hud-label">DESVIOS</span>
@@ -631,7 +748,7 @@ const HyperdriveEscape = ({
           );
         })}
 
-        {/* Crystals with depth effect */}
+        {/* Crystals and Hypercrystals with depth effect */}
         {g.crystals.map((c) => {
           const progress = clamp(c.y / 100, 0, 1);
           const scale = getDepthScale(progress);
@@ -639,15 +756,23 @@ const HyperdriveEscape = ({
           return (
             <div
               key={c.id}
-              className="sw-crystal"
+              className={c.isHyper ? "sw-hypercrystal" : "sw-crystal"}
               style={{
                 left: `${c.x}%`,
                 top: `${c.y}%`,
                 transform: `translate(-50%, -50%) scale(${scale})`,
                 opacity,
+                zIndex: c.isHyper ? 20 : 5
               }}
             >
-              <div className="sw-crystal-inner" />
+              {c.isHyper ? (
+                <span style={{ 
+                  fontSize: '48px', 
+                  filter: 'drop-shadow(0 0 20px #facc15) drop-shadow(0 0 40px #eab308) drop-shadow(0 0 60px #ca8a04)', 
+                  display: 'block',
+                  transform: 'translateY(-4px)'
+                }}>💎</span>
+              ) : <div className="sw-crystal-inner" />}
             </div>
           );
         })}

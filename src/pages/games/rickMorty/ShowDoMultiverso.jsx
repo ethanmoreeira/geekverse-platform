@@ -6,6 +6,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { generateQuestions } from '../../../utils/questionGenerator';
+import { useAuth } from '../../../hooks/useAuth';
+import { saveResult } from '../../../services/rankingService';
 import QuestionCard from '../../../components/multiverseQuiz/QuestionCard';
 import AnswerCard from '../../../components/multiverseQuiz/AnswerCard';
 import ScoreBoard from '../../../components/multiverseQuiz/ScoreBoard';
@@ -77,6 +79,8 @@ const formatNumber = (value) =>
 // ─── Componente Principal ───────────────────────────────────────────
 const ShowDoMultiverso = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const hasSavedRankingRef = useRef(false);
 
   // Estado geral
   const [isEntering, setIsEntering] = useState(true);
@@ -181,6 +185,7 @@ const ShowDoMultiverso = () => {
     setEliminatedOptions([]);
     setHintPenaltyTotal(0);
     setScoreBeforeHints(0);
+    hasSavedRankingRef.current = false;
 
     try {
       const config = GAME_MODES[mode];
@@ -345,6 +350,7 @@ const ShowDoMultiverso = () => {
     setEliminatedOptions([]);
     setHintPenaltyTotal(0);
     setScoreBeforeHints(0);
+    hasSavedRankingRef.current = false;
   };
 
   const handleBackToDashboard = () => {
@@ -366,6 +372,41 @@ const ShowDoMultiverso = () => {
 
   // Pontuação final com desconto de dicas (nunca negativa)
   const finalScore = Math.max(0, score - hintPenaltyTotal);
+
+  // ── Salvar resultado no Ranking quando o jogo terminar (uma única vez) ──
+  useEffect(() => {
+    if (gamePhase !== 'gameover') return;
+    if (hasSavedRankingRef.current) return;
+    if (!selectedMode) return;
+
+    hasSavedRankingRef.current = true;
+
+    const modeKeyMap = { easy: 'easy', medium: 'medium', hard: 'challenge' };
+    const diffKey = modeKeyMap[selectedMode] || selectedMode;
+    const currentFinalScore = Math.max(0, score - hintPenaltyTotal);
+
+    const payload = {
+      gameId: 'show-multiverso',
+      gameName: 'Show do Multiverso',
+      playerName: user?.nome || 'Jogador GeekVerse',
+      playerEmail: user?.email || '',
+      difficulty: diffKey,
+      status: gameWon ? 'completed' : 'failed',
+      score: currentFinalScore,
+      scoreBeforeHints: score,
+      hits: correctCount,
+      errors: gameWon ? 0 : 1,
+      hintsUsed,
+      hintPenaltyTotal,
+      rankingEligible: gameWon,
+    };
+
+    saveResult(payload);
+
+    if (import.meta.env.DEV) {
+      console.log('[ShowDoMultiverso] Resultado salvo no ranking:', payload);
+    }
+  }, [gamePhase, selectedMode, score, hintPenaltyTotal, gameWon, correctCount, hintsUsed, user]);
 
   const renderScreen = () => {
     if (isEntering) {

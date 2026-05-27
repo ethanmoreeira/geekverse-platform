@@ -1,14 +1,30 @@
 // RankingList.jsx
 // Lista de posições do 4º ao 10º lugar.
 // Destaca o jogador logado com badge "Você".
+// padTo: preenche com traços até atingir esse total de linhas.
 
-const RankingList = ({ results, startPosition, formatMetric, currentUserEmail }) => {
-  if (!results || results.length === 0) return null;
+const RankingList = ({ results, startPosition, formatMetric, currentUserEmail, padTo = 0 }) => {
+  const list = [...(results || [])];
+  while (list.length < padTo) {
+    list.push(null);
+  }
+
+  if (list.length === 0) return null;
 
   return (
     <div className="rk-list">
-      {results.map((r, i) => {
+      {list.map((r, i) => {
         const pos = startPosition + i;
+
+        if (!r) {
+          return (
+            <div key={`empty-${pos}`} className="rk-list-row" style={{ opacity: 0.55 }}>
+              <span className="rk-list-pos">{pos}º</span>
+              <span className="rk-list-name" style={{ fontStyle: 'italic', color: 'var(--gv-text-muted)' }}>—</span>
+            </div>
+          );
+        }
+
         const isYou = currentUserEmail &&
           r.playerEmail?.toLowerCase() === currentUserEmail.toLowerCase();
 
@@ -33,3 +49,4 @@ const RankingList = ({ results, startPosition, formatMetric, currentUserEmail })
 };
 
 export default RankingList;
+

@@ -16,6 +16,8 @@ import PokemonExitLoader from '../../../components/pokemon/PokemonExitLoader';
 import { getPokemonBatchByRandomIds } from '../../../services/apis/pokeApi';
 import { POKEMON_LEVELS, MAX_HINTS_PER_TARGET, HINT_PENALTY_TABLE } from '../../../data/pokemonGameConfig';
 import { shuffleArray } from '../../../utils/shuffleArray';
+import { useAuth } from '../../../hooks/useAuth';
+import { saveResult } from '../../../services/rankingService';
 import { FaArrowLeft, FaExclamationTriangle, FaRedo } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
 import { usePokemonMusic } from '../../../hooks/usePokemonMusic';
@@ -34,6 +36,10 @@ const GAME_STATUS = {
 
 const PokeSombra = () => {
   const navigate = useNavigate();
+
+  // --- Auth & Ranking ---
+  const { user } = useAuth();
+  const hasSavedRankingRef = useRef(false);
 
   // --- Musica Tematica ---
   const { isPlaying, toggleMusic } = usePokemonMusic();
@@ -92,7 +98,43 @@ const PokeSombra = () => {
     if (gameStatus === GAME_STATUS.FINISHED || gameStatus === GAME_STATUS.ERROR) {
       setIsTimerRunning(false);
     }
-  }, [gameStatus]);
+
+    // ── Salvar resultado no Ranking (uma única vez) ──
+    if (gameStatus === GAME_STATUS.FINISHED && selectedLevel && !hasSavedRankingRef.current) {
+      hasSavedRankingRef.current = true;
+
+      const finalTime = elapsedSeconds + penaltySeconds;
+      const diffKey = selectedLevel.id === 'hard' ? 'challenge' : selectedLevel.id;
+      const fmtTime = (s) => {
+        const m = Math.floor(s / 60);
+        const r = s % 60;
+        return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+      };
+
+      const payload = {
+        gameId: 'pokesombra',
+        gameName: 'PokeSombra',
+        playerName: user?.nome || 'Jogador GeekVerse',
+        playerEmail: user?.email || '',
+        difficulty: diffKey,
+        status: 'completed',
+        score: null,
+        timeInSeconds: finalTime,
+        formattedTime: fmtTime(finalTime),
+        errors: mistakes,
+        hintsUsed,
+        hintPenaltyTotal: penaltySeconds,
+        penalties: penaltySeconds,
+        rankingEligible: true,
+      };
+
+      saveResult(payload);
+
+      if (import.meta.env.DEV) {
+        console.log('[PokeSombra] Resultado salvo no ranking:', payload);
+      }
+    }
+  }, [gameStatus, selectedLevel, elapsedSeconds, penaltySeconds, mistakes, hintsUsed, user]);
 
   // --- Esconde a scrollbar da página raiz enquanto o jogo estiver aberto ---
   useEffect(() => {
@@ -162,6 +204,7 @@ const PokeSombra = () => {
     setRevealedPokemon(null);
     setWrongRecentlyId(null);
     setCurrentTargetIndex(0);
+    hasSavedRankingRef.current = false;
 
     try {
       const startTime = Date.now();
@@ -321,6 +364,7 @@ const PokeSombra = () => {
     setRevealedTiles(new Set());
     setCurrentTargetIndex(0);
     setErrorMessage(null);
+    hasSavedRankingRef.current = false;
   };
 
   /**

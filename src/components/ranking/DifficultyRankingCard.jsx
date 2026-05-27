@@ -1,18 +1,23 @@
 // DifficultyRankingCard.jsx
 // Card de ranking por dificuldade. Mostra pódio, lista 4º–10º,
 // posição do jogador logado, e botões de ação.
+// Fonte oficial: Supabase (global). Fallback: localStorage.
 
-import { useState, useMemo } from 'react';
-import { FaListOl, FaFileExport, FaTrophy } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { FaListOl, FaFileExport } from 'react-icons/fa';
 import Podium from './Podium';
 import RankingList from './RankingList';
 import UserPositionCard from './UserPositionCard';
 import {
   getTopTen,
-  getUserPosition,
   getRankedResults,
+  getUserPosition,
+  fetchTopTen,
+  fetchRankedResults,
+  fetchUserPosition,
   RANKING_GAMES,
 } from '../../services/rankingService';
+import { isSupabaseConfigured } from '../../services/supabaseClient';
 
 const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUserEmail }) => {
   const [showFullRanking, setShowFullRanking] = useState(false);
@@ -21,18 +26,49 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
   const gameConfig = RANKING_GAMES[gameId];
   const formatMetric = gameConfig?.formatMainMetric;
 
-  const topTen = useMemo(() => getTopTen(gameId, difficulty), [gameId, difficulty]);
-  const topThree = topTen.slice(0, 3);
-  const rest = topTen.slice(3);
-  const allResults = useMemo(
-    () => showFullRanking ? getRankedResults(gameId, difficulty) : [],
-    [gameId, difficulty, showFullRanking]
+  // Se Supabase configurado: iniciar vazio (traços) e esperar resposta global.
+  // Se não configurado: usar localStorage imediatamente.
+  const [topTen, setTopTen] = useState(() =>
+    isSupabaseConfigured ? [] : getTopTen(gameId, difficulty)
+  );
+  const [allResults, setAllResults] = useState([]);
+  const [userPos, setUserPos] = useState(() =>
+    isSupabaseConfigured ? null : getUserPosition(gameId, difficulty, currentUserEmail)
   );
 
-  const userPos = useMemo(
-    () => getUserPosition(gameId, difficulty, currentUserEmail),
-    [gameId, difficulty, currentUserEmail]
-  );
+  // Busca dados da fonte oficial ao montar
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchTopTen(gameId, difficulty).then((data) => {
+      if (!cancelled) setTopTen(data);
+    });
+
+    fetchUserPosition(gameId, difficulty, currentUserEmail).then((pos) => {
+      if (!cancelled) setUserPos(pos);
+    });
+
+    return () => { cancelled = true; };
+  }, [gameId, difficulty, currentUserEmail]);
+
+  // Busca ranking completo quando "Ver completo" é aberto
+  useEffect(() => {
+    if (!showFullRanking) {
+      setAllResults([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    fetchRankedResults(gameId, difficulty).then((data) => {
+      if (!cancelled) setAllResults(data);
+    });
+
+    return () => { cancelled = true; };
+  }, [gameId, difficulty, showFullRanking]);
+
+  const topThree = topTen.slice(0, 3);
+  const rest = topTen.slice(3);
 
   // Mostra "Sua colocação" apenas se fora do Top 10
   const showUserPos = userPos && userPos.position > 10;
@@ -44,8 +80,6 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
 
   const diffClass = `rk-diff-${difficulty}`;
 
-  const isEmpty = topTen.length === 0;
-
   return (
     <div className={`rk-diff-card ${diffClass}`} data-game-id={gameId}>
       <div className="rk-diff-header">
@@ -55,33 +89,27 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
         </span>
       </div>
 
-      {isEmpty ? (
-        <div className="rk-empty">
-          <FaTrophy className="rk-empty-icon" />
-          <h4>Sem campeões ainda</h4>
-          <p>Jogue uma partida para inaugurar o ranking desta dificuldade.</p>
-        </div>
-      ) : showFullRanking ? (
+      {showFullRanking ? (
         <div style={{ marginTop: 8 }}>
           <RankingList
             results={allResults}
             startPosition={1}
             formatMetric={formatMetric}
             currentUserEmail={currentUserEmail}
+            padTo={10}
           />
         </div>
       ) : (
         <>
           <Podium topThree={topThree} formatMetric={formatMetric} />
 
-          {rest.length > 0 && (
-            <RankingList
-              results={rest}
-              startPosition={4}
-              formatMetric={formatMetric}
-              currentUserEmail={currentUserEmail}
-            />
-          )}
+          <RankingList
+            results={rest}
+            startPosition={4}
+            formatMetric={formatMetric}
+            currentUserEmail={currentUserEmail}
+            padTo={7}
+          />
 
           {showUserPos && (
             <UserPositionCard
@@ -94,15 +122,13 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
       )}
 
       <div className="rk-actions">
-        {!isEmpty && (
-          <button
-            className="rk-btn-action"
-            onClick={() => setShowFullRanking(!showFullRanking)}
-            aria-label="Ver ranking completo"
-          >
-            <FaListOl /> {showFullRanking ? 'Fechar' : 'Ver completo'}
-          </button>
-        )}
+        <button
+          className="rk-btn-action"
+          onClick={() => setShowFullRanking(!showFullRanking)}
+          aria-label="Ver ranking completo"
+        >
+          <FaListOl /> {showFullRanking ? 'Fechar' : 'Ver completo'}
+        </button>
         <button
           className="rk-btn-action"
           onClick={handleExport}
@@ -119,3 +145,4 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
 };
 
 export default DifficultyRankingCard;
+
