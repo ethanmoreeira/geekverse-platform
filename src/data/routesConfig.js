@@ -13,6 +13,5 @@ export const PRIVATE_ROUTES = [
   { path: '/app/rick-morty', label: 'Show do Multiverso' },
   { path: '/app/star-wars', label: 'Fuga do Hiperespaço' },
   { path: '/app/ranking', label: 'Ranking' },
-  { path: '/app/exportar', label: 'Exportar' },
   { path: '/app/sobre', label: 'Sobre' },
 ];

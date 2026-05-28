@@ -9,7 +9,6 @@ import { useAuth } from '../../hooks/useAuth';
 import {
   FaGamepad,
   FaTrophy,
-  FaFileExport,
   FaInfoCircle,
   FaSignOutAlt,
 } from 'react-icons/fa';
@@ -62,13 +61,6 @@ const AppNavbar = () => {
             >
               <FaTrophy />
               <span>Ranking</span>
-            </Link>
-            <Link
-              to="/app/exportar"
-              className={`gv-nav-link ${isActive('/app/exportar') ? 'active' : ''}`}
-            >
-              <FaFileExport />
-              <span>Exportar</span>
             </Link>
             <Link
               to="/app/sobre"

@@ -34,7 +34,7 @@ const GAMES = [
     description: 'Encontre pares de personagens em um jogo da memória.',
     route: '/app/harry-potter',
     icon: GiMagicSwirl,
-    color: '#f59e0b',
+    color: '#a855f7', // Roxo
     bgImage: harryCardBg,
     status: 'playable',
   },
@@ -45,7 +45,7 @@ const GAMES = [
     description: 'Cacada visual por silhuetas usando dados reais da PokeAPI.',
     route: '/app/pokemon',
     icon: GiSwordsPower,
-    color: '#ef4444',
+    color: '#ef4444', // Vermelho
     bgImage: pokemonCardBg,
     status: 'playable',
   },
@@ -56,7 +56,7 @@ const GAMES = [
     description: 'Quiz interdimensional com cards de personagens, episódios e localizações da API.',
     route: '/app/rick-morty',
     icon: GiPortal,
-    color: '#22c55e',
+    color: '#22c55e', // Verde
     bgImage: rickCardBg,
     status: 'playable',
   },
@@ -67,7 +67,7 @@ const GAMES = [
     description: 'Monte sua missão e escape do campo de asteroides.',
     route: '/app/star-wars',
     icon: GiSpaceship,
-    color: '#3b82f6',
+    color: '#3b82f6', // Azul
     bgImage: starWarsBg,
   },
 ];
@@ -142,8 +142,12 @@ const Dashboard = () => {
             >
 
               <div className="gv-game-card-body">
-                <h3 className="gv-game-card-title">{game.name}</h3>
-                <span className="gv-game-card-api">{game.api}</span>
+                <h3 className="gv-game-card-title" style={{ background: 'none', WebkitTextFillColor: 'initial', color: '#ffffff' }}>
+                  {game.name}
+                </h3>
+                <span className="gv-game-card-api" style={{ color: game.color }}>
+                  {game.api}
+                </span>
               </div>
 
             </div>

@@ -1,0 +1,407 @@
+/* Sobre.css */
+
+.about-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.4) contrast(1.05) brightness(1.05);
+}
+
+.about-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 15, 26, 0.30);
+}
+
+.about-page {
+  position: relative;
+  width: 100%;
+  max-width: 1080px; /* Reduzido para ficar mais compacto */
+  margin: 0 auto;
+  padding: 10px 20px 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Gap reduzido */
+  color: #f3e8ff;
+}
+
+.about-hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px; /* Reduzido */
+  padding: 0 0 10px 0;
+}
+
+.about-hero-logo {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  display: block;
+  mix-blend-mode: screen;
+  margin: -40px auto 0 auto; /* Ajuste sutil */
+}
+
+.about-hero-subtitle {
+  font-size: 15px;
+  color: #d8b4fe;
+  max-width: 600px;
+  margin-top: -40px; /* Ajuste sutil para colar na logo */
+}
+
+.about-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Reduzido */
+}
+
+/* Rows Layouts */
+.about-row-65-35 {
+  display: grid;
+  grid-template-columns: 65fr 35fr;
+  gap: 16px;
+}
+
+.about-row-60-40 {
+  display: grid;
+  grid-template-columns: 60fr 40fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.about-row-50-50 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.about-row-wide {
+  width: 100%;
+}
+
+/* Common Card Style */
+.about-card {
+  background: rgba(14, 12, 30, 0.20);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(190, 120, 255, 0.28);
+  border-radius: var(--gv-radius);
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  height: 100%;
+}
+
+.about-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(190, 120, 255, 0.5);
+}
+
+.about-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #d8b4fe;
+  text-shadow: 0 0 8px rgba(216, 180, 254, 0.3);
+  border-bottom: 1px solid rgba(216, 180, 254, 0.15);
+  padding-bottom: 8px;
+  margin: 0;
+}
+
+.about-card p {
+  color: #e9d5ff;
+  line-height: 1.5;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Info Project (Ficha Técnica) */
+
+.about-project-info .about-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about-ficha-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.about-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.about-info-grid p {
+  color: #f3e8ff;
+  display: flex;
+  align-items: center;
+}
+
+.about-info-grid strong {
+  color: #c084fc;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.about-members-list {
+  background: rgba(12, 14, 28, 0.15);
+  padding: 12px 16px;
+  border-radius: 6px;
+  border-left: 2px solid #a855f7;
+}
+
+.about-members-list strong {
+  display: block;
+  color: #c084fc;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.about-members-list ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.about-members-list li {
+  color: #f3e8ff;
+  font-size: 13px;
+  position: relative;
+  padding-left: 10px;
+}
+
+.about-members-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #a855f7;
+}
+
+/* Games List */
+.about-games-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.about-game-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(12, 14, 28, 0.15);
+  padding: 10px 12px;
+  border-radius: 6px;
+  border-left: 2px solid rgba(167, 139, 250, 0.4);
+}
+
+.about-game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.about-game-item strong {
+  font-size: 12px;
+  color: #d8b4fe;
+}
+
+.about-game-item p {
+  font-size: 11px;
+  color: #e9d5ff;
+  margin: 0;
+}
+
+.about-game-api {
+  display: inline-block;
+  font-size: 9px;
+  color: #f3e8ff;
+  background: rgba(168, 85, 247, 0.4);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Tech Chips */
+.about-tech-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.about-tech-chip {
+  background: rgba(12, 14, 28, 0.20);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #f3e8ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Discreet Text */
+.about-discreet-text {
+  font-size: 12px !important;
+  color: #c4b5fd !important;
+}
+
+/* Video Placeholder */
+.about-video-placeholder {
+  flex: 1;
+  min-height: 50px;
+  background: rgba(12, 14, 28, 0.15);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 4px;
+  padding: 10px;
+}
+
+.about-video-placeholder:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.about-video-icon {
+  color: rgba(216, 180, 254, 0.5);
+  transition: color 0.3s ease;
+}
+
+.about-video-placeholder:hover .about-video-icon {
+  color: rgba(216, 180, 254, 0.9);
+}
+
+/* Audit Card */
+.about-audit-btn {
+  margin-top: auto;
+  background: rgba(34, 197, 94, 0.15) !important;
+  border-color: rgba(34, 197, 94, 0.5) !important;
+  color: #22c55e !important;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.about-audit-btn:hover {
+  background: rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Contact Form */
+.about-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.about-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.about-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about-form-group label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #c084fc;
+  letter-spacing: 0.5px;
+}
+
+.about-form-group input,
+.about-form-group textarea {
+  width: 100%;
+  padding: 8px 12px; /* Reduzido */
+  background: rgba(3, 5, 16, 0.72);
+  border: 1px solid rgba(180, 120, 255, 0.25);
+  border-radius: 6px;
+  color: #f3e8ff;
+  font-family: inherit;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.about-form-group input:focus,
+.about-form-group textarea:focus {
+  outline: none;
+  border-color: #c084fc;
+  box-shadow: 0 0 8px rgba(192, 132, 252, 0.3);
+  background: rgba(3, 5, 16, 0.9);
+}
+
+.about-submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 6px;
+  color: #f3e8ff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 13px;
+}
+
+.about-submit-button:hover {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: rgba(168, 85, 247, 0.8);
+}
+
+.about-contact-submit {
+  align-self: flex-start;
+  padding: 10px 20px;
+}
+
+.about-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/* Responsiveness */
+@media (max-width: 900px) {
+  .about-row-65-35,
+  .about-row-60-40,
+  .about-row-50-50,
+  .about-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .about-games-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-contact-submit {
+    align-self: stretch;
+  }
+}

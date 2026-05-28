@@ -40,7 +40,7 @@ import '../../../styles/starWars.css';
 
 // Imagens
 import exitImage from '../../../assets/backgrounds/star-wars/capital_ship_exit_screen_8k.png';
-import warsShipSobria from '../../../assets/backgrounds/star-wars/wars_ship_sobria.png';
+import capitalShipBg from '../../../assets/backgrounds/star-wars/capital_ship_8k_ultra_quality.png';
 
 // ─── Fases do Jogo ──────────────────────────────────────────────────
 
@@ -113,7 +113,7 @@ const StarWarsGame = () => {
   useEffect(() => {
     // Garante que a música toque caso o React StrictMode ou um reload cancele o play do Dashboard
     playFugaMusic();
-    
+
     return () => {
       stopAllFugaMusic();
     };
@@ -323,12 +323,12 @@ const StarWarsGame = () => {
 
       {/* ── EXIT LOADING ── */}
       {isExiting && (
-        <section 
-          className="starwars-transition-screen" 
-          style={{ 
+        <section
+          className="starwars-transition-screen"
+          style={{
             backgroundImage: `linear-gradient(rgba(3, 7, 18, 0.4), rgba(3, 7, 18, 0.7)), url(${exitImage})`,
-            backgroundSize: 'cover', 
-            backgroundPosition: 'center' 
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
           }}
         >
           <span className="starwars-transition-kicker">FUGA DO HIPERESPAÇO</span>
@@ -349,12 +349,12 @@ const StarWarsGame = () => {
 
       {/* ── LOADING ── */}
       {loading && (
-        <section 
+        <section
           className="starwars-transition-screen"
           style={{ 
-            backgroundImage: `linear-gradient(rgba(2, 6, 23, 0.75), rgba(2, 6, 23, 0.85)), url(${warsShipSobria})`,
-            backgroundSize: 'cover', 
-            backgroundPosition: 'center' 
+            backgroundImage: `linear-gradient(rgba(2, 6, 23, 0.18), rgba(2, 6, 23, 0.32)), url(${capitalShipBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
           }}
         >
           <span className="starwars-transition-kicker">FUGA DO HIPERESPAÇO</span>

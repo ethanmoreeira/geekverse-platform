@@ -2717,7 +2717,7 @@
   .sw-effects-attrs {
     grid-template-columns: 1fr 1fr;
   }
-} 
+}
 
 /* ============================================ */
 /* CINEMATIC TRANSITION SCREEN                  */
@@ -2727,8 +2727,10 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(3, 7, 18, 0.3); /* Transparent to let the vivid background show */
-  backdrop-filter: blur(3px); /* Gentle blur to maintain focus on text but keep image visible */
+  background: rgba(3, 7, 18, 0.3);
+  /* Transparent to let the vivid background show */
+  backdrop-filter: blur(3px);
+  /* Gentle blur to maintain focus on text but keep image visible */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2748,11 +2750,11 @@
 }
 
 .starwars-transition-screen h1 {
-  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-size: clamp(0.9rem, 1.5vw, 1.2rem);
   font-weight: 800;
   color: #ffffff;
   margin: 0;
-  text-shadow: 
+  text-shadow:
     0 0 10px rgba(56, 217, 255, 0.4),
     0 0 20px rgba(255, 255, 255, 0.2);
   letter-spacing: 2px;
@@ -2762,14 +2764,15 @@
 @keyframes cinematic-pulse {
   0% {
     opacity: 0.8;
-    text-shadow: 
+    text-shadow:
       0 0 10px rgba(56, 217, 255, 0.4),
       0 0 20px rgba(255, 255, 255, 0.2);
     transform: scale(0.98);
   }
+
   100% {
     opacity: 1;
-    text-shadow: 
+    text-shadow:
       0 0 15px rgba(56, 217, 255, 0.8),
       0 0 30px rgba(255, 255, 255, 0.5);
     transform: scale(1);

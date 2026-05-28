@@ -36,7 +36,7 @@ const Ranking = () => {
           <div className="rk-title-wrapper">
             <img src={titleImg} alt="Hall dos Campeões GeekVerse" className="rk-title-img" />
           </div>
-          <p className="rk-subtitle">
+          <p className="rk-subtitle" style={{ color: '#d8b4fe', marginTop: '-30px' }}>
             Escolha um universo e veja quem domina cada desafio.
           </p>
         </div>
