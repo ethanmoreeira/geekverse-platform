@@ -2778,3 +2778,19 @@
     transform: scale(1);
   }
 }
+
+/* ============================================ */
+/* EXPORT BUTTON — Fuga do Hiperespaço (azul)   */
+/* ============================================ */
+
+.starwars-export-button {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(29, 78, 216, 0.25)) !important;
+  border-color: rgba(96, 165, 250, 0.5) !important;
+  color: #93c5fd !important;
+}
+
+.starwars-export-button:hover {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.45), rgba(29, 78, 216, 0.45)) !important;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3) !important;
+  color: #bfdbfe !important;
+}

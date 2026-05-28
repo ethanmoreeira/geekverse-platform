@@ -6,6 +6,7 @@
 // Persistência via localStorage.
 
 import { createContext, useState, useEffect } from 'react';
+import { logAuditEvent, resetAuditSessionSummary } from '../services/auditService';
 
 export const AuthContext = createContext(null);
 
@@ -90,10 +91,32 @@ export const AuthProvider = ({ children }) => {
     // Compatibilidade com chaves legadas
     localStorage.setItem('auth', 'true');
 
+    // Reset visual session audit when user logs in so it starts clean for them
+    resetAuditSessionSummary();
+
+    logAuditEvent({
+      eventType: 'login',
+      description: 'Usuário realizou login no GeekVerse G8',
+      path: '/',
+      metadata: {
+        source: 'login',
+        loginMethod: 'fixed-password'
+      }
+    });
+
     return { success: true };
   };
 
   const logout = () => {
+    logAuditEvent({
+      eventType: 'logout',
+      description: 'Usuário saiu do GeekVerse G8',
+      path: window.location.pathname
+    });
+
+    // Reset visual session audit when user logs out
+    resetAuditSessionSummary();
+
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(USER_STORAGE_KEY);

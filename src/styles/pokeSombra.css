@@ -2094,3 +2094,19 @@ body.pks-body-intro-bg .pks-page {
   transform: translateY(-1px);
   opacity: 1;
 }
+
+/* ============================================ */
+/* EXPORT BUTTON — PokeSombra (vermelho)        */
+/* ============================================ */
+
+.pokemon-export-button {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.35), rgba(153, 27, 27, 0.35)) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  color: #fca5a5 !important;
+}
+
+.pokemon-export-button:hover {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.55), rgba(153, 27, 27, 0.55)) !important;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3) !important;
+  color: #fee2e2 !important;
+}

@@ -3,8 +3,9 @@
 // Jogo de montagem de missão com dados reais da SWAPI.
 // Fluxo: BUILDER → SUMMARY → ARENA_PREVIEW → RESULT_PREVIEW
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logAuditEvent } from '../../../services/auditService';
 import { fetchStarWarsMissionData } from '../../../services/apis/starWarsApi';
 import { calculateMissionStats } from '../../../utils/starWarsMission';
 import { stopAllFugaMusic, toggleActiveFugaMusic, playFugaMusic, switchToFugaIntroMusic } from '../../../services/audioService';
@@ -109,6 +110,20 @@ const StarWarsGame = () => {
   // Estado de carregamento
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const hasLoggedEnter = useRef(false);
+
+  useEffect(() => {
+    if (!hasLoggedEnter.current) {
+      hasLoggedEnter.current = true;
+      logAuditEvent({
+        eventType: 'game_enter',
+        description: 'Usuário entrou no jogo Fuga do Hiperespaço',
+        gameId: 'fuga-hiperespaco',
+        gameName: 'Fuga do Hiperespaço'
+      });
+    }
+  }, []);
 
   useEffect(() => {
     // Garante que a música toque caso o React StrictMode ou um reload cancele o play do Dashboard

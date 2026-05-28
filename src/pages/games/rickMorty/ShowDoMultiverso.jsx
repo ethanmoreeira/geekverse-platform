@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { generateQuestions } from '../../../utils/questionGenerator';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
+import { logAuditEvent } from '../../../services/auditService';
 import QuestionCard from '../../../components/multiverseQuiz/QuestionCard';
 import AnswerCard from '../../../components/multiverseQuiz/AnswerCard';
 import ScoreBoard from '../../../components/multiverseQuiz/ScoreBoard';
@@ -18,8 +19,9 @@ import { GiPortal } from 'react-icons/gi';
 import {
   FaStar, FaBolt, FaSkull, FaTrophy, FaTimesCircle,
   FaArrowLeft, FaArrowRight, FaRedo, FaExclamationTriangle, FaCheckCircle,
-  FaLightbulb, FaClipboardList,
+  FaLightbulb, FaClipboardList, FaFileExport,
 } from 'react-icons/fa';
+import { exportJsonFile } from '../../../utils/exportResult';
 import rickMortyMusic from '../../../assets/audio/magpiemusic-ambient-meditative-clear-sky-353119.mp3';
 
 import '../../../styles/showDoMultiverso.css';
@@ -89,6 +91,20 @@ const ShowDoMultiverso = () => {
   const [selectedMode, setSelectedMode] = useState(null);
   const [enteringPortal, setEnteringPortal] = useState(null);
   const [isPortalTransitioning, setIsPortalTransitioning] = useState(false);
+
+  const hasLoggedEnter = useRef(false);
+
+  useEffect(() => {
+    if (!hasLoggedEnter.current) {
+      hasLoggedEnter.current = true;
+      logAuditEvent({
+        eventType: 'game_enter',
+        description: 'Usuário entrou no jogo Show do Multiverso',
+        gameId: 'show-multiverso',
+        gameName: 'Show do Multiverso'
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -207,6 +223,17 @@ const ShowDoMultiverso = () => {
 
       setQuestions(generated);
       setGamePhase('playing');
+      
+      logAuditEvent({
+        eventType: 'game_start',
+        description: 'Usuário iniciou uma partida em Show do Multiverso',
+        gameId: 'show-multiverso',
+        gameName: 'Show do Multiverso',
+        metadata: {
+          difficulty: mode,
+          startedAt: new Date().toISOString()
+        }
+      });
     } catch (err) {
       console.error('[ShowDoMultiverso] Erro ao gerar perguntas:', err);
       setLoadError(
@@ -402,6 +429,22 @@ const ShowDoMultiverso = () => {
     };
 
     saveResult(payload);
+
+    logAuditEvent({
+      eventType: 'game_finish',
+      description: `Usuário concluiu uma partida em Show do Multiverso com ${gameWon ? 'vitória' : 'derrota'}`,
+      gameId: 'show-multiverso',
+      gameName: 'Show do Multiverso',
+      metadata: {
+        difficulty: diffKey,
+        status: gameWon ? 'completed' : 'failed',
+        score: currentFinalScore,
+        attempts: correctCount,
+        errors: gameWon ? 0 : 1,
+        hintsUsed,
+        rankingEligible: gameWon
+      }
+    });
 
     if (import.meta.env.DEV) {
       console.log('[ShowDoMultiverso] Resultado salvo no ranking:', payload);
@@ -609,6 +652,46 @@ const ShowDoMultiverso = () => {
                 id="btn-restart-gameover"
               >
                 <FaRedo /> Jogar Novamente
+              </button>
+              <button
+                className="smv-btn-primary multiverse-export-button"
+                type="button"
+                id="btn-export-multiverso"
+                onClick={() => {
+                  const exportData = {
+                    jogo: 'Show do Multiverso',
+                    gameId: 'show-multiverso',
+                    jogador: user?.nome || 'Jogador GeekVerse',
+                    email: user?.email || '',
+                    modo: modeConfig?.name || '',
+                    dificuldade: selectedMode || '',
+                    status: gameWon ? 'vitória' : 'derrota',
+                    pontuacaoFinal: finalScore,
+                    pontuacaoAntesAjudas: score,
+                    acertos: correctCount,
+                    erros: gameWon ? 0 : 1,
+                    ajudasUsadas: hintsUsed,
+                    penalidadeAjudas: hintPenaltyTotal,
+                    dataExportacao: new Date().toLocaleString('pt-BR'),
+                  };
+                  
+                  logAuditEvent({
+                    eventType: 'result_export',
+                    description: `Usuário exportou ${gameWon ? 'o resultado' : 'uma tentativa'} de Show do Multiverso`,
+                    gameId: 'show-multiverso',
+                    gameName: 'Show do Multiverso',
+                    metadata: {
+                      status: gameWon ? 'vitória' : 'derrota',
+                      difficulty: selectedMode || '',
+                      fileType: 'json',
+                      filename: 'geekverse-show-multiverso-resultado'
+                    }
+                  });
+
+                  exportJsonFile(exportData, 'geekverse-show-multiverso-resultado');
+                }}
+              >
+                <FaFileExport /> {gameWon ? 'Exportar resultado' : 'Exportar tentativa'}
               </button>
             </div>
           </div>

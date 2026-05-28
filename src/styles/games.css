@@ -2009,3 +2009,19 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
     gap: 4px;
   }
 }
+
+/* ============================================ */
+/* EXPORT BUTTON — Memória dos Bruxos (roxo)    */
+/* ============================================ */
+
+.memory-export-button {
+  background: linear-gradient(135deg, #6a0dad 0%, #8b5cf6 100%) !important;
+  border-color: #a78bfa !important;
+  font-size: 0.85rem !important;
+  padding: 10px 22px !important;
+}
+
+.memory-export-button:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%) !important;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4) !important;
+}

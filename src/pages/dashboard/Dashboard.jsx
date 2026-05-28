@@ -3,6 +3,7 @@
 // Exibe cards dos 4 jogos oficiais.
 // Estilo arcade geek com grid responsivo.
 
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   GiMagicSwirl,

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAuditSessionSummary } from '../../services/auditService';
 import {
   FaArrowLeft,
   FaPlayCircle
@@ -23,6 +24,7 @@ const TECHS = [
 
 const Sobre = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -40,8 +42,19 @@ const Sobre = () => {
     alert('EmailJS ainda não configurado. O envio será implementado nas próximas etapas.');
   };
 
-  const handleAudit = () => {
-    alert('Auditoria visual. auditService ainda não configurado.');
+  const [auditSummary, setAuditSummary] = useState(null);
+
+  const fetchAuditSummary = () => {
+    const summary = getAuditSessionSummary();
+    setAuditSummary(summary);
+  };
+
+  useEffect(() => {
+    fetchAuditSummary();
+  }, []);
+
+  const handleAuditRefresh = () => {
+    fetchAuditSummary();
   };
 
   return (
@@ -108,12 +121,47 @@ const Sobre = () => {
 
             {/* Auditoria de Navegação */}
             <div className="about-card about-audit-card">
-              <h2 className="about-card-title">Auditoria de Navegação</h2>
-              <p className="about-discreet-text">
-                O sistema registra automaticamente os principais acessos e ações realizadas nesta sessão. O relatório poderá ser enviado ao e-mail administrativo do projeto.
+              <h2 className="about-card-title">Auditoria da Sessão</h2>
+              <p className="about-discreet-text" style={{ marginBottom: '10px' }}>
+                O sistema registra eventos importantes da sessão no Supabase.
+                <br />
+                <span style={{ fontSize: '0.8em', opacity: 0.8 }}>Os eventos completos também são registrados no Supabase para fins de auditoria do projeto. Os dados exibidos são contadores agregados. Nenhum nome ou e-mail é exibido nesta tela.</span>
               </p>
-              <button onClick={handleAudit} className="about-submit-button about-audit-btn">
-                Enviar auditoria ao projeto
+
+              {!auditSummary ? (
+                <div style={{ padding: '20px 0', textAlign: 'center', color: '#ff6b6b' }}>Resumo de auditoria indisponível no momento.</div>
+              ) : (
+                <div className="about-audit-grid" style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(2, 1fr)', 
+                  gap: '10px',
+                  margin: '15px 0'
+                }}>
+                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#d8b4fe' }}>{auditSummary.totalEvents}</div>
+                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Eventos registrados</div>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#fca5a5' }}>{auditSummary.gameEnters}</div>
+                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Jogos acessados</div>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#fcd34d' }}>{auditSummary.gameStarts}</div>
+                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Partidas iniciadas</div>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#c4b5fd' }}>{auditSummary.gameFinishes}</div>
+                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Partidas finalizadas</div>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center', gridColumn: 'span 2' }}>
+                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#f9a8d4' }}>{auditSummary.resultExports}</div>
+                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Exportações realizadas</div>
+                  </div>
+                </div>
+              )}
+
+              <button onClick={handleAuditRefresh} className="about-submit-button about-audit-btn">
+                Atualizar sessão
               </button>
             </div>
           </div>

@@ -14,7 +14,9 @@ import { fetchCharactersForGame } from '../../../services/apis/harryPotterApi';
 import { DIFFICULTIES } from '../../../utils/difficultyConfig';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
-import { FaArrowLeft, FaSyncAlt, FaMagic, FaTrophy, FaRedoAlt, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { logAuditEvent } from '../../../services/auditService';
+import { FaArrowLeft, FaSyncAlt, FaMagic, FaTrophy, FaRedoAlt, FaVolumeUp, FaVolumeMute, FaFileExport } from 'react-icons/fa';
+import { exportJsonFile } from '../../../utils/exportResult';
 import ThemedGameLoader from '../../../components/feedback/ThemedGameLoader';
 import ThemedLogoutScreen from '../../../components/feedback/ThemedLogoutScreen';
 import '../../../styles/games.css';
@@ -46,6 +48,20 @@ const HarryMemory = () => {
   const [error, setError] = useState(null);
   const [adjustmentInfo, setAdjustmentInfo] = useState(null);
   const [apiMetadata, setApiMetadata] = useState(null);
+
+  const hasLoggedEnter = useRef(false);
+
+  useEffect(() => {
+    if (!hasLoggedEnter.current) {
+      hasLoggedEnter.current = true;
+      logAuditEvent({
+        eventType: 'game_enter',
+        description: 'Usuário entrou no jogo Memória dos Bruxos',
+        gameId: 'memoria-bruxos',
+        gameName: 'Memória dos Bruxos'
+      });
+    }
+  }, []);
 
   // Efeito de intro loader
   useEffect(() => {
@@ -218,6 +234,17 @@ const HarryMemory = () => {
       if (!hasGameStarted) {
         setHasGameStarted(true);
         setIsTimerRunning(true);
+        
+        logAuditEvent({
+          eventType: 'game_start',
+          description: 'Usuário iniciou uma partida em Memória dos Bruxos',
+          gameId: 'memoria-bruxos',
+          gameName: 'Memória dos Bruxos',
+          metadata: {
+            difficulty: difficulty,
+            startedAt: new Date().toISOString()
+          }
+        });
       }
 
       const newFlipped = [...flippedCards, card];
@@ -362,6 +389,20 @@ const HarryMemory = () => {
         };
 
         saveResult(payload);
+
+        logAuditEvent({
+          eventType: 'game_finish',
+          description: 'Usuário concluiu uma partida em Memória dos Bruxos',
+          gameId: 'memoria-bruxos',
+          gameName: 'Memória dos Bruxos',
+          metadata: {
+            difficulty: difficultyKey,
+            status: 'completed',
+            time: elapsedTime,
+            attempts,
+            rankingEligible: true
+          }
+        });
 
         if (import.meta.env.DEV) {
           console.log('[HarryMemory] Resultado salvo no ranking:', payload);
@@ -534,9 +575,48 @@ const HarryMemory = () => {
                   <span className="gv-victory-stat-label">Dificuldade</span>
                 </div>
               </div>
-              <button className="gv-btn-play-again" onClick={handlePlayAgain} id="btn-play-again">
-                <FaRedoAlt /> Jogar Novamente
-              </button>
+              <div className="gv-victory-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button className="gv-btn-play-again" onClick={handlePlayAgain} id="btn-play-again">
+                  <FaRedoAlt /> Jogar Novamente
+                </button>
+                <button
+                  className="gv-btn-play-again memory-export-button"
+                  id="btn-export-memory"
+                  onClick={() => {
+                    const exportData = {
+                      jogo: 'Memória dos Bruxos',
+                      gameId: 'harry-memory',
+                      jogador: user?.nome || 'Jogador GeekVerse',
+                      email: user?.email || '',
+                      dificuldade: difficultyConfig?.label || '',
+                      status: 'concluído',
+                      tempoFormatado: formatTime(finalTime),
+                      tempoSegundos: finalTime,
+                      tentativas: attempts,
+                      paresEncontrados: pairsFound,
+                      totalPares: totalPairs,
+                      dataExportacao: new Date().toLocaleString('pt-BR'),
+                    };
+                    
+                    logAuditEvent({
+                      eventType: 'result_export',
+                      description: 'Usuário exportou o resultado de Memória dos Bruxos',
+                      gameId: 'memoria-bruxos',
+                      gameName: 'Memória dos Bruxos',
+                      metadata: {
+                        status: 'concluído',
+                        difficulty: difficultyConfig?.label || '',
+                        fileType: 'json',
+                        filename: 'geekverse-memoria-bruxos-resultado'
+                      }
+                    });
+
+                    exportJsonFile(exportData, 'geekverse-memoria-bruxos-resultado');
+                  }}
+                >
+                  <FaFileExport /> Exportar resultado
+                </button>
+              </div>
             </div>
           </div>
         )}

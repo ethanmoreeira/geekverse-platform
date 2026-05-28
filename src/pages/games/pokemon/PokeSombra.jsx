@@ -18,6 +18,7 @@ import { POKEMON_LEVELS, MAX_HINTS_PER_TARGET, HINT_PENALTY_TABLE } from '../../
 import { shuffleArray } from '../../../utils/shuffleArray';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
+import { logAuditEvent } from '../../../services/auditService';
 import { FaArrowLeft, FaExclamationTriangle, FaRedo } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
 import { usePokemonMusic } from '../../../hooks/usePokemonMusic';
@@ -78,6 +79,20 @@ const PokeSombra = () => {
   // --- Transicao de entrada ---
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  const hasLoggedEnter = useRef(false);
+
+  useEffect(() => {
+    if (!hasLoggedEnter.current) {
+      hasLoggedEnter.current = true;
+      logAuditEvent({
+        eventType: 'game_enter',
+        description: 'Usuário entrou no jogo PokeSombra',
+        gameId: 'pokesombra',
+        gameName: 'PokeSombra'
+      });
+    }
+  }, []);
+
   // --- Timer effect ---
   useEffect(() => {
     if (isTimerRunning) {
@@ -129,6 +144,21 @@ const PokeSombra = () => {
       };
 
       saveResult(payload);
+
+      logAuditEvent({
+        eventType: 'game_finish',
+        description: 'Usuário concluiu uma partida em PokeSombra',
+        gameId: 'pokesombra',
+        gameName: 'PokeSombra',
+        metadata: {
+          difficulty: diffKey,
+          status: 'completed',
+          time: finalTime,
+          errors: mistakes,
+          hintsUsed,
+          rankingEligible: true
+        }
+      });
 
       if (import.meta.env.DEV) {
         console.log('[PokeSombra] Resultado salvo no ranking:', payload);
@@ -234,6 +264,17 @@ const PokeSombra = () => {
       setRevealedTiles(new Set());
       setGameStatus(GAME_STATUS.PLAYING);
       
+      logAuditEvent({
+        eventType: 'game_start',
+        description: 'Usuário iniciou uma partida em PokeSombra',
+        gameId: 'pokesombra',
+        gameName: 'PokeSombra',
+        metadata: {
+          difficulty: levelId,
+          startedAt: new Date().toISOString()
+        }
+      });
+
       const elapsed = Date.now() - startTime;
       const remainingTime = Math.max(0, 800 - elapsed);
       

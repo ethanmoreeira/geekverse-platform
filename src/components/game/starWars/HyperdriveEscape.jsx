@@ -8,11 +8,13 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   FaArrowLeft, FaRedo, FaTrophy, FaSkullCrossbones,
-  FaChevronLeft, FaChevronRight, FaChevronUp, FaChevronDown, FaShare
+  FaChevronLeft, FaChevronRight, FaChevronUp, FaChevronDown, FaShare, FaFileExport
 } from 'react-icons/fa';
 import { GiSpaceship } from 'react-icons/gi';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
+import { exportJsonFile } from '../../../utils/exportResult';
+import { logAuditEvent } from '../../../services/auditService';
 import spaceshipSpriteImg from '../../../assets/backgrounds/star-wars/spaceship_sprite_topdown.png';
 import { stopAllFugaMusic, switchToFugaArenaMusic } from '../../../services/audioService';
 
@@ -448,6 +450,17 @@ const HyperdriveEscape = ({
     setRenderTick(0);
     hasSavedRankingRef.current = false;
 
+    logAuditEvent({
+      eventType: 'game_start',
+      description: 'Usuário iniciou uma partida em Fuga do Hiperespaço',
+      gameId: 'fuga-hiperespaco',
+      gameName: 'Fuga do Hiperespaço',
+      metadata: {
+        difficulty: difficultyLabel,
+        startedAt: new Date().toISOString()
+      }
+    });
+
     switchToFugaArenaMusic();
 
     g.frameId = requestAnimationFrame(tickRef.current);
@@ -506,6 +519,22 @@ const HyperdriveEscape = ({
 
     saveResult(payload);
     
+    logAuditEvent({
+      eventType: 'game_finish',
+      description: `Usuário concluiu uma partida em Fuga do Hiperespaço com ${isWin ? 'vitória' : 'derrota'}`,
+      gameId: 'fuga-hiperespaco',
+      gameName: 'Fuga do Hiperespaço',
+      metadata: {
+        difficulty: diffKey,
+        status: isWin ? 'completed' : 'failed',
+        score: Math.max(0, g.score),
+        time: Math.round(survived),
+        crystals: g.crystalsCollected,
+        collisions: g.collisions,
+        rankingEligible: isWin
+      }
+    });
+
     stopAllFugaMusic();
 
     if (import.meta.env.DEV) {
@@ -639,8 +668,47 @@ const HyperdriveEscape = ({
             <button className="sw-btn sw-btn-secondary" onClick={onBackToBuilder} type="button">
               <FaArrowLeft /> Editar missao
             </button>
-            <button className="sw-btn sw-btn-secondary" onClick={() => alert('A exportação por e-mail será ativada na etapa final do projeto.')} type="button">
-              <FaShare /> Exportar meu resultado
+            <button
+              className="sw-btn sw-btn-secondary starwars-export-button"
+              type="button"
+              id="btn-export-starwars"
+              onClick={() => {
+                const exportData = {
+                  jogo: 'Fuga do Hiperespaço',
+                  gameId: 'fuga-hiperespaco',
+                  jogador: user?.nome || 'Jogador GeekVerse',
+                  email: user?.email || '',
+                  dificuldade: difficultyLabel,
+                  status: isWin ? 'vitória' : 'derrota',
+                  pontuacaoFinal: finalScore,
+                  cristais: g.crystalsCollected,
+                  hipercristais: g.hyperCrystalsCollected,
+                  desvios: g.obstaclesDodged,
+                  colisoes: g.collisions,
+                  nave: starship?.name || '',
+                  piloto: pilot?.name || '',
+                  planeta: planet?.name || '',
+                  equipamento: vehicle?.name || '',
+                  dataExportacao: new Date().toLocaleString('pt-BR'),
+                };
+                
+                logAuditEvent({
+                  eventType: 'result_export',
+                  description: `Usuário exportou ${isWin ? 'o resultado' : 'uma tentativa'} de Fuga do Hiperespaço`,
+                  gameId: 'fuga-hiperespaco',
+                  gameName: 'Fuga do Hiperespaço',
+                  metadata: {
+                    status: isWin ? 'vitória' : 'derrota',
+                    difficulty: difficultyLabel,
+                    fileType: 'json',
+                    filename: 'geekverse-fuga-hiperespaco-resultado'
+                  }
+                });
+
+                exportJsonFile(exportData, 'geekverse-fuga-hiperespaco-resultado');
+              }}
+            >
+              <FaFileExport /> {isWin ? 'Exportar resultado' : 'Exportar tentativa'}
             </button>
           </div>
         </div>

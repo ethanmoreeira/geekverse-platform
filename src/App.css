@@ -43,6 +43,26 @@
   padding: 0;
 }
 
+/* ---- Global Scrollbar — oculta / invisível ---- */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
 body {
   font-family: var(--gv-font);
   background: var(--gv-bg-primary);

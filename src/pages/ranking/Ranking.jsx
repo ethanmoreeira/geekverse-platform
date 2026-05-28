@@ -11,7 +11,6 @@ import { RANKING_GAMES } from '../../services/rankingService';
 import '../../styles/ranking.css';
 
 const Ranking = () => {
-
   const games = Object.values(RANKING_GAMES);
 
   return (

@@ -2,10 +2,13 @@
 // Tela final do jogo PokéSombra.
 // Mostra resumo da partida, Pokémon encontrados e JSON formatado.
 
-import { FaTrophy, FaRedo, FaArrowLeft, FaClock, FaExclamationTriangle, FaLightbulb, FaStopwatch } from 'react-icons/fa';
+import { FaTrophy, FaRedo, FaArrowLeft, FaClock, FaExclamationTriangle, FaLightbulb, FaStopwatch, FaFileExport } from 'react-icons/fa';
 import { GiPodiumWinner } from 'react-icons/gi';
 import JsonViewer from '../feedback/JsonViewer';
 import { translateType } from '../../data/pokemonGameConfig';
+import { exportJsonFile } from '../../utils/exportResult';
+import { useAuth } from '../../hooks/useAuth';
+import { logAuditEvent } from '../../services/auditService';
 
 const formatTime = (seconds) => {
   const mins = Math.floor(seconds / 60);
@@ -24,6 +27,7 @@ const PokemonResultScreen = ({
   onChooseLevel,
   onBack,
 }) => {
+  const { user } = useAuth();
   const finalTime = elapsedSeconds + penaltySeconds;
 
   const resultData = {
@@ -129,6 +133,50 @@ const PokemonResultScreen = ({
             id="pks-btn-choose-level"
           >
             <FaArrowLeft /> Voltar
+          </button>
+          <button
+            className="pks-btn-primary pokemon-export-button"
+            type="button"
+            id="pks-btn-export"
+            onClick={() => {
+              const exportData = {
+                jogo: 'PokéSombra',
+                gameId: 'pokesombra',
+                jogador: user?.nome || user?.name || 'Jogador GeekVerse',
+                email: user?.email || 'E-mail não informado',
+                dificuldade: levelConfig.label,
+                status: 'concluído',
+                tempoReal: formatTime(elapsedSeconds),
+                penalidades: `+${penaltySeconds}s`,
+                tempoFinal: formatTime(finalTime),
+                tempoFinalSegundos: finalTime,
+                erros: mistakes,
+                dicasTotais: hintsUsed,
+                pokemonEncontrados: foundPokemon.map((p) => ({
+                  id: p.id,
+                  nome: p.displayName,
+                  tipos: p.types.map(translateType),
+                })),
+                dataExportacao: new Date().toLocaleString('pt-BR'),
+              };
+
+              logAuditEvent({
+                eventType: 'result_export',
+                description: 'Usuário exportou o resultado de PokeSombra',
+                gameId: 'pokesombra',
+                gameName: 'PokeSombra',
+                metadata: {
+                  status: 'concluído',
+                  difficulty: levelConfig.label,
+                  fileType: 'json',
+                  filename: 'geekverse-pokesombra-resultado'
+                }
+              });
+
+              exportJsonFile(exportData, 'geekverse-pokesombra-resultado');
+            }}
+          >
+            <FaFileExport /> Exportar resultado
           </button>
         </div>
 
