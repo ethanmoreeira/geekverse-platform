@@ -19,13 +19,12 @@
 // - NÃO fazer envio automático a cada navegação.
 // - O envio é sempre MANUAL, feito pelo usuário na página Exportar ou Sobre.
 
-// import emailjs from '@emailjs/browser';
+import emailjs from '@emailjs/browser';
 
-// Chaves futuras via .env (NUNCA colocar chaves reais no código):
-// const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-// const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-// const TEMPLATE_CONTACT_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_CONTACT_ID;
-// const TEMPLATE_REPORT_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_REPORT_ID;
+// Chaves via .env (NUNCA colocar chaves reais no código):
+const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+const TEMPLATE_CONTACT_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_CONTATO;
 
 /**
  * Envia e-mail de contato a partir do formulário da página Sobre.
@@ -33,9 +32,31 @@
  * @returns {Promise<Object>} Resultado do envio.
  */
 export const sendContactEmail = async (formData) => {
-  // Implementação futura com EmailJS
-  console.log('[emailService] sendContactEmail — aguardando configuração do EmailJS', formData);
-  return { success: false, message: 'EmailJS ainda não configurado.' };
+  // Validar variáveis de ambiente
+  if (!SERVICE_ID || !TEMPLATE_CONTACT_ID || !PUBLIC_KEY) {
+    throw new Error(
+      'EmailJS não configurado. Verifique as variáveis VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_CONTATO e VITE_EMAILJS_PUBLIC_KEY no arquivo .env.'
+    );
+  }
+
+  // Mapear campos do formulário para o template do EmailJS
+  const templateParams = {
+    from_name: formData.name,
+    from_email: formData.email,
+    subject: formData.subject,
+    message: formData.message,
+    sent_at: new Date().toLocaleString('pt-BR', {
+      dateStyle: 'short',
+      timeStyle: 'medium',
+    }),
+  };
+
+  try {
+    const response = await emailjs.send(SERVICE_ID, TEMPLATE_CONTACT_ID, templateParams, PUBLIC_KEY);
+    return { success: true, message: 'Mensagem enviada com sucesso!', response };
+  } catch (error) {
+    throw new Error(error?.text || 'Erro ao enviar mensagem. Tente novamente mais tarde.');
+  }
 };
 
 /**

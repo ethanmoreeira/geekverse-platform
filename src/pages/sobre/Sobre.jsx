@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuditSessionSummary } from '../../services/auditService';
+import { sendContactEmail } from '../../services/emailService';
 import {
   FaArrowLeft,
   FaPlayCircle
@@ -32,14 +33,36 @@ const Sobre = () => {
     message: '',
   });
 
+  const [isSending, setIsSending] = useState(false);
+  const [contactFeedback, setContactFeedback] = useState(null);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('[Sobre] Formulário de contato — EmailJS não configurado', formData);
-    alert('EmailJS ainda não configurado. O envio será implementado nas próximas etapas.');
+    if (isSending) return;
+
+    // Validação básica
+    const { name, email, subject, message } = formData;
+    if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
+      setContactFeedback({ type: 'error', text: 'Preencha todos os campos antes de enviar.' });
+      return;
+    }
+
+    setIsSending(true);
+    setContactFeedback(null);
+
+    try {
+      const result = await sendContactEmail(formData);
+      setContactFeedback({ type: 'success', text: result.message });
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      setContactFeedback({ type: 'error', text: error.message || 'Erro ao enviar mensagem.' });
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const [auditSummary, setAuditSummary] = useState(null);
@@ -172,27 +195,34 @@ const Sobre = () => {
             <div className="about-card about-contact-card">
               <h2 className="about-card-title">Contato</h2>
               <p className="about-contact-support">Use o formulário para enviar dúvidas, sugestões ou observações sobre o projeto GeekVerse G8.</p>
+
+              {contactFeedback && (
+                <div className={`about-contact-feedback about-contact-feedback--${contactFeedback.type}`}>
+                  {contactFeedback.text}
+                </div>
+              )}
+
               <form className="about-contact-form" onSubmit={handleSubmit}>
                 <div className="about-form-row">
                   <div className="about-form-group">
                     <label>Nome</label>
-                    <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} required disabled={isSending} />
                   </div>
                   <div className="about-form-group">
                     <label>E-mail</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} required disabled={isSending} />
                   </div>
                 </div>
                 <div className="about-form-group">
                   <label>Assunto</label>
-                  <input type="text" name="subject" value={formData.subject} onChange={handleChange} required />
+                  <input type="text" name="subject" value={formData.subject} onChange={handleChange} required disabled={isSending} />
                 </div>
                 <div className="about-form-group">
                   <label>Mensagem</label>
-                  <textarea name="message" rows={2} value={formData.message} onChange={handleChange} required></textarea>
+                  <textarea name="message" rows={2} value={formData.message} onChange={handleChange} required disabled={isSending}></textarea>
                 </div>
-                <button type="submit" className="about-submit-button about-contact-submit">
-                  Enviar mensagem
+                <button type="submit" className="about-submit-button about-contact-submit" disabled={isSending}>
+                  {isSending ? 'Enviando...' : 'Enviar mensagem'}
                 </button>
               </form>
             </div>
