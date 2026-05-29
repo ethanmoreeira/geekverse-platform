@@ -14,6 +14,7 @@ import { GiSpaceship } from 'react-icons/gi';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
 import { exportJsonFile } from '../../../utils/exportResult';
+import { sendGameResultEmail } from '../../../services/emailService';
 import { logAuditEvent } from '../../../services/auditService';
 import spaceshipSpriteImg from '../../../assets/backgrounds/star-wars/spaceship_sprite_topdown.png';
 import { stopAllFugaMusic, switchToFugaArenaMusic } from '../../../services/audioService';
@@ -110,6 +111,8 @@ const HyperdriveEscape = ({
   // ── Estado para render ──
   const [gameStatus, setGameStatus] = useState(GAME_STATUS.READY);
   const [renderTick, setRenderTick] = useState(0);
+  const [exportFeedback, setExportFeedback] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   // ── Auth & Ranking ──
   const { user } = useAuth();
@@ -677,44 +680,45 @@ const HyperdriveEscape = ({
               className="sw-btn sw-btn-secondary starwars-export-button"
               type="button"
               id="btn-export-starwars"
-              onClick={() => {
-                const exportData = {
-                  jogo: 'Fuga do Hiperespaço',
-                  gameId: 'fuga-hiperespaco',
-                  jogador: user?.nome || 'Jogador GeekVerse',
-                  email: user?.email || '',
-                  dificuldade: difficultyLabel,
-                  status: isWin ? 'vitória' : 'derrota',
-                  pontuacaoFinal: finalScore,
-                  cristais: g.crystalsCollected,
-                  hipercristais: g.hyperCrystalsCollected,
-                  desvios: g.obstaclesDodged,
-                  colisoes: g.collisions,
-                  nave: starship?.name || '',
-                  piloto: pilot?.name || '',
-                  planeta: planet?.name || '',
-                  equipamento: vehicle?.name || '',
-                  dataExportacao: new Date().toLocaleString('pt-BR'),
-                };
-                
-                logAuditEvent({
-                  eventType: 'result_export',
-                  description: `Usuário exportou ${isWin ? 'o resultado' : 'uma tentativa'} de Fuga do Hiperespaço`,
-                  gameId: 'fuga-hiperespaco',
-                  gameName: 'Fuga do Hiperespaço',
-                  metadata: {
-                    status: isWin ? 'vitória' : 'derrota',
+              disabled={isExporting}
+              onClick={async () => {
+                if (!user?.email) {
+                  setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+                  return;
+                }
+                setIsExporting(true);
+                setExportFeedback(null);
+                try {
+                  const fmtSurv = (s) => { const m = Math.floor(s / 60); const r = Math.round(s % 60); return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`; };
+                  await sendGameResultEmail({
+                    game_name: 'Fuga do Hiperespaço',
+                    player_name: user?.nome || user?.name || 'Jogador GeekVerse',
+                    player_email: user.email,
                     difficulty: difficultyLabel,
-                    fileType: 'json',
-                    filename: 'geekverse-fuga-hiperespaco-resultado'
-                  }
-                });
-
-                exportJsonFile(exportData, 'geekverse-fuga-hiperespaco-resultado');
+                    status: isWin ? 'vitória' : 'derrota',
+                    result_title: 'Resultado da Fuga do Hiperespaço',
+                    result_message: isWin
+                      ? 'Você concluiu a missão no hiperespaço.'
+                      : 'Você registrou uma tentativa na missão do hiperespaço.',
+                    main_metric_label: 'Pontuação final',
+                    main_metric_value: finalScore.toLocaleString('pt-BR'),
+                    secondary_metrics: `Cristais: ${g.crystalsCollected}\nHipercristais: ${g.hyperCrystalsCollected}\nDesvios: ${g.obstaclesDodged}\nColisões: ${g.collisions}\nTempo de sobrevivência: ${fmtSurv(timeSurvived)}`,
+                    generated_at: new Date().toLocaleString('pt-BR'),
+                  });
+                  setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
+                  try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Fuga do Hiperespaço`, gameId: 'fuga-hiperespaco', gameName: 'Fuga do Hiperespaço' }); } catch (_) {}
+                } catch (err) {
+                  setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
+                } finally {
+                  setIsExporting(false);
+                }
               }}
             >
-              <FaFileExport /> {isWin ? 'Exportar resultado' : 'Exportar tentativa'}
+              <FaFileExport /> {isExporting ? 'Enviando...' : (isWin ? 'Exportar resultado' : 'Exportar tentativa')}
             </button>
+            {exportFeedback && (
+              <span className={`gv-export-feedback gv-export-feedback--${exportFeedback.type}`}>{exportFeedback.text}</span>
+            )}
           </div>
         </div>
       </div>

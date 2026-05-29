@@ -2,11 +2,14 @@
 // Tela final do jogo PokéSombra.
 // Mostra resumo da partida, Pokémon encontrados e JSON formatado.
 
+import { useState } from 'react';
+
 import { FaTrophy, FaRedo, FaArrowLeft, FaClock, FaExclamationTriangle, FaLightbulb, FaStopwatch, FaFileExport } from 'react-icons/fa';
 import { GiPodiumWinner } from 'react-icons/gi';
 import JsonViewer from '../feedback/JsonViewer';
 import { translateType } from '../../data/pokemonGameConfig';
 import { exportJsonFile } from '../../utils/exportResult';
+import { sendGameResultEmail } from '../../services/emailService';
 import { useAuth } from '../../hooks/useAuth';
 import { logAuditEvent } from '../../services/auditService';
 
@@ -29,6 +32,8 @@ const PokemonResultScreen = ({
 }) => {
   const { user } = useAuth();
   const finalTime = elapsedSeconds + penaltySeconds;
+  const [exportFeedback, setExportFeedback] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const resultData = {
     gameId: 'pokemon',
@@ -138,46 +143,42 @@ const PokemonResultScreen = ({
             className="pks-btn-primary pokemon-export-button"
             type="button"
             id="pks-btn-export"
-            onClick={() => {
-              const exportData = {
-                jogo: 'PokéSombra',
-                gameId: 'pokesombra',
-                jogador: user?.nome || user?.name || 'Jogador GeekVerse',
-                email: user?.email || 'E-mail não informado',
-                dificuldade: levelConfig.label,
-                status: 'concluído',
-                tempoReal: formatTime(elapsedSeconds),
-                penalidades: `+${penaltySeconds}s`,
-                tempoFinal: formatTime(finalTime),
-                tempoFinalSegundos: finalTime,
-                erros: mistakes,
-                dicasTotais: hintsUsed,
-                pokemonEncontrados: foundPokemon.map((p) => ({
-                  id: p.id,
-                  nome: p.displayName,
-                  tipos: p.types.map(translateType),
-                })),
-                dataExportacao: new Date().toLocaleString('pt-BR'),
-              };
-
-              logAuditEvent({
-                eventType: 'result_export',
-                description: 'Usuário exportou o resultado de PokeSombra',
-                gameId: 'pokesombra',
-                gameName: 'PokeSombra',
-                metadata: {
-                  status: 'concluído',
+            disabled={isExporting}
+            onClick={async () => {
+              if (!user?.email) {
+                setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+                return;
+              }
+              setIsExporting(true);
+              setExportFeedback(null);
+              try {
+                await sendGameResultEmail({
+                  game_name: 'PokéSombra',
+                  player_name: user?.nome || user?.name || 'Jogador GeekVerse',
+                  player_email: user.email,
                   difficulty: levelConfig.label,
-                  fileType: 'json',
-                  filename: 'geekverse-pokesombra-resultado'
-                }
-              });
-
-              exportJsonFile(exportData, 'geekverse-pokesombra-resultado');
+                  status: 'vitória',
+                  result_title: 'Resultado do PokéSombra',
+                  result_message: 'Você completou a caçada de silhuetas Pokémon.',
+                  main_metric_label: 'Tempo final',
+                  main_metric_value: formatTime(finalTime),
+                  secondary_metrics: `Erros: ${mistakes}\nDicas usadas: ${hintsUsed}\nPenalidades: +${penaltySeconds}s\nPokémon encontrados: ${foundPokemon.length}`,
+                  generated_at: new Date().toLocaleString('pt-BR'),
+                });
+                setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
+                try { logAuditEvent({ eventType: 'result_email_send', description: 'E-mail de resultado enviado para PokeSombra', gameId: 'pokesombra', gameName: 'PokeSombra' }); } catch (_) { }
+              } catch (err) {
+                setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
+              } finally {
+                setIsExporting(false);
+              }
             }}
           >
-            <FaFileExport /> Exportar resultado
+            <FaFileExport /> {isExporting ? 'Enviando...' : 'Exportar resultado'}
           </button>
+          {exportFeedback && (
+            <span className={`gv-export-feedback gv-export-feedback--${exportFeedback.type}`}>{exportFeedback.text}</span>
+          )}
         </div>
 
         <JsonViewer

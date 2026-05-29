@@ -17,6 +17,7 @@ import { saveResult } from '../../../services/rankingService';
 import { logAuditEvent } from '../../../services/auditService';
 import { FaArrowLeft, FaSyncAlt, FaMagic, FaTrophy, FaRedoAlt, FaVolumeUp, FaVolumeMute, FaFileExport } from 'react-icons/fa';
 import { exportJsonFile } from '../../../utils/exportResult';
+import { sendGameResultEmail } from '../../../services/emailService';
 import { preloadImages } from '../../../utils/preloadImages';
 import ThemedGameLoader from '../../../components/feedback/ThemedGameLoader';
 import ThemedLogoutScreen from '../../../components/feedback/ThemedLogoutScreen';
@@ -49,6 +50,8 @@ const HarryMemory = () => {
   const [error, setError] = useState(null);
   const [adjustmentInfo, setAdjustmentInfo] = useState(null);
   const [apiMetadata, setApiMetadata] = useState(null);
+  const [exportFeedback, setExportFeedback] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const hasLoggedEnter = useRef(false);
 
@@ -615,40 +618,42 @@ const HarryMemory = () => {
                 <button
                   className="gv-btn-play-again memory-export-button"
                   id="btn-export-memory"
-                  onClick={() => {
-                    const exportData = {
-                      jogo: 'Memória dos Bruxos',
-                      gameId: 'harry-memory',
-                      jogador: user?.nome || 'Jogador GeekVerse',
-                      email: user?.email || '',
-                      dificuldade: difficultyConfig?.label || '',
-                      status: 'concluído',
-                      tempoFormatado: formatTime(finalTime),
-                      tempoSegundos: finalTime,
-                      tentativas: attempts,
-                      paresEncontrados: pairsFound,
-                      totalPares: totalPairs,
-                      dataExportacao: new Date().toLocaleString('pt-BR'),
-                    };
-                    
-                    logAuditEvent({
-                      eventType: 'result_export',
-                      description: 'Usuário exportou o resultado de Memória dos Bruxos',
-                      gameId: 'memoria-bruxos',
-                      gameName: 'Memória dos Bruxos',
-                      metadata: {
-                        status: 'concluído',
-                        difficulty: difficultyConfig?.label || '',
-                        fileType: 'json',
-                        filename: 'geekverse-memoria-bruxos-resultado'
-                      }
-                    });
-
-                    exportJsonFile(exportData, 'geekverse-memoria-bruxos-resultado');
+                  disabled={isExporting}
+                  onClick={async () => {
+                    if (!user?.email) {
+                      setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+                      return;
+                    }
+                    setIsExporting(true);
+                    setExportFeedback(null);
+                    try {
+                      await sendGameResultEmail({
+                        game_name: 'Memória dos Bruxos',
+                        player_name: user?.nome || user?.name || 'Jogador GeekVerse',
+                        player_email: user.email,
+                        difficulty: difficultyConfig?.label || 'Padrão',
+                        status: 'vitória',
+                        result_title: 'Resultado da Memória dos Bruxos',
+                        result_message: 'Você concluiu o desafio encontrando todos os pares.',
+                        main_metric_label: 'Tempo final',
+                        main_metric_value: formatTime(finalTime),
+                        secondary_metrics: `Tentativas: ${attempts}\nPares encontrados: ${pairsFound}\nTotal de pares: ${totalPairs}\nTempo em segundos: ${finalTime}`,
+                        generated_at: new Date().toLocaleString('pt-BR'),
+                      });
+                      setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
+                      try { logAuditEvent({ eventType: 'result_email_send', description: 'E-mail de resultado enviado para Memória dos Bruxos', gameId: 'memoria-bruxos', gameName: 'Memória dos Bruxos' }); } catch (_) {}
+                    } catch (err) {
+                      setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
+                    } finally {
+                      setIsExporting(false);
+                    }
                   }}
                 >
-                  <FaFileExport /> Exportar resultado
+                  <FaFileExport /> {isExporting ? 'Enviando...' : 'Exportar resultado'}
                 </button>
+                {exportFeedback && (
+                  <span className={`gv-export-feedback gv-export-feedback--${exportFeedback.type}`}>{exportFeedback.text}</span>
+                )}
               </div>
             </div>
           </div>

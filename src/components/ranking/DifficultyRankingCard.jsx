@@ -16,13 +16,19 @@ import {
   fetchRankedResults,
   fetchUserPosition,
   RANKING_GAMES,
+  DIFFICULTIES,
 } from '../../services/rankingService';
 import { isSupabaseConfigured } from '../../services/supabaseClient';
+import { useAuth } from '../../hooks/useAuth';
+import { sendRankingEmail } from '../../services/emailService';
+import { logAuditEvent } from '../../services/auditService';
 
 const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUserEmail }) => {
   const [showFullRanking, setShowFullRanking] = useState(false);
   const [toast, setToast] = useState(null);
+  const [sending, setSending] = useState(false);
 
+  const { user } = useAuth();
   const gameConfig = RANKING_GAMES[gameId];
   const formatMetric = gameConfig?.formatMainMetric;
 
@@ -73,9 +79,89 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
   // Mostra "Sua colocação" apenas se fora do Top 10
   const showUserPos = userPos && userPos.position > 10;
 
-  const handleExport = () => {
-    setToast('Exportação por e-mail será configurada na próxima etapa.');
-    setTimeout(() => setToast(null), 3000);
+  // Monta ranking_list como texto a partir dos dados exibidos no card
+  const buildRankingListText = (entries) => {
+    if (!entries || entries.length === 0) return 'Nenhum resultado registrado.';
+    return entries.map((r, i) => {
+      const pos = `${i + 1}º`;
+      const name = r.playerName || 'Jogador';
+      const metric = formatMetric ? formatMetric(r) : (r.mainMetric ?? '');
+
+      // Dados extras conforme o jogo
+      const extras = [];
+      if (r.timeInSeconds != null && gameId !== 'harry-memory' && gameId !== 'pokesombra') {
+        extras.push(`Tempo: ${r.formattedTime || r.timeInSeconds + 's'}`);
+      }
+      if (r.score != null && gameId !== 'show-multiverso' && gameId !== 'fuga-hiperespaco') {
+        extras.push(`Pontuação: ${r.score}`);
+      }
+      if (r.attempts != null && r.attempts > 0) extras.push(`Tentativas: ${r.attempts}`);
+      if (r.errors != null && r.errors > 0) extras.push(`Erros: ${r.errors}`);
+      if ((r.hintsUsed ?? r.hints) != null && (r.hintsUsed ?? r.hints) > 0) {
+        extras.push(`Dicas: ${r.hintsUsed ?? r.hints}`);
+      }
+      if (r.collisions != null && r.collisions > 0) extras.push(`Colisões: ${r.collisions}`);
+      if (r.crystals != null && r.crystals > 0) extras.push(`Cristais: ${r.crystals}`);
+
+      const extrasStr = extras.length > 0 ? ` (${extras.join(', ')})` : '';
+      return `${pos} - ${name} | ${metric}${extrasStr}`;
+    }).join('\n');
+  };
+
+  const handleExport = async () => {
+    if (sending) return;
+
+    const playerEmail = user?.email || currentUserEmail;
+    if (!playerEmail) {
+      setToast('E-mail do jogador não encontrado. Faça login novamente para enviar o ranking.');
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+
+    setSending(true);
+    setToast(null);
+
+    try {
+      // Usa os dados visíveis no card (topTen ou allResults conforme o modo)
+      const entries = showFullRanking && allResults.length > 0 ? allResults : topTen;
+      const diffLabel = DIFFICULTIES.find(d => d.key === difficulty)?.label || difficulty;
+
+      const rankingData = {
+        ranking_title: `Ranking ${gameConfig?.name || gameId} — ${diffLabel}`,
+        game_name: gameConfig?.name || gameId,
+        difficulty: diffLabel,
+        player_name: user?.nome || user?.name || 'Jogador GeekVerse',
+        player_email: playerEmail,
+        ranking_list: buildRankingListText(entries),
+        generated_at: new Date().toLocaleString('pt-BR', {
+          dateStyle: 'long',
+          timeStyle: 'medium',
+        }),
+      };
+
+      const result = await sendRankingEmail(rankingData);
+      setToast(result.message || 'Ranking enviado com sucesso para o e-mail cadastrado.');
+
+      // Registrar auditoria (sem quebrar o fluxo principal)
+      try {
+        await logAuditEvent({
+          eventType: 'ranking_email_send',
+          description: `Ranking enviado por e-mail: ${gameConfig?.name || gameId} (${diffLabel})`,
+          path: '/app/ranking/' + gameId,
+          gameId,
+          gameName: gameConfig?.name || gameId,
+          metadata: { difficulty, entriesCount: entries.length },
+        });
+      } catch {
+        // Falha de auditoria não deve impedir o feedback de sucesso
+      }
+    } catch (error) {
+      const msg = error?.message || 'Não foi possível enviar o ranking por e-mail. Tente novamente.';
+      setToast(msg);
+    } finally {
+      setSending(false);
+      setTimeout(() => setToast(null), 5000);
+    }
   };
 
   const diffClass = `rk-diff-${difficulty}`;
@@ -132,9 +218,10 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
         <button
           className="rk-btn-action"
           onClick={handleExport}
-          aria-label="Exportar ranking"
+          disabled={sending}
+          aria-label="Exportar ranking por e-mail"
         >
-          <FaFileExport /> Exportar
+          <FaFileExport /> {sending ? 'Enviando...' : 'Exportar'}
         </button>
       </div>
 
@@ -145,4 +232,3 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
 };
 
 export default DifficultyRankingCard;
-

@@ -22,6 +22,7 @@ import {
   FaLightbulb, FaClipboardList, FaFileExport,
 } from 'react-icons/fa';
 import { exportJsonFile } from '../../../utils/exportResult';
+import { sendGameResultEmail } from '../../../services/emailService';
 import { preloadImages } from '../../../utils/preloadImages';
 import rickMortyMusic from '../../../assets/audio/magpiemusic-ambient-meditative-clear-sky-353119.mp3';
 
@@ -92,6 +93,8 @@ const ShowDoMultiverso = () => {
   const [selectedMode, setSelectedMode] = useState(null);
   const [enteringPortal, setEnteringPortal] = useState(null);
   const [isPortalTransitioning, setIsPortalTransitioning] = useState(false);
+  const [exportFeedback, setExportFeedback] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const hasLoggedEnter = useRef(false);
 
@@ -697,42 +700,44 @@ const ShowDoMultiverso = () => {
                 className="smv-btn-primary multiverse-export-button"
                 type="button"
                 id="btn-export-multiverso"
-                onClick={() => {
-                  const exportData = {
-                    jogo: 'Show do Multiverso',
-                    gameId: 'show-multiverso',
-                    jogador: user?.nome || 'Jogador GeekVerse',
-                    email: user?.email || '',
-                    modo: modeConfig?.name || '',
-                    dificuldade: selectedMode || '',
-                    status: gameWon ? 'vitória' : 'derrota',
-                    pontuacaoFinal: finalScore,
-                    pontuacaoAntesAjudas: score,
-                    acertos: correctCount,
-                    erros: gameWon ? 0 : 1,
-                    ajudasUsadas: hintsUsed,
-                    penalidadeAjudas: hintPenaltyTotal,
-                    dataExportacao: new Date().toLocaleString('pt-BR'),
-                  };
-                  
-                  logAuditEvent({
-                    eventType: 'result_export',
-                    description: `Usuário exportou ${gameWon ? 'o resultado' : 'uma tentativa'} de Show do Multiverso`,
-                    gameId: 'show-multiverso',
-                    gameName: 'Show do Multiverso',
-                    metadata: {
+                disabled={isExporting}
+                onClick={async () => {
+                  if (!user?.email) {
+                    setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+                    return;
+                  }
+                  setIsExporting(true);
+                  setExportFeedback(null);
+                  try {
+                    await sendGameResultEmail({
+                      game_name: 'Show do Multiverso',
+                      player_name: user?.nome || user?.name || 'Jogador GeekVerse',
+                      player_email: user.email,
+                      difficulty: modeConfig?.name || selectedMode || 'Padrão',
                       status: gameWon ? 'vitória' : 'derrota',
-                      difficulty: selectedMode || '',
-                      fileType: 'json',
-                      filename: 'geekverse-show-multiverso-resultado'
-                    }
-                  });
-
-                  exportJsonFile(exportData, 'geekverse-show-multiverso-resultado');
+                      result_title: 'Resultado do Show do Multiverso',
+                      result_message: gameWon
+                        ? 'Você completou o modo atual do Show do Multiverso.'
+                        : 'Você registrou uma tentativa no Show do Multiverso.',
+                      main_metric_label: 'Pontuação final',
+                      main_metric_value: String(finalScore),
+                      secondary_metrics: `Acertos: ${correctCount}\nErros: ${gameWon ? 0 : 1}\nAjudas usadas: ${hintsUsed}\nPenalidade por ajudas: ${hintPenaltyTotal}`,
+                      generated_at: new Date().toLocaleString('pt-BR'),
+                    });
+                    setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
+                    try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Show do Multiverso`, gameId: 'show-multiverso', gameName: 'Show do Multiverso' }); } catch (_) {}
+                  } catch (err) {
+                    setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
+                  } finally {
+                    setIsExporting(false);
+                  }
                 }}
               >
-                <FaFileExport /> {gameWon ? 'Exportar resultado' : 'Exportar tentativa'}
+                <FaFileExport /> {isExporting ? 'Enviando...' : (gameWon ? 'Exportar resultado' : 'Exportar tentativa')}
               </button>
+              {exportFeedback && (
+                <span className={`gv-export-feedback gv-export-feedback--${exportFeedback.type}`}>{exportFeedback.text}</span>
+              )}
             </div>
           </div>
         </div>
