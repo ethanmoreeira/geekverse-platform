@@ -17,6 +17,7 @@ import { saveResult } from '../../../services/rankingService';
 import { logAuditEvent } from '../../../services/auditService';
 import { FaArrowLeft, FaSyncAlt, FaMagic, FaTrophy, FaRedoAlt, FaVolumeUp, FaVolumeMute, FaFileExport } from 'react-icons/fa';
 import { exportJsonFile } from '../../../utils/exportResult';
+import { preloadImages } from '../../../utils/preloadImages';
 import ThemedGameLoader from '../../../components/feedback/ThemedGameLoader';
 import ThemedLogoutScreen from '../../../components/feedback/ThemedLogoutScreen';
 import '../../../styles/games.css';
@@ -88,11 +89,21 @@ const HarryMemory = () => {
     }
   }, [showIntroLoader]);
 
-  // Pausar música ao sair da página
+  // Pausar música ao sair da página — cleanup robusto
   useEffect(() => {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      // Limpar timers pendentes
+      if (zoomTimerRef.current) {
+        clearTimeout(zoomTimerRef.current);
+        zoomTimerRef.current = null;
+      }
+      if (shuffleTimerRef.current) {
+        clearTimeout(shuffleTimerRef.current);
+        shuffleTimerRef.current = null;
       }
     };
   }, []);
@@ -183,8 +194,26 @@ const HarryMemory = () => {
         setAdjustmentInfo(result.metadata.adjustmentMessage);
       }
 
-      setCards(result.cards);
-      setTotalPairs(result.metadata.pairsUsed);
+      // Pré-carregar imagens dos personagens selecionados
+      const imageUrls = result.cards.map((c) => c.image).filter(Boolean);
+      const preloadResult = await preloadImages(imageUrls);
+
+      // Filtrar cartas cujas imagens falharam no preload
+      let finalCards = result.cards;
+      if (preloadResult.failed > 0 && preloadResult.failedUrls) {
+        // Criar set de URLs que falharam
+        const failedUrls = new Set(preloadResult.failedUrls);
+        
+        // Filtra os cards que possuem alguma imagem quebrada
+        finalCards = result.cards.filter(c => !failedUrls.has(c.image));
+
+        if (import.meta.env.DEV) {
+          console.warn(`[HarryMemory] ${preloadResult.failed} imagens falharam no preload, removendo cartas com erro.`);
+        }
+      }
+
+      setCards(finalCards);
+      setTotalPairs(finalCards.length / 2);
 
       // Iniciar animação de embaralhamento mágico (timer inicia no primeiro clique)
       setGameStatus(GAME_STATUS.SHUFFLING);
@@ -207,9 +236,13 @@ const HarryMemory = () => {
         mensagemAjuste: result.metadata.adjustmentMessage || 'Nenhum ajuste necessário.',
         personagensPriorizados: result.metadata.prioritizedCharacters,
         personagensSelecionados: result.metadata.selectedCharacters,
+        imagensPrecarregadas: preloadResult.loaded,
+        imagensFalharam: preloadResult.failed,
       });
     } catch (err) {
-      console.error('Erro ao carregar personagens:', err);
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar personagens:', err);
+      }
       setError(
         'Não foi possível carregar os personagens da API. Verifique sua conexão e tente novamente.'
       );
@@ -490,7 +523,7 @@ const HarryMemory = () => {
         {loading && (
           <div className="gv-loading-magic" id="loading-indicator">
             <div className="gv-loading-spinner"></div>
-            <p className="gv-loading-text">Convocando personagens mágicos...</p>
+            <p className="gv-loading-text">Carregando retratos dos bruxos...</p>
           </div>
         )}
 

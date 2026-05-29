@@ -23,7 +23,15 @@ import { FaArrowLeft, FaExclamationTriangle, FaRedo } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
 import { usePokemonMusic } from '../../../hooks/usePokemonMusic';
 import PokemonMusicButton from '../../../components/pokemon/PokemonMusicButton';
+import { preloadImages, withTimeout } from '../../../utils/preloadImages';
 import '../../../styles/pokeSombra.css';
+
+// Mensagens temáticas para o loader
+const LOADING_MESSAGES = [
+  'Preparando sombras Pokémon...',
+  'Carregando sprites e alternativas...',
+  'Buscando Pokémon na PokéAPI...',
+];
 
 // Status do jogo
 const GAME_STATUS = {
@@ -48,6 +56,7 @@ const PokeSombra = () => {
   // --- Estado do jogo ---
   const [gameStatus, setGameStatus] = useState(GAME_STATUS.INTRO);
   const [selectedLevel, setSelectedLevel] = useState(null);
+  const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
   const [boardPokemon, setBoardPokemon] = useState([]);
   const [targetPokemon, setTargetPokemon] = useState([]);
   const [currentTargetIndex, setCurrentTargetIndex] = useState(0);
@@ -237,13 +246,25 @@ const PokeSombra = () => {
     hasSavedRankingRef.current = false;
 
     try {
-      const startTime = Date.now();
-      const result = await getPokemonBatchByRandomIds({
-        count: level.boardSize,
-        maxPokemonId: level.maxPokemonId,
-      });
+      // Mensagem rotativa enquanto carrega
+      setLoadingMessage(LOADING_MESSAGES[0]);
+      const msgTimer = setInterval(() => {
+        setLoadingMessage((prev) => {
+          const idx = LOADING_MESSAGES.indexOf(prev);
+          return LOADING_MESSAGES[(idx + 1) % LOADING_MESSAGES.length];
+        });
+      }, 2500);
+
+      const result = await withTimeout(
+        getPokemonBatchByRandomIds({
+          count: level.boardSize,
+          maxPokemonId: level.maxPokemonId,
+        }),
+        12000
+      );
 
       if (result.pokemon.length < level.targetsCount) {
+        clearInterval(msgTimer);
         setErrorMessage(
           'Não foi possível carregar Pokémon suficientes da API. Tente novamente.'
         );
@@ -251,6 +272,15 @@ const PokeSombra = () => {
         setIsTransitioning(false);
         return;
       }
+
+      // Pré-carregar imagens dos Pokémon antes de liberar a arena
+      setLoadingMessage('Carregando sprites e alternativas...');
+      const imageUrls = result.pokemon
+        .map((p) => p.image)
+        .filter(Boolean);
+      await preloadImages(imageUrls);
+
+      clearInterval(msgTimer);
 
       // Embaralhar e selecionar alvos
       const shuffled = shuffleArray(result.pokemon);
@@ -275,16 +305,16 @@ const PokeSombra = () => {
         }
       });
 
-      const elapsed = Date.now() - startTime;
-      const remainingTime = Math.max(0, 800 - elapsed);
-      
+      // Transição suave — mínimo 400ms de overlay
       setTimeout(() => {
         setIsTransitioning(false);
         setIsTimerRunning(true);
-      }, remainingTime);
+      }, 400);
 
     } catch (err) {
-      console.error('[PokeSombra] Erro ao carregar Pokemon:', err);
+      if (import.meta.env.DEV) {
+        console.error('[PokeSombra] Erro ao carregar Pokemon:', err);
+      }
       setErrorMessage(
         'Não foi possível carregar os Pokémon agora. Verifique sua conexão e tente novamente.'
       );
@@ -486,8 +516,20 @@ const PokeSombra = () => {
     );
   }
 
-  // O status LOADING foi removido do fluxo principal de renderização
-  // pois agora usamos isTransitioning como overlay flutuante.
+  // ─── RENDER: LOADING ────────────────────────────────────────────────
+  if (gameStatus === GAME_STATUS.LOADING && !isTransitioning) {
+    return (
+      <div className="pks-page">
+        <PokemonMusicButton isPlaying={isPlaying} onToggle={toggleMusic} />
+        <div className="pks-error-box" style={{ border: 'none' }}>
+          <ClipLoader color="#ff5e5e" size={50} speedMultiplier={0.8} />
+          <p className="pks-error-text" style={{ marginTop: '16px' }}>
+            {loadingMessage}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // ─── RENDER: ERROR ─────────────────────────────────────────────────
   if (gameStatus === GAME_STATUS.ERROR) {

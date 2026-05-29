@@ -22,6 +22,7 @@ import {
   FaLightbulb, FaClipboardList, FaFileExport,
 } from 'react-icons/fa';
 import { exportJsonFile } from '../../../utils/exportResult';
+import { preloadImages } from '../../../utils/preloadImages';
 import rickMortyMusic from '../../../assets/audio/magpiemusic-ambient-meditative-clear-sky-353119.mp3';
 
 import '../../../styles/showDoMultiverso.css';
@@ -211,15 +212,23 @@ const ShowDoMultiverso = () => {
         setLoadError(
           'Não foi possível gerar perguntas. A API pode estar indisponível. Tente novamente.'
         );
-        setGamePhase('menu');
+        // Manter em loading para mostrar retry, não voltar ao menu
         return;
       }
 
       if (generated.length < config.questionCount) {
-        console.warn(
-          `[ShowDoMultiverso] Apenas ${generated.length} de ${config.questionCount} perguntas geradas.`
-        );
+        if (import.meta.env.DEV) {
+          console.warn(
+            `[ShowDoMultiverso] Apenas ${generated.length} de ${config.questionCount} perguntas geradas.`
+          );
+        }
       }
+
+      // Pré-carregar imagens dos personagens das alternativas
+      const imageUrls = generated.flatMap((q) =>
+        (q.options || []).map((opt) => (typeof opt === 'object' ? opt.image : null))
+      ).filter(Boolean);
+      await preloadImages(imageUrls);
 
       setQuestions(generated);
       setGamePhase('playing');
@@ -235,11 +244,13 @@ const ShowDoMultiverso = () => {
         }
       });
     } catch (err) {
-      console.error('[ShowDoMultiverso] Erro ao gerar perguntas:', err);
+      if (import.meta.env.DEV) {
+        console.error('[ShowDoMultiverso] Erro ao gerar perguntas:', err);
+      }
       setLoadError(
         'Erro ao carregar o quiz. Verifique sua conexão com a internet e tente novamente.'
       );
-      setGamePhase('menu');
+      // Manter em loading para mostrar retry
     }
   }, []);
 
@@ -548,17 +559,46 @@ const ShowDoMultiverso = () => {
   // ─── TELA: LOADING ────────────────────────────────────────────────
   if (gamePhase === 'loading') {
     let loaderTitle = 'Abrindo o Portal';
-    let loaderSubtitle = 'Sincronizando personagens e dimensões...';
+    let loaderSubtitle = 'Sincronizando universos...';
 
     if (selectedMode === 'easy') {
       loaderTitle = 'Portal Verde';
-      loaderSubtitle = 'Carregando personagens principais...';
+      loaderSubtitle = 'Preparando perguntas interdimensionais...';
     } else if (selectedMode === 'medium') {
       loaderTitle = 'Viagem Interdimensional';
       loaderSubtitle = 'Sincronizando versões alternativas...';
     } else if (selectedMode === 'hard') {
       loaderTitle = 'Desafio da Citadel';
       loaderSubtitle = 'Preparando os desafios...';
+    }
+
+    // Se houve erro durante loading, mostrar retry inline
+    if (loadError) {
+      return (
+        <div className="smv-page smv-bg-game" style={{ '--smv-rick-bg': `url(${quizBg})` }}>
+          <div className="smv-top-bar">
+            <button
+              className="smv-btn-top-back"
+              onClick={handleBackToMenu}
+              type="button"
+              id="btn-back-loading-error"
+            >
+              <FaArrowLeft /> Voltar aos portais
+            </button>
+          </div>
+          <div className="smv-error" style={{ margin: '60px auto', maxWidth: 520 }}>
+            <p><FaExclamationTriangle aria-hidden="true" className="smv-icon smv-icon-warning" /> {loadError}</p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
+              <button className="smv-btn-primary" onClick={() => startGame(selectedMode)} type="button" id="btn-retry-loading">
+                <FaRedo /> Tentar novamente
+              </button>
+              <button className="smv-btn-primary" onClick={handleBackToMenu} type="button" style={{ opacity: 0.8 }}>
+                <FaArrowLeft /> Voltar
+              </button>
+            </div>
+          </div>
+        </div>
+      );
     }
 
     return <RickMortyLoader title={loaderTitle} subtitle={loaderSubtitle} />;

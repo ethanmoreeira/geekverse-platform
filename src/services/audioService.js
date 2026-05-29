@@ -73,6 +73,12 @@ export function toggleActiveFugaMusic() {
 }
 
 export function stopAllFugaMusic() {
+  // Limpar fade interval pendente
+  if (fadeInterval) {
+    clearInterval(fadeInterval);
+    fadeInterval = null;
+  }
+
   if (fugaIntroAudio) {
     fugaIntroAudio.pause();
     fugaIntroAudio.currentTime = 0;

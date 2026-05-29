@@ -6,6 +6,7 @@
 import apiClient from '../apiClient';
 
 const HP_API_BASE = 'https://hp-api.onrender.com/api';
+const CACHE_KEY = 'geekverse_hp_characters';
 
 // Lista de personagens prioritários para o jogo
 const PRIORITY_CHARACTERS = [
@@ -49,8 +50,30 @@ const PRIORITY_CHARACTERS = [
  * @returns {Promise<Array>} Lista completa de personagens.
  */
 export const fetchAllCharacters = async () => {
+  // Tentar cache primeiro
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const cached = JSON.parse(raw);
+      if (cached && Array.isArray(cached.data) && cached.data.length > 0) {
+        return cached.data;
+      }
+    }
+  } catch {
+    // Cache corrompido — ignorar
+  }
+
   const response = await apiClient.get(`${HP_API_BASE}/characters`);
-  return response.data;
+  const data = response.data;
+
+  // Salvar no cache
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data }));
+  } catch {
+    // Quota excedida — ignorar
+  }
+
+  return data;
 };
 
 /**

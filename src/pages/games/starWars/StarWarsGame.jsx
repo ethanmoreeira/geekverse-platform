@@ -195,7 +195,9 @@ const StarWarsGame = () => {
         setMissionData(data);
       }
     } catch (err) {
-      console.error('[StarWarsGame] Erro ao carregar dados:', err);
+      if (import.meta.env.DEV) {
+        console.error('[StarWarsGame] Erro ao carregar dados:', err);
+      }
       setError(
         'Erro ao conectar com a SWAPI. Verifique sua conexão e tente novamente.'
       );
@@ -373,7 +375,8 @@ const StarWarsGame = () => {
           }}
         >
           <span className="starwars-transition-kicker">FUGA DO HIPERESPAÇO</span>
-          <h1>Entrando no Salto Hiperespacial</h1>
+          <h1>Calculando rota hiperespacial</h1>
+          <p style={{ color: 'rgba(56, 217, 255, 0.7)', fontSize: '0.9rem', marginTop: '12px' }}>Carregando frota, pilotos e planetas...</p>
         </section>
       )}
 

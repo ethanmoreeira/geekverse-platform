@@ -476,6 +476,11 @@ const HyperdriveEscape = ({
         cancelAnimationFrame(g.frameId);
         g.frameId = null;
       }
+      // Limpar teclas pressionadas
+      g.keysDown = {};
+      g.mobileDir = { x: 0, y: 0 };
+      // Parar toda música do Fuga ao desmontar
+      stopAllFugaMusic();
     };
   }, []);
 

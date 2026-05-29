@@ -7,6 +7,8 @@
 // Isso evita instabilidade de paginação da SWAPI (cards que aparecem e somem).
 
 const SWAPI_BASE = 'https://www.swapi.tech/api';
+const CACHE_PREFIX = 'geekverse_swapi_';
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutos
 
 // ─── Listas Curadas ─────────────────────────────────────────────────
 // UIDs baseados no endpoint /starships/:uid, /people/:uid, etc.
@@ -343,9 +345,34 @@ export const normalizeVehicle = (raw) => {
  * Retorna null em caso de falha (sem quebrar o carregamento).
  */
 const fetchByUid = async (endpoint, uid) => {
+  // Tentar cache primeiro
+  const cacheKey = `${CACHE_PREFIX}${endpoint}_${uid}`;
+  try {
+    const raw = sessionStorage.getItem(cacheKey);
+    if (raw) {
+      const cached = JSON.parse(raw);
+      if (cached && cached._ts && Date.now() - cached._ts < CACHE_TTL_MS) {
+        return cached.data;
+      }
+    }
+  } catch {
+    // Cache corrompido — ignorar e buscar normalmente
+  }
+
   try {
     const data = await safeFetch(`${SWAPI_BASE}/${endpoint}/${uid}`, `${endpoint} #${uid}`);
-    return data?.result || null;
+    const result = data?.result || null;
+
+    // Salvar no cache
+    if (result) {
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ data: result, _ts: Date.now() }));
+      } catch {
+        // Quota excedida — ignorar
+      }
+    }
+
+    return result;
   } catch {
     console.warn(`[starWarsApi] Falha ao buscar ${endpoint}/${uid}. Ignorando.`);
     return null;
