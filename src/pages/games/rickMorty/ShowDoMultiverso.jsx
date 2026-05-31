@@ -23,6 +23,7 @@ import {
 } from 'react-icons/fa';
 import { exportJsonFile } from '../../../utils/exportResult';
 import { sendGameResultEmail } from '../../../services/emailService';
+import { hasEmailExportBeenSent, markEmailExportAsSent, buildResultKey } from '../../../utils/emailExportControl';
 import { preloadImages } from '../../../utils/preloadImages';
 import rickMortyMusic from '../../../assets/audio/magpiemusic-ambient-meditative-clear-sky-353119.mp3';
 
@@ -95,6 +96,7 @@ const ShowDoMultiverso = () => {
   const [isPortalTransitioning, setIsPortalTransitioning] = useState(false);
   const [exportFeedback, setExportFeedback] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [matchKey, setMatchKey] = useState(null);
 
   const hasLoggedEnter = useRef(false);
 
@@ -206,6 +208,9 @@ const ShowDoMultiverso = () => {
     setHintPenaltyTotal(0);
     setScoreBeforeHints(0);
     hasSavedRankingRef.current = false;
+    // Resetar controles de exportação para a nova partida
+    setMatchKey(null);
+    setExportFeedback(null);
 
     try {
       const config = GAME_MODES[mode];
@@ -421,6 +426,9 @@ const ShowDoMultiverso = () => {
     if (!selectedMode) return;
 
     hasSavedRankingRef.current = true;
+
+    // Gerar identificador único desta partida para controle de envio de e-mail
+    setMatchKey(`${Date.now()}`);
 
     const modeKeyMap = { easy: 'easy', medium: 'medium', hard: 'challenge' };
     const diffKey = modeKeyMap[selectedMode] || selectedMode;
@@ -700,10 +708,16 @@ const ShowDoMultiverso = () => {
                 className="smv-btn-primary multiverse-export-button"
                 type="button"
                 id="btn-export-multiverso"
-                disabled={isExporting}
+                disabled={isExporting || (matchKey && hasEmailExportBeenSent(buildResultKey('show-multiverso', matchKey)))}
                 onClick={async () => {
                   if (!user?.email) {
                     setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+                    return;
+                  }
+                  // Guard: bloquear reenvio da mesma partida
+                  const exportKey = buildResultKey('show-multiverso', matchKey);
+                  if (hasEmailExportBeenSent(exportKey)) {
+                    setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
                     return;
                   }
                   setIsExporting(true);
@@ -724,6 +738,8 @@ const ShowDoMultiverso = () => {
                       secondary_metrics: `Acertos: ${correctCount}\nErros: ${gameWon ? 0 : 1}\nAjudas usadas: ${hintsUsed}\nPenalidade por ajudas: ${hintPenaltyTotal}`,
                       generated_at: new Date().toLocaleString('pt-BR'),
                     });
+                    // Marcar como enviado APENAS após sucesso
+                    markEmailExportAsSent(exportKey);
                     setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
                     try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Show do Multiverso`, gameId: 'show-multiverso', gameName: 'Show do Multiverso' }); } catch (_) {}
                   } catch (err) {

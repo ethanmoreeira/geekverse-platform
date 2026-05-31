@@ -15,6 +15,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
 import { exportJsonFile } from '../../../utils/exportResult';
 import { sendGameResultEmail } from '../../../services/emailService';
+import { hasEmailExportBeenSent, markEmailExportAsSent, buildResultKey } from '../../../utils/emailExportControl';
 import { logAuditEvent } from '../../../services/auditService';
 import spaceshipSpriteImg from '../../../assets/backgrounds/star-wars/spaceship_sprite_topdown.png';
 import { stopAllFugaMusic, switchToFugaArenaMusic } from '../../../services/audioService';
@@ -113,6 +114,7 @@ const HyperdriveEscape = ({
   const [renderTick, setRenderTick] = useState(0);
   const [exportFeedback, setExportFeedback] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [matchKey, setMatchKey] = useState(null);
 
   // ── Auth & Ranking ──
   const { user } = useAuth();
@@ -452,6 +454,9 @@ const HyperdriveEscape = ({
     setGameStatus(GAME_STATUS.PLAYING);
     setRenderTick(0);
     hasSavedRankingRef.current = false;
+    // Resetar controles de exportação para nova partida
+    setMatchKey(null);
+    setExportFeedback(null);
 
     logAuditEvent({
       eventType: 'game_start',
@@ -495,6 +500,9 @@ const HyperdriveEscape = ({
     hasSavedRankingRef.current = true;
     const g = gameRef.current;
     const isWin = gameStatus === GAME_STATUS.WON;
+
+    // Gerar identificador único desta partida para controle de envio de e-mail
+    setMatchKey(`${Date.now()}`);
 
     // Map label back to ranking key
     const labelToKey = { 'fácil': 'easy', 'médio': 'medium', 'difícil': 'challenge' };
@@ -680,10 +688,16 @@ const HyperdriveEscape = ({
               className="sw-btn sw-btn-secondary starwars-export-button"
               type="button"
               id="btn-export-starwars"
-              disabled={isExporting}
+              disabled={isExporting || (matchKey && hasEmailExportBeenSent(buildResultKey('fuga-hiperespaco', matchKey)))}
               onClick={async () => {
                 if (!user?.email) {
                   setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+                  return;
+                }
+                // Guard: bloquear reenvio da mesma partida
+                const exportKey = buildResultKey('fuga-hiperespaco', matchKey);
+                if (hasEmailExportBeenSent(exportKey)) {
+                  setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
                   return;
                 }
                 setIsExporting(true);
@@ -705,6 +719,8 @@ const HyperdriveEscape = ({
                     secondary_metrics: `Cristais: ${g.crystalsCollected}\nHipercristais: ${g.hyperCrystalsCollected}\nDesvios: ${g.obstaclesDodged}\nColisões: ${g.collisions}\nTempo de sobrevivência: ${fmtSurv(timeSurvived)}`,
                     generated_at: new Date().toLocaleString('pt-BR'),
                   });
+                  // Marcar como enviado APENAS após sucesso
+                  markEmailExportAsSent(exportKey);
                   setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
                   try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Fuga do Hiperespaço`, gameId: 'fuga-hiperespaco', gameName: 'Fuga do Hiperespaço' }); } catch (_) {}
                 } catch (err) {

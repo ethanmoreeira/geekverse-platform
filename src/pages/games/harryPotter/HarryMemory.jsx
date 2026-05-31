@@ -18,11 +18,12 @@ import { logAuditEvent } from '../../../services/auditService';
 import { FaArrowLeft, FaSyncAlt, FaMagic, FaTrophy, FaRedoAlt, FaVolumeUp, FaVolumeMute, FaFileExport } from 'react-icons/fa';
 import { exportJsonFile } from '../../../utils/exportResult';
 import { sendGameResultEmail } from '../../../services/emailService';
+import { hasEmailExportBeenSent, markEmailExportAsSent, buildResultKey } from '../../../utils/emailExportControl';
 import { preloadImages } from '../../../utils/preloadImages';
 import ThemedGameLoader from '../../../components/feedback/ThemedGameLoader';
 import ThemedLogoutScreen from '../../../components/feedback/ThemedLogoutScreen';
 import '../../../styles/games.css';
-import boardBg from '../../../assets/backgrounds/harry-potter/e86fd375-07cb-42a1-9784-0a31beb7e584.png';
+import boardBg from '../../../assets/backgrounds/harry-potter/harry-memory-board-bg.png';
 import victoryBg from '../../../assets/backgrounds/harry-potter/f087384f-df83-4ea0-bcbc-63a9473ae699.jpg';
 import magicAmbient from '../../../assets/audio/geoffharvey-let-the-mystery-unfold-122118.mp3';
 
@@ -52,6 +53,7 @@ const HarryMemory = () => {
   const [apiMetadata, setApiMetadata] = useState(null);
   const [exportFeedback, setExportFeedback] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [matchKey, setMatchKey] = useState(null);
 
   const hasLoggedEnter = useRef(false);
 
@@ -396,6 +398,11 @@ const HarryMemory = () => {
       setIsTimerRunning(false);
       setFinalTime(elapsedTime);
 
+      // Gerar identificador único desta partida para controle de envio de e-mail
+      setMatchKey(`${Date.now()}`);
+      // Resetar feedback de exportação para a nova partida
+      setExportFeedback(null);
+
       // ── Salvar resultado no Ranking (uma única vez) ──
       if (!hasSavedRankingRef.current && difficulty) {
         hasSavedRankingRef.current = true;
@@ -618,10 +625,16 @@ const HarryMemory = () => {
                 <button
                   className="gv-btn-play-again memory-export-button"
                   id="btn-export-memory"
-                  disabled={isExporting}
+                  disabled={isExporting || (matchKey && hasEmailExportBeenSent(buildResultKey('harry-memory', matchKey)))}
                   onClick={async () => {
                     if (!user?.email) {
                       setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+                      return;
+                    }
+                    // Guard: bloquear reenvio da mesma partida
+                    const exportKey = buildResultKey('harry-memory', matchKey);
+                    if (hasEmailExportBeenSent(exportKey)) {
+                      setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
                       return;
                     }
                     setIsExporting(true);
@@ -640,6 +653,8 @@ const HarryMemory = () => {
                         secondary_metrics: `Tentativas: ${attempts}\nPares encontrados: ${pairsFound}\nTotal de pares: ${totalPairs}\nTempo em segundos: ${finalTime}`,
                         generated_at: new Date().toLocaleString('pt-BR'),
                       });
+                      // Marcar como enviado APENAS após sucesso
+                      markEmailExportAsSent(exportKey);
                       setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
                       try { logAuditEvent({ eventType: 'result_email_send', description: 'E-mail de resultado enviado para Memória dos Bruxos', gameId: 'memoria-bruxos', gameName: 'Memória dos Bruxos' }); } catch (_) {}
                     } catch (err) {

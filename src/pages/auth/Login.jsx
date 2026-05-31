@@ -10,7 +10,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { FaUser, FaLock, FaSignInAlt, FaEnvelope } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
 import { registerAuditEvent } from '../../services/auditService';
-import loginBg from '../../assets/backgrounds/login/a96642b4-b257-45bb-a49b-2ce054400e58.png';
+import loginBg from '../../assets/backgrounds/login/login-page-bg.png';
 import geekverseLogo from '../../assets/backgrounds/dashboard/geekverse_logo_cropped.png';
 import LoginTransitionLoader from '../../components/feedback/LoginTransitionLoader';
 

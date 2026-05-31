@@ -21,6 +21,7 @@ import {
 import { isSupabaseConfigured } from '../../services/supabaseClient';
 import { useAuth } from '../../hooks/useAuth';
 import { sendRankingEmail } from '../../services/emailService';
+import { hasEmailExportBeenSent, markEmailExportAsSent, buildRankingKey } from '../../utils/emailExportControl';
 import { logAuditEvent } from '../../services/auditService';
 
 const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUserEmail }) => {
@@ -118,6 +119,14 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
       return;
     }
 
+    // Guard: bloquear reenvio do mesmo ranking na sessão
+    const rankingKey = buildRankingKey(gameId, difficulty);
+    if (hasEmailExportBeenSent(rankingKey)) {
+      setToast('Este ranking já foi enviado nesta sessão.');
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+
     setSending(true);
     setToast(null);
 
@@ -140,6 +149,8 @@ const DifficultyRankingCard = ({ gameId, difficulty, difficultyLabel, currentUse
       };
 
       const result = await sendRankingEmail(rankingData);
+      // Marcar como enviado APENAS após sucesso
+      markEmailExportAsSent(rankingKey);
       setToast(result.message || 'Ranking enviado com sucesso para o e-mail cadastrado.');
 
       // Registrar auditoria (sem quebrar o fluxo principal)

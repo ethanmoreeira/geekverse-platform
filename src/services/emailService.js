@@ -5,9 +5,9 @@
 //
 // Funções:
 // - sendContactEmail      — formulário de contato da página Sobre
-// - sendGameResultsEmail  — resultados de jogos selecionados (página Exportar)
+// - sendGameResultEmail   — resultado pessoal de uma partida (enviado ao jogador)
 // - sendRankingEmail      — ranking local por jogo (página Exportar)
-// - sendAuditEmail        — relatório de auditoria de navegação (página Exportar)
+// - sendAuditEmail        — relatório de auditoria de navegação (página Sobre)
 //
 // Fluxo:
 // 1. O usuário joga um ou mais jogos.
@@ -111,16 +111,6 @@ export const sendGameResultEmail = async (resultData) => {
   }
 };
 
-/**
- * Envia resultados de jogos selecionados por e-mail.
- * @param {Object} data - { recipientEmail, results, gameName }
- * @returns {Promise<Object>} Resultado do envio.
- */
-export const sendGameResultsEmail = async (data) => {
-  // Implementação futura com EmailJS
-  console.log('[emailService] sendGameResultsEmail — aguardando configuração do EmailJS', data);
-  return { success: false, message: 'EmailJS ainda não configurado.' };
-};
 
 /**
  * Envia ranking de um jogo por e-mail usando o serviço EmailJS de Ranking.
@@ -180,12 +170,58 @@ export const sendRankingEmail = async (rankingData) => {
 };
 
 /**
- * Envia relatório de auditoria de navegação por e-mail.
- * @param {Object} data - { recipientEmail, auditEvents }
+ * Envia relatório de auditoria da sessão por e-mail.
+ *
+ * Usa o mesmo serviço/chave do ranking:
+ *   VITE_EMAILJS_RANKING_SERVICE_ID
+ *   VITE_EMAILJS_RANKING_PUBLIC_KEY
+ * Com template dedicado de auditoria:
+ *   VITE_EMAILJS_TEMPLATE_AUDIT
+ *
+ * @param {Object} auditData
+ * @param {string} auditData.audit_title      — Título do relatório
+ * @param {string} auditData.user_name        — Nome do usuário
+ * @param {string} auditData.user_email       — E-mail do usuário
+ * @param {number} auditData.total_events     — Total de eventos registrados
+ * @param {number} auditData.game_enters      — Jogos acessados
+ * @param {number} auditData.game_starts      — Partidas iniciadas
+ * @param {number} auditData.game_finishes    — Partidas finalizadas
+ * @param {number} auditData.result_exports   — Exportações realizadas
+ * @param {string} auditData.summary          — Resumo descritivo
+ * @param {string} auditData.generated_at     — Data/hora em pt-BR
  * @returns {Promise<Object>} Resultado do envio.
  */
-export const sendAuditEmail = async (data) => {
-  // Implementação futura com EmailJS
-  console.log('[emailService] sendAuditEmail — aguardando configuração do EmailJS', data);
-  return { success: false, message: 'EmailJS ainda não configurado.' };
+export const sendAuditEmail = async (auditData) => {
+  const serviceId = import.meta.env.VITE_EMAILJS_RANKING_SERVICE_ID;
+  const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_AUDIT;
+  const publicKey = import.meta.env.VITE_EMAILJS_RANKING_PUBLIC_KEY;
+
+  // Validar variáveis de ambiente
+  if (!serviceId || !templateId || !publicKey) {
+    throw new Error(
+      'EmailJS de auditoria não configurado. Verifique VITE_EMAILJS_RANKING_SERVICE_ID, VITE_EMAILJS_TEMPLATE_AUDIT e VITE_EMAILJS_RANKING_PUBLIC_KEY no .env.'
+    );
+  }
+
+  const templateParams = {
+    audit_title: auditData.audit_title,
+    user_name: auditData.user_name,
+    user_email: auditData.user_email,
+    total_events: auditData.total_events,
+    game_enters: auditData.game_enters,
+    game_starts: auditData.game_starts,
+    game_finishes: auditData.game_finishes,
+    result_exports: auditData.result_exports,
+    summary: auditData.summary,
+    generated_at: auditData.generated_at,
+  };
+
+  try {
+    await emailjs.send(serviceId, templateId, templateParams, publicKey);
+    return { success: true, message: 'Auditoria da sessão enviada com sucesso para o e-mail do projeto.' };
+  } catch (error) {
+    throw new Error(
+      error?.text || 'Não foi possível enviar a auditoria da sessão. Tente novamente.'
+    );
+  }
 };

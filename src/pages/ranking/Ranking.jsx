@@ -5,7 +5,7 @@
 // Dados reais são salvos pelos jogos via rankingService.saveResult().
 
 import RankingGameCard from '../../components/ranking/RankingGameCard';
-import titleImg from '../../assets/backgrounds/ranking/ChatGPT Image 26 de mai. de 2026, 15_21_31.png';
+import titleImg from '../../assets/backgrounds/ranking/ranking-title-banner.png';
 import bgImg from '../../assets/backgrounds/ranking/geekverse_g8_multiverse_dashboard.png';
 import { RANKING_GAMES } from '../../services/rankingService';
 import '../../styles/ranking.css';

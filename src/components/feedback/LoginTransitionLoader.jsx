@@ -1,5 +1,5 @@
 import React from 'react';
-import baseBg from '../../assets/backgrounds/login/a96642b4-b257-45bb-a49b-2ce054400e58.png';
+import baseBg from '../../assets/backgrounds/login/login-page-bg.png';
 import portalBg from '../../assets/backgrounds/login/geekverse_loading_screen.png';
 import geekverseLogo from '../../assets/backgrounds/dashboard/geekverse_logo_cropped.png';
 

@@ -10,6 +10,7 @@ import JsonViewer from '../feedback/JsonViewer';
 import { translateType } from '../../data/pokemonGameConfig';
 import { exportJsonFile } from '../../utils/exportResult';
 import { sendGameResultEmail } from '../../services/emailService';
+import { hasEmailExportBeenSent, markEmailExportAsSent, buildResultKey } from '../../utils/emailExportControl';
 import { useAuth } from '../../hooks/useAuth';
 import { logAuditEvent } from '../../services/auditService';
 
@@ -34,6 +35,10 @@ const PokemonResultScreen = ({
   const finalTime = elapsedSeconds + penaltySeconds;
   const [exportFeedback, setExportFeedback] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Chave única desta partida para controle de envio único de e-mail
+  const matchKey = `${finalTime}_${mistakes}_${hintsUsed}_${foundPokemon.length}`;
+  const exportKey = buildResultKey('pokesombra', matchKey);
 
   const resultData = {
     gameId: 'pokemon',
@@ -143,10 +148,15 @@ const PokemonResultScreen = ({
             className="pks-btn-primary pokemon-export-button"
             type="button"
             id="pks-btn-export"
-            disabled={isExporting}
+            disabled={isExporting || hasEmailExportBeenSent(exportKey)}
             onClick={async () => {
               if (!user?.email) {
                 setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+                return;
+              }
+              // Guard: bloquear reenvio da mesma partida
+              if (hasEmailExportBeenSent(exportKey)) {
+                setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
                 return;
               }
               setIsExporting(true);
@@ -165,6 +175,8 @@ const PokemonResultScreen = ({
                   secondary_metrics: `Erros: ${mistakes}\nDicas usadas: ${hintsUsed}\nPenalidades: +${penaltySeconds}s\nPokémon encontrados: ${foundPokemon.length}`,
                   generated_at: new Date().toLocaleString('pt-BR'),
                 });
+                // Marcar como enviado APENAS após sucesso
+                markEmailExportAsSent(exportKey);
                 setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
                 try { logAuditEvent({ eventType: 'result_email_send', description: 'E-mail de resultado enviado para PokeSombra', gameId: 'pokesombra', gameName: 'PokeSombra' }); } catch (_) { }
               } catch (err) {

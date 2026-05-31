@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuditSessionSummary } from '../../services/auditService';
-import { sendContactEmail } from '../../services/emailService';
+import { sendContactEmail, sendAuditEmail } from '../../services/emailService';
+import { hasEmailExportBeenSent, markEmailExportAsSent, AUDIT_SESSION_KEY } from '../../utils/emailExportControl';
+import { logAuditEvent } from '../../services/auditService';
+import { useAuth } from '../../hooks/useAuth';
 import {
   FaArrowLeft,
   FaPlayCircle
@@ -78,6 +81,76 @@ const Sobre = () => {
 
   const handleAuditRefresh = () => {
     fetchAuditSummary();
+  };
+
+  const { user } = useAuth();
+  const [isSendingAudit, setIsSendingAudit] = useState(false);
+  const [auditFeedback, setAuditFeedback] = useState(null);
+
+  const handleAuditEmailSend = async () => {
+    if (isSendingAudit) return;
+
+    // Guard: bloquear reenvio da auditoria na mesma sessão
+    if (hasEmailExportBeenSent(AUDIT_SESSION_KEY)) {
+      setAuditFeedback({ type: 'warn', text: 'A auditoria desta sessão já foi enviada.' });
+      setTimeout(() => setAuditFeedback(null), 5000);
+      return;
+    }
+
+    setIsSendingAudit(true);
+    setAuditFeedback(null);
+
+    try {
+      // Refresh para pegar dados mais recentes
+      const freshSummary = getAuditSessionSummary();
+
+      const auditData = {
+        audit_title: 'Auditoria da Sessão GeekVerse G8',
+        user_name: user?.nome || user?.name || 'Usuário não informado',
+        user_email: user?.email || 'E-mail não informado',
+        total_events: freshSummary.totalEvents ?? 0,
+        game_enters: freshSummary.gameEnters ?? 0,
+        game_starts: freshSummary.gameStarts ?? 0,
+        game_finishes: freshSummary.gameFinishes ?? 0,
+        result_exports: freshSummary.resultExports ?? 0,
+        summary: 'Este relatório apresenta um resumo da sessão atual do usuário na aplicação GeekVerse G8, incluindo acessos aos jogos, partidas iniciadas, partidas finalizadas e exportações realizadas.',
+        generated_at: new Date().toLocaleString('pt-BR', {
+          dateStyle: 'long',
+          timeStyle: 'medium',
+        }),
+      };
+
+      const result = await sendAuditEmail(auditData);
+      // Marcar como enviado APENAS após sucesso
+      markEmailExportAsSent(AUDIT_SESSION_KEY);
+      setAuditFeedback({ type: 'success', text: result.message });
+
+      // Registrar auditoria (sem quebrar o fluxo principal)
+      try {
+        await logAuditEvent({
+          eventType: 'audit_email_send',
+          description: 'Auditoria da sessão enviada por e-mail',
+          path: '/app/sobre',
+          metadata: {
+            totalEvents: freshSummary.totalEvents,
+            gameEnters: freshSummary.gameEnters,
+            gameStarts: freshSummary.gameStarts,
+            gameFinishes: freshSummary.gameFinishes,
+            resultExports: freshSummary.resultExports,
+          },
+        });
+      } catch {
+        // Falha de auditoria não deve impedir o feedback de sucesso
+      }
+    } catch (error) {
+      setAuditFeedback({
+        type: 'error',
+        text: error.message || 'Não foi possível enviar a auditoria da sessão. Tente novamente.',
+      });
+    } finally {
+      setIsSendingAudit(false);
+      setTimeout(() => setAuditFeedback(null), 6000);
+    }
   };
 
   return (
@@ -186,6 +259,18 @@ const Sobre = () => {
               <button onClick={handleAuditRefresh} className="about-submit-button about-audit-btn">
                 Atualizar sessão
               </button>
+              <button
+                onClick={handleAuditEmailSend}
+                className="about-submit-button about-audit-send-btn"
+                disabled={isSendingAudit}
+              >
+                {isSendingAudit ? 'Enviando...' : 'Enviar auditoria da sessão'}
+              </button>
+              {auditFeedback && (
+                <div className={`about-audit-feedback about-audit-feedback--${auditFeedback.type}`}>
+                  {auditFeedback.text}
+                </div>
+              )}
             </div>
           </div>
 
