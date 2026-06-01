@@ -34,9 +34,16 @@ export const RANKING_GAMES = {
     api: 'Rick and Morty API',
     icon: 'portal',
     color: '#22c55e',
-    criterion: 'Maior pontuação vence. Empate por dicas e erros.',
+    criterion: 'Maior pontuação vence. Empate por tempo, dicas e erros.',
     mainMetricLabel: 'Score',
-    formatMainMetric: (r) => `${r.score ?? 0} pts`,
+    formatMainMetric: (r) => {
+      let metric = `${r.score ?? 0} pts`;
+      if (r.timeInSeconds != null) {
+        const timeStr = r.formattedTime || formatTime(r.timeInSeconds);
+        metric += ` (${timeStr})`;
+      }
+      return metric;
+    },
   },
   'fuga-hiperespaco': {
     id: 'fuga-hiperespaco',
@@ -97,9 +104,14 @@ function getSortFn(gameId) {
         return (b.score ?? 0) - (a.score ?? 0);
       };
     case 'show-multiverso':
-      // Maior score → menor hintsUsed → menor erros
+      // Maior score → menor tempo → menor hintsUsed → menor erros
       return (a, b) => {
         if ((b.score ?? 0) !== (a.score ?? 0)) return (b.score ?? 0) - (a.score ?? 0);
+        
+        const timeA = a.timeInSeconds ?? Infinity;
+        const timeB = b.timeInSeconds ?? Infinity;
+        if (timeA !== timeB) return timeA - timeB;
+        
         if ((a.hintsUsed ?? 0) !== (b.hintsUsed ?? 0)) return (a.hintsUsed ?? 0) - (b.hintsUsed ?? 0);
         return (a.errors ?? 0) - (b.errors ?? 0);
       };

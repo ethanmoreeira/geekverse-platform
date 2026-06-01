@@ -167,6 +167,10 @@ export const logAuditEvent = async ({
       metadata
     };
 
+    // Incrementa a sessão local independentemente do sucesso do banco de dados
+    // Isso garante que a tela Sobre atualize mesmo se o RLS do Supabase bloquear o INSERT
+    incrementAuditSessionSummary(eventType);
+
     const { error } = await supabase.from('audit_logs').insert([payload]);
 
     if (error) {
@@ -176,7 +180,6 @@ export const logAuditEvent = async ({
       return false;
     }
 
-    incrementAuditSessionSummary(eventType);
     return true;
   } catch (err) {
     if (import.meta.env.DEV) {
@@ -218,7 +221,7 @@ export const incrementAuditSessionSummary = (eventType) => {
     if (eventType === 'game_enter') summary.gameEnters += 1;
     if (eventType === 'game_start') summary.gameStarts += 1;
     if (eventType === 'game_finish') summary.gameFinishes += 1;
-    if (eventType === 'result_export') summary.resultExports += 1;
+    if (eventType === 'result_export' || eventType === 'result_email_send') summary.resultExports += 1;
 
     sessionStorage.setItem('geekverse_audit_session_summary', JSON.stringify(summary));
   } catch (err) {

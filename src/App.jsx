@@ -18,8 +18,6 @@ import HarryMemory from './pages/games/harryPotter/HarryMemory';
 import PokeSombra from './pages/games/pokemon/PokeSombra';
 import ShowDoMultiverso from './pages/games/rickMorty/ShowDoMultiverso';
 import StarWarsGame from './pages/games/starWars/StarWarsGame';
-import IceFireWar from './pages/games/iceFire/IceFireWar';
-import MultiverseHunt from './pages/games/multiverseHunt/MultiverseHunt';
 import Ranking from './pages/ranking/Ranking';
 import RankingGameDetails from './pages/ranking/RankingGameDetails';
 import Sobre from './pages/sobre/Sobre';
@@ -53,8 +51,6 @@ function App() {
             <Route path="pokemon" element={<PokeSombra />} />
             <Route path="rick-morty" element={<ShowDoMultiverso />} />
             <Route path="star-wars" element={<StarWarsGame />} />
-            <Route path="ice-fire" element={<IceFireWar />} />
-            <Route path="multiverse-hunt" element={<MultiverseHunt />} />
             <Route path="ranking">
               <Route index element={<Ranking />} />
               <Route path=":gameId" element={<RankingGameDetails />} />

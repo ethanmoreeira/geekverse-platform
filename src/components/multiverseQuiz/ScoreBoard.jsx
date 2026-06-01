@@ -10,12 +10,12 @@ const formatNumber = (value) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-const ScoreBoard = ({ prizeValues, currentQuestionIndex, score, gameOver, onBack }) => {
+const ScoreBoard = ({ prizeValues, currentQuestionIndex, score, gameOver, onBack, timeStr }) => {
   if (!prizeValues || prizeValues.length === 0) return null;
 
   return (
     <div className="smv-scoreboard">
-      <div className="smv-scoreboard-header" style={{ paddingBottom: '0', borderBottom: 'none' }}>
+      <div className="smv-scoreboard-header" style={{ paddingBottom: '0', borderBottom: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <button
           className="smv-btn-top-back"
           onClick={onBack}
@@ -24,6 +24,11 @@ const ScoreBoard = ({ prizeValues, currentQuestionIndex, score, gameOver, onBack
         >
           <FaArrowLeft /> Voltar aos portais
         </button>
+        {timeStr && (
+          <span style={{ color: '#22c55e', fontSize: '0.9rem', fontWeight: 'bold', fontFamily: 'monospace' }}>
+            {timeStr}
+          </span>
+        )}
       </div>
       <div className="smv-scoreboard-current">
         <span className="smv-scoreboard-current-label">Prêmio atual</span>

@@ -527,7 +527,7 @@
 
  .smv-themed-loader-title {
    color: #22c55e;
-   font-size: clamp(1.3rem, 2.8vw, 2.1rem);
+   font-size: clamp(1.2rem, 2.5vw, 1.8rem);
    font-weight: 800;
    letter-spacing: 0.5px;
    text-shadow:
@@ -540,7 +540,7 @@
 
  .smv-themed-loader-subtitle {
    color: #22c55e;
-   font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+   font-size: clamp(0.85rem, 1.4vw, 1.05rem);
    letter-spacing: 0.3px;
    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
    margin: 0;
@@ -553,7 +553,7 @@
 
  /* Exit loader — slightly smaller title */
  .smv-loader-exit-title {
-   font-size: clamp(1.2rem, 2.8vw, 1.9rem);
+   font-size: clamp(1.1rem, 2.0vw, 1.5rem);
  }
 
  @media (max-width: 640px) {
@@ -1458,16 +1458,16 @@
    color: #22c55e;
  }
 
- .smv-gameover-stats {
-   display: flex;
-   gap: 24px;
-   justify-content: center;
-   padding: 16px 24px;
-   background: transparent;
-   border: 1px solid rgba(255, 255, 255, 0.05);
-   border-radius: var(--gv-radius-sm);
-   width: 100%;
- }
+  .smv-gameover-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+    padding: 16px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--gv-radius-sm);
+    width: 100%;
+  }
 
  .smv-gameover-stat {
    display: flex;
@@ -2037,11 +2037,11 @@
  }
 
  .smv-loader-brand-title {
-   font-size: clamp(1.5rem, 3.5vw, 2.6rem);
+   font-size: clamp(1.3rem, 2.5vw, 2.0rem);
  }
 
  .smv-portal-hero-title {
-   font-size: clamp(1.4rem, 3vw, 2.4rem);
+   font-size: clamp(1.3rem, 2.5vw, 2.1rem);
    animation: smv-title-glow 2.5s ease-in-out infinite;
  }
 

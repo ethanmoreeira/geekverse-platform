@@ -22,7 +22,7 @@ const CRITERIA_UI = {
   },
   'show-multiverso': {
     main: 'Maior pontuação vence',
-    tie: 'Desempate: dicas e erros'
+    tie: 'Desempate: tempo, dicas e erros'
   },
   'fuga-hiperespaco': {
     main: 'Maior pontuação vence',

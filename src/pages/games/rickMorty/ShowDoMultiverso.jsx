@@ -97,6 +97,27 @@ const ShowDoMultiverso = () => {
   const [exportFeedback, setExportFeedback] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const [matchKey, setMatchKey] = useState(null);
+  const [durationSeconds, setDurationSeconds] = useState(0);
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
+  useEffect(() => {
+    let interval = null;
+    if (gamePhase === 'playing') {
+      interval = setInterval(() => {
+        setDurationSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (interval) clearInterval(interval);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [gamePhase]);
 
   const hasLoggedEnter = useRef(false);
 
@@ -211,6 +232,7 @@ const ShowDoMultiverso = () => {
     // Resetar controles de exportação para a nova partida
     setMatchKey(null);
     setExportFeedback(null);
+    setDurationSeconds(0);
 
     try {
       const config = GAME_MODES[mode];
@@ -397,6 +419,7 @@ const ShowDoMultiverso = () => {
     setHintPenaltyTotal(0);
     setScoreBeforeHints(0);
     hasSavedRankingRef.current = false;
+    setDurationSeconds(0);
   };
 
   const handleBackToDashboard = () => {
@@ -447,6 +470,8 @@ const ShowDoMultiverso = () => {
       errors: gameWon ? 0 : 1,
       hintsUsed,
       hintPenaltyTotal,
+      timeInSeconds: durationSeconds,
+      formattedTime: formatTime(durationSeconds),
       rankingEligible: gameWon,
     };
 
@@ -515,7 +540,7 @@ const ShowDoMultiverso = () => {
           <div className="smv-menu-header">
             <h1 className="smv-brand-title smv-portal-hero-title">Show do Multiverso</h1>
             <p className="smv-brand-subtitle">
-              Escolha um portal, descubra personagens e explore dados reais da Rick and Morty API.
+              Escolha um portal, descubra personagens e explore dados de Rick and Morty.
             </p>
           </div>
 
@@ -638,11 +663,7 @@ const ShowDoMultiverso = () => {
           >
             {gameWon ? (
               <>
-                <h1 className="smv-brand-title smv-final-title" style={{ color: '#4ade80', textShadow: '0 0 16px rgba(74, 222, 128, 0.4)' }}>Parabéns!</h1>
-                <div className="smv-brand-subtitle" style={{marginBottom: 20}}>
-                  <p style={{ color: '#e2e8f0', marginBottom: '8px' }}>Você completou o modo <strong>{modeConfig?.name}</strong>.</p>
-                  <p style={{ color: '#e2e8f0' }}>Sua pontuação final foi registrada.</p>
-                </div>
+                <h1 className="smv-brand-title smv-final-title" style={{ color: '#4ade80', textShadow: '0 0 16px rgba(74, 222, 128, 0.4)', marginBottom: '24px' }}>Parabéns!</h1>
               </>
             ) : (
               <>
@@ -688,19 +709,24 @@ const ShowDoMultiverso = () => {
                 <span className="smv-gameover-stat-label">Penalidade por ajudas</span>
               </div>
               <div className="smv-gameover-stat">
-                <span className="smv-gameover-stat-value">{modeConfig?.name || '?'}</span>
+                <span className="smv-gameover-stat-value" style={{ fontSize: '15px', textAlign: 'center', lineHeight: '1.2' }}>{modeConfig?.name || '?'}</span>
                 <span className="smv-gameover-stat-label">Modo</span>
+              </div>
+              <div className="smv-gameover-stat">
+                <span className="smv-gameover-stat-value">{formatTime(durationSeconds)}</span>
+                <span className="smv-gameover-stat-label">Tempo final</span>
               </div>
             </div>
 
             <JsonViewer data={apiData} title="JSON da última rodada" />
 
-            <div className="smv-gameover-actions">
+            <div className="smv-gameover-actions" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: '12px', marginTop: '16px' }}>
               <button
                 className="smv-btn-primary"
                 onClick={handleRestart}
                 type="button"
                 id="btn-restart-gameover"
+                style={{ padding: '10px 16px', fontSize: '13px', width: 'auto', flex: '1 1 140px', maxWidth: '200px' }}
               >
                 <FaRedo /> Jogar Novamente
               </button>
@@ -708,6 +734,7 @@ const ShowDoMultiverso = () => {
                 className="smv-btn-primary multiverse-export-button"
                 type="button"
                 id="btn-export-multiverso"
+                style={{ padding: '10px 16px', fontSize: '13px', width: 'auto', flex: '1 1 140px', maxWidth: '200px' }}
                 disabled={isExporting || (matchKey && hasEmailExportBeenSent(buildResultKey('show-multiverso', matchKey)))}
                 onClick={async () => {
                   if (!user?.email) {
@@ -786,6 +813,7 @@ const ShowDoMultiverso = () => {
             score={Math.max(0, score - hintPenaltyTotal)}
             gameOver={false}
             onBack={handleBackToMenu}
+            timeStr={formatTime(durationSeconds)}
           />
         </aside>
 
