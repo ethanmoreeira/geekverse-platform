@@ -3,54 +3,36 @@
 // Mecânica: Jogo da memória com personagens. Fácil (30), Médio (40), Desafio (50).
 // Controlador principal: gerencia estados do jogo, lógica de pares e vitória.
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MemoryBoard from '../../../components/game/memory/MemoryBoard';
 import FloatingMemoryCards from '../../../components/game/memory/FloatingMemoryCards';
 import MemoryStats from '../../../components/game/memory/MemoryStats';
 import DifficultySelector from '../../../components/ui/DifficultySelector';
 import JsonViewer from '../../../components/feedback/JsonViewer';
-import { fetchCharactersForGame } from '../../../services/apis/harryPotterApi';
 import { DIFFICULTIES } from '../../../utils/difficultyConfig';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
 import { logAuditEvent } from '../../../services/auditService';
-import { FaArrowLeft, FaSyncAlt, FaMagic, FaTrophy, FaRedoAlt, FaVolumeUp, FaVolumeMute, FaFileExport } from 'react-icons/fa';
-import { exportJsonFile } from '../../../utils/exportResult';
+import { FaArrowLeft, FaSyncAlt, FaTrophy, FaRedoAlt, FaVolumeUp, FaVolumeMute, FaFileExport } from 'react-icons/fa';
 import { sendGameResultEmail } from '../../../services/emailService';
 import { hasEmailExportBeenSent, markEmailExportAsSent, buildResultKey } from '../../../utils/emailExportControl';
-import { preloadImages } from '../../../utils/preloadImages';
 import ThemedGameLoader from '../../../components/feedback/ThemedGameLoader';
 import ThemedLogoutScreen from '../../../components/feedback/ThemedLogoutScreen';
+import { useHarryMemoryGame } from '../../../hooks/useHarryMemoryGame';
 import '../../../styles/games.css';
 import boardBg from '../../../assets/backgrounds/harry-potter/harry-memory-board-bg.png';
 import victoryBg from '../../../assets/backgrounds/harry-potter/f087384f-df83-4ea0-bcbc-63a9473ae699.jpg';
 import magicAmbient from '../../../assets/audio/geoffharvey-let-the-mystery-unfold-122118.mp3';
-
-const SHUFFLE_DURATION = 3200; // 3.2 segundos de animação
-
-// Status do jogo
-const GAME_STATUS = {
-  IDLE: 'idle',           // Aguardando seleção de dificuldade
-  SHUFFLING: 'shuffling', // Animação de embaralhamento
-  PLAYING: 'playing',     // Jogo em andamento
-  FINISHED: 'finished',   // Todos os pares encontrados
-};
 
 const HarryMemory = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const hasSavedRankingRef = useRef(false);
 
-  // Estados de carregamento e API
+  // Estados de carregamento locais (transições de página)
   const [showIntroLoader, setShowIntroLoader] = useState(true);
   const [isLeaving, setIsLeaving] = useState(false);
-  const [difficulty, setDifficulty] = useState(null);
-  const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [adjustmentInfo, setAdjustmentInfo] = useState(null);
-  const [apiMetadata, setApiMetadata] = useState(null);
   const [exportFeedback, setExportFeedback] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const [matchKey, setMatchKey] = useState(null);
@@ -101,15 +83,6 @@ const HarryMemory = () => {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
-      // Limpar timers pendentes
-      if (zoomTimerRef.current) {
-        clearTimeout(zoomTimerRef.current);
-        zoomTimerRef.current = null;
-      }
-      if (shuffleTimerRef.current) {
-        clearTimeout(shuffleTimerRef.current);
-        shuffleTimerRef.current = null;
-      }
     };
   }, []);
 
@@ -127,255 +100,6 @@ const HarryMemory = () => {
     }
   };
 
-  // Estados do jogo
-  const [gameStatus, setGameStatus] = useState(GAME_STATUS.IDLE);
-  const [flippedCards, setFlippedCards] = useState([]);
-  const [matchedPairs, setMatchedPairs] = useState(new Set());
-  const [isChecking, setIsChecking] = useState(false);
-  const [attempts, setAttempts] = useState(0);
-  const [pairsFound, setPairsFound] = useState(0);
-  const [totalPairs, setTotalPairs] = useState(0);
-
-  // Timer
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [hasGameStarted, setHasGameStarted] = useState(false);
-  const [finalTime, setFinalTime] = useState(0);
-
-  // Zoom temporário no card revelado
-  const [zoomedCardId, setZoomedCardId] = useState(null);
-  const zoomTimerRef = useRef(null);
-  const shuffleTimerRef = useRef(null);
-
-  /**
-   * Reseta todos os estados do jogo (sem alterar cartas/dificuldade).
-   */
-  const resetGameState = useCallback(() => {
-    setFlippedCards([]);
-    setMatchedPairs(new Set());
-    setIsChecking(false);
-    setAttempts(0);
-    setPairsFound(0);
-    setElapsedTime(0);
-    setIsTimerRunning(false);
-    setHasGameStarted(false);
-    setFinalTime(0);
-    setZoomedCardId(null);
-    if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
-  }, []);
-
-  /**
-   * Carrega as cartas da API com base na dificuldade selecionada.
-   */
-  const loadCards = useCallback(async (selectedDifficulty) => {
-    setLoading(true);
-    setError(null);
-    setAdjustmentInfo(null);
-    setCards([]);
-    setApiMetadata(null);
-    resetGameState();
-    hasSavedRankingRef.current = false;
-    setGameStatus(GAME_STATUS.IDLE);
-
-    try {
-      const config = DIFFICULTIES[selectedDifficulty];
-      if (!config) {
-        throw new Error('Dificuldade inválida.');
-      }
-
-      const result = await fetchCharactersForGame(config.pairs);
-
-      // Se não há nenhum personagem válido, mostrar erro
-      if (result.metadata.selectedCount === 0) {
-        setError(
-          'A API não retornou nenhum personagem com imagem válida. Tente novamente mais tarde.'
-        );
-        setLoading(false);
-        return;
-      }
-
-      // Se houve ajuste automático, informar o usuário
-      if (result.metadata.wasAdjusted) {
-        setAdjustmentInfo(result.metadata.adjustmentMessage);
-      }
-
-      // Pré-carregar imagens dos personagens selecionados
-      const imageUrls = result.cards.map((c) => c.image).filter(Boolean);
-      const preloadResult = await preloadImages(imageUrls);
-
-      // Filtrar cartas cujas imagens falharam no preload
-      let finalCards = result.cards;
-      if (preloadResult.failed > 0 && preloadResult.failedUrls) {
-        // Criar set de URLs que falharam
-        const failedUrls = new Set(preloadResult.failedUrls);
-        
-        // Filtra os cards que possuem alguma imagem quebrada
-        finalCards = result.cards.filter(c => !failedUrls.has(c.image));
-
-        if (import.meta.env.DEV) {
-          console.warn(`[HarryMemory] ${preloadResult.failed} imagens falharam no preload, removendo cartas com erro.`);
-        }
-      }
-
-      setCards(finalCards);
-      setTotalPairs(finalCards.length / 2);
-
-      // Iniciar animação de embaralhamento mágico (timer inicia no primeiro clique)
-      setGameStatus(GAME_STATUS.SHUFFLING);
-      setElapsedTime(0);
-      setIsTimerRunning(false);
-      setHasGameStarted(false);
-      if (shuffleTimerRef.current) clearTimeout(shuffleTimerRef.current);
-      shuffleTimerRef.current = setTimeout(() => {
-        setGameStatus(GAME_STATUS.PLAYING);
-      }, SHUFFLE_DURATION);
-
-      setApiMetadata({
-        totalPersonagensRetornadosAPI: result.metadata.totalFromApi,
-        totalComImagemValida: result.metadata.totalWithValidImage,
-        dificuldadeEscolhida: config.label,
-        paresSolicitados: result.metadata.pairsRequested,
-        paresUtilizados: result.metadata.pairsUsed,
-        totalCartasGeradas: result.cards.length,
-        ajusteAutomatico: result.metadata.wasAdjusted ? 'Sim' : 'Não',
-        mensagemAjuste: result.metadata.adjustmentMessage || 'Nenhum ajuste necessário.',
-        personagensPriorizados: result.metadata.prioritizedCharacters,
-        personagensSelecionados: result.metadata.selectedCharacters,
-        imagensPrecarregadas: preloadResult.loaded,
-        imagensFalharam: preloadResult.failed,
-      });
-    } catch (err) {
-      if (import.meta.env.DEV) {
-        console.error('Erro ao carregar personagens:', err);
-      }
-      setError(
-        'Não foi possível carregar os personagens da API. Verifique sua conexão e tente novamente.'
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [resetGameState]);
-
-  /**
-   * Lógica de clique em uma carta.
-   */
-  const handleCardClick = useCallback(
-    (card) => {
-      // Bloquear cliques fora do estado PLAYING
-      if (gameStatus !== GAME_STATUS.PLAYING) return;
-      if (isChecking) return;
-      if (flippedCards.length >= 2) return;
-      if (flippedCards.find((c) => c.uniqueId === card.uniqueId)) return;
-      if (matchedPairs.has(card.pairId)) return;
-
-      // Iniciar timer no primeiro clique válido da partida
-      if (!hasGameStarted) {
-        setHasGameStarted(true);
-        setIsTimerRunning(true);
-        
-        logAuditEvent({
-          eventType: 'game_start',
-          description: 'Usuário iniciou uma partida em Memória dos Bruxos',
-          gameId: 'memoria-bruxos',
-          gameName: 'Memória dos Bruxos',
-          metadata: {
-            difficulty: difficulty,
-            startedAt: new Date().toISOString()
-          }
-        });
-      }
-
-      const newFlipped = [...flippedCards, card];
-      setFlippedCards(newFlipped);
-
-      // Zoom temporário no card revelado
-      setZoomedCardId(card.uniqueId);
-      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current);
-      zoomTimerRef.current = setTimeout(() => {
-        setZoomedCardId(null);
-      }, 1200);
-
-      // Quando 2 cartas viradas, verificar par
-      if (newFlipped.length === 2) {
-        setIsChecking(true);
-        setAttempts((prev) => prev + 1);
-        const [first, second] = newFlipped;
-
-        if (first.pairId === second.pairId) {
-          // Par encontrado
-          setTimeout(() => {
-            const newMatched = new Set([...matchedPairs, first.pairId]);
-            setMatchedPairs(newMatched);
-            setFlippedCards([]);
-            setIsChecking(false);
-
-            const newPairsFound = pairsFound + 1;
-            setPairsFound(newPairsFound);
-
-            // Verificar vitória
-            if (newPairsFound >= totalPairs) {
-              setGameStatus(GAME_STATUS.FINISHED);
-            }
-          }, 600);
-        } else {
-          // Não é par — desvirar após delay
-          setTimeout(() => {
-            setFlippedCards([]);
-            setIsChecking(false);
-          }, 1000);
-        }
-      }
-    },
-    [gameStatus, flippedCards, matchedPairs, isChecking, pairsFound, totalPairs, hasGameStarted]
-  );
-
-  /**
-   * Verifica se uma carta está virada (temporariamente ou como par encontrado).
-   */
-  const isCardFlipped = useCallback(
-    (card) => {
-      return (
-        flippedCards.some((c) => c.uniqueId === card.uniqueId) ||
-        matchedPairs.has(card.pairId)
-      );
-    },
-    [flippedCards, matchedPairs]
-  );
-
-  /**
-   * Verifica se uma carta faz parte de um par encontrado.
-   */
-  const isCardMatched = useCallback(
-    (card) => matchedPairs.has(card.pairId),
-    [matchedPairs]
-  );
-
-  /**
-   * Seleciona dificuldade e carrega cartas.
-   */
-  const handleDifficultySelect = (key) => {
-    setDifficulty(key);
-    loadCards(key);
-  };
-
-  /**
-   * Recarrega (nova rodada, mesma dificuldade).
-   */
-  const handleReload = () => {
-    if (difficulty) {
-      loadCards(difficulty);
-    }
-  };
-
-  /**
-   * Jogar novamente (após vitória).
-   */
-  const handlePlayAgain = () => {
-    if (difficulty) {
-      loadCards(difficulty);
-    }
-  };
-
   const handleBack = () => {
     setIsLeaving(true);
     setTimeout(() => {
@@ -383,21 +107,34 @@ const HarryMemory = () => {
     }, 1800);
   };
 
-  // Intervalo do timer — inicia/para com isTimerRunning
-  useEffect(() => {
-    if (!isTimerRunning) return;
-    const interval = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isTimerRunning]);
+  // ── Hook de lógica do jogo ──
+  const {
+    difficulty,
+    cards,
+    loading,
+    error,
+    adjustmentInfo,
+    apiMetadata,
+    gameStatus,
+    attempts,
+    pairsFound,
+    totalPairs,
+    elapsedTime,
+    finalTime,
+    zoomedCardId,
+    formatTime,
+    handleCardClick,
+    isCardFlipped,
+    isCardMatched,
+    handleDifficultySelect,
+    handleReload,
+    handlePlayAgain,
+    GAME_STATUS
+  } = useHarryMemoryGame();
 
   // Para o timer e salva o tempo final quando o jogo termina
   useEffect(() => {
     if (gameStatus === GAME_STATUS.FINISHED) {
-      setIsTimerRunning(false);
-      setFinalTime(elapsedTime);
-
       // Gerar identificador único desta partida para controle de envio de e-mail
       setMatchKey(`${Date.now()}`);
       // Resetar feedback de exportação para a nova partida
@@ -408,11 +145,7 @@ const HarryMemory = () => {
         hasSavedRankingRef.current = true;
 
         const difficultyKey = difficulty === 'hard' ? 'challenge' : difficulty;
-        const fmtTime = (s) => {
-          const m = Math.floor(s / 60);
-          const r = s % 60;
-          return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
-        };
+        const finalDuration = finalTime || elapsedTime;
 
         const payload = {
           gameId: 'harry-memory',
@@ -422,8 +155,8 @@ const HarryMemory = () => {
           difficulty: difficultyKey,
           status: 'completed',
           score: null,
-          timeInSeconds: elapsedTime,
-          formattedTime: fmtTime(elapsedTime),
+          timeInSeconds: finalDuration,
+          formattedTime: formatTime(finalDuration),
           attempts,
           hits: pairsFound,
           errors: 0,
@@ -441,7 +174,7 @@ const HarryMemory = () => {
           metadata: {
             difficulty: difficultyKey,
             status: 'completed',
-            time: elapsedTime,
+            time: finalDuration,
             attempts,
             rankingEligible: true
           }
@@ -451,14 +184,10 @@ const HarryMemory = () => {
           console.log('[HarryMemory] Resultado salvo no ranking:', payload);
         }
       }
+    } else if (gameStatus === GAME_STATUS.IDLE) {
+      hasSavedRankingRef.current = false;
     }
-  }, [gameStatus, elapsedTime, difficulty, attempts, pairsFound, user]);
-
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-  };
+  }, [gameStatus, difficulty, finalTime, formatTime, attempts, pairsFound, user, GAME_STATUS]);
 
   const isShuffling = gameStatus === GAME_STATUS.SHUFFLING;
   const isPlaying = gameStatus === GAME_STATUS.PLAYING;
@@ -491,6 +220,9 @@ const HarryMemory = () => {
 
       <div className="gv-harry-header">
         <h1 className="gv-magic-title">Memória dos Bruxos</h1>
+        <p className="gv-subtitle" style={{ textAlign: 'center', color: 'var(--gv-text-dim)', marginBottom: '1.5rem', marginTop: '-0.5rem' }}>
+          Escolha uma dificuldade e encontre os pares mágicos.
+        </p>
       </div>
 
       <div className="gv-game-content gv-harry-content">
@@ -555,8 +287,6 @@ const HarryMemory = () => {
             <p>{adjustmentInfo}</p>
           </div>
         )}
-
-
 
         {/* Tela de Vitória */}
         {isFinished && (
