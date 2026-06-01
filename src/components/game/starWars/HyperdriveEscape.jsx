@@ -20,10 +20,15 @@ import { logAuditEvent } from '../../../services/auditService';
 import spaceshipSpriteImg from '../../../assets/backgrounds/star-wars/spaceship_sprite_topdown.png';
 import { stopAllFugaMusic, switchToFugaArenaMusic } from '../../../services/audioService';
 
+// GAMEPAD EXPERIMENT START
+import { useGamepadControls } from '../../../experimental/gamepad/useGamepadControls';
+// GAMEPAD EXPERIMENT END
+
 // ─── Constantes ─────────────────────────────────────────────────────
 
 const GAME_STATUS = {
   READY: 'ready',
+  COUNTDOWN: 'countdown',
   PLAYING: 'playing',
   WON: 'won',
   LOST: 'lost',
@@ -39,6 +44,12 @@ const OBSTACLE_TYPES = [
   { type: 'large', css: 'sw-obstacle-large', w: 6, h: 6, speedMult: 0.7, weight: 15 },
   { type: 'debris', css: 'sw-obstacle-debris', w: 4, h: 2.2, speedMult: 1.15, weight: 15 },
 ];
+
+const TARGETED_OBSTACLE_CHANCE_BY_LEVEL = {
+  'Fácil': 0.30,
+  'Médio': 0.40,
+  'Difícil': 0.50,
+};
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
@@ -115,6 +126,7 @@ const HyperdriveEscape = ({
   const [exportFeedback, setExportFeedback] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const [matchKey, setMatchKey] = useState(null);
+  const [countdownValue, setCountdownValue] = useState(null);
 
   // ── Auth & Ranking ──
   const { user } = useAuth();
@@ -124,6 +136,10 @@ const HyperdriveEscape = ({
   const gameRef = useRef(null);
   const arenaRef = useRef(null);
   const tickRef = useRef(null);
+
+  // GAMEPAD EXPERIMENT START
+  const { gamepadInputRef } = useGamepadControls();
+  // GAMEPAD EXPERIMENT END
 
   // ── Parâmetros derivados de missionStats (com fallbacks seguros) ──
   const ms = missionStats || {};
@@ -250,6 +266,17 @@ const HyperdriveEscape = ({
     if (g.mobileDir.x !== 0) dirX = g.mobileDir.x;
     if (g.mobileDir.y !== 0) dirY = g.mobileDir.y;
 
+    // GAMEPAD EXPERIMENT START
+    if (gamepadInputRef && gamepadInputRef.current) {
+      dirX += gamepadInputRef.current.moveX;
+      dirY += gamepadInputRef.current.moveY;
+
+      // Clamp para evitar aceleração dupla se usar teclado + controle juntos
+      dirX = Math.max(-1, Math.min(1, dirX));
+      dirY = Math.max(-1, Math.min(1, dirY));
+    }
+    // GAMEPAD EXPERIMENT END
+
     // Apply acceleration
     if (dirX !== 0) {
       g.velX += dirX * accel;
@@ -278,11 +305,32 @@ const HyperdriveEscape = ({
       const oType = pickObstacleType(planetDanger);
       const x = 10 + Math.random() * 80; // spawn across width
       const speedVariance = 0.8 + Math.random() * 0.4;
+      const computedSpeed = obstacleSpeed * oType.speedMult * speedVariance;
+
+      let isTargeted = false;
+      let velX = 0;
+      let velY = 0;
+
+      const targetedChance = TARGETED_OBSTACLE_CHANCE_BY_LEVEL[difficultyLabel] ?? 0.40;
+
+      if (Math.random() < targetedChance) {
+        isTargeted = true;
+        const dx = g.shipX - x;
+        const dy = g.shipY - (-2);
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const baseSpeed = computedSpeed * 0.15; // Ligeiramente maior ou igual ao padrao 0.14
+        velX = (dx / dist) * baseSpeed;
+        velY = (dy / dist) * baseSpeed;
+      }
+
       g.obstacles.push({
         id: now + Math.random(),
         x,
         y: -2, // start above arena
-        speed: obstacleSpeed * oType.speedMult * speedVariance,
+        speed: computedSpeed,
+        isTargeted,
+        velX,
+        velY,
         ...oType,
       });
     }
@@ -327,12 +375,19 @@ const HyperdriveEscape = ({
 
     const aliveObstacles = [];
     for (const o of g.obstacles) {
-      o.y += o.speed * 0.14;
+      if (o.isTargeted) {
+        o.x += o.velX;
+        o.y += o.velY;
+      } else {
+        o.y += o.speed * 0.14;
+      }
 
-      if (o.y > 105) {
-        // Dodged
-        g.obstaclesDodged += 1;
-        g.score += 30;
+      if (o.y > 105 || o.x < -20 || o.x > 120) {
+        // Dodged (apenas pontua se passou pelo fundo)
+        if (o.y > 105) {
+          g.obstaclesDodged += 1;
+          g.score += 30;
+        }
         continue;
       }
 
@@ -424,9 +479,9 @@ const HyperdriveEscape = ({
       g.frameId = null;
     }
 
-    // Reset
+    // Reset para fase COUNTDOWN (nav visível, mas sem movimento ou tempo)
     Object.assign(g, {
-      status: GAME_STATUS.PLAYING,
+      status: GAME_STATUS.COUNTDOWN,
       shipX: 50,
       shipY: 80,
       velX: 0,
@@ -443,36 +498,67 @@ const HyperdriveEscape = ({
       timeLeft: duration,
       keysDown: {},
       mobileDir: { x: 0, y: 0 },
-      startTime: performance.now(),
-      lastObstacleSpawn: performance.now(),
-      lastCrystalSpawn: performance.now(),
-      flashUntil: 0,
-      hyperCrystalsSpawned: 0,
-      hyperCrystalSchedule: generateHyperCrystalSchedule(duration, difficultyLabel),
     });
 
-    setGameStatus(GAME_STATUS.PLAYING);
+    setGameStatus(GAME_STATUS.COUNTDOWN);
+    setCountdownValue(3);
     setRenderTick(0);
     hasSavedRankingRef.current = false;
-    // Resetar controles de exportação para nova partida
     setMatchKey(null);
     setExportFeedback(null);
 
-    logAuditEvent({
-      eventType: 'game_start',
-      description: 'Usuário iniciou uma partida em Fuga do Hiperespaço',
-      gameId: 'fuga-hiperespaco',
-      gameName: 'Fuga do Hiperespaço',
-      metadata: {
-        difficulty: difficultyLabel,
-        startedAt: new Date().toISOString()
-      }
-    });
-
+    // Música começa junto com a contagem
     switchToFugaArenaMusic();
-
-    g.frameId = requestAnimationFrame(tickRef.current);
   };
+
+  // ── Countdown Effect ──
+  useEffect(() => {
+    if (gameStatus === GAME_STATUS.COUNTDOWN && countdownValue !== null) {
+      if (typeof countdownValue === 'number') {
+        if (countdownValue > 1) {
+          const t = setTimeout(() => {
+            setCountdownValue(countdownValue - 1);
+          }, 1000);
+          return () => clearTimeout(t);
+        } else if (countdownValue === 1) {
+          const t = setTimeout(() => {
+            setCountdownValue(null);
+
+            // Iniciar arena valendo
+            const g = gameRef.current;
+            Object.assign(g, {
+              status: GAME_STATUS.PLAYING,
+              startTime: performance.now(),
+              lastObstacleSpawn: performance.now(),
+              lastCrystalSpawn: performance.now(),
+              flashUntil: 0,
+              hyperCrystalsSpawned: 0,
+              hyperCrystalSchedule: generateHyperCrystalSchedule(duration, difficultyLabel),
+            });
+
+            setGameStatus(GAME_STATUS.PLAYING);
+
+            try {
+              logAuditEvent({
+                eventType: 'game_start',
+                description: 'Usuário iniciou uma partida em Fuga do Hiperespaço',
+                gameId: 'fuga-hiperespaco',
+                gameName: 'Fuga do Hiperespaço',
+                metadata: {
+                  difficulty: difficultyLabel,
+                  startedAt: new Date().toISOString()
+                }
+              });
+            } catch (e) {}
+
+            // Libera a engine
+            g.frameId = requestAnimationFrame(tickRef.current);
+          }, 1000);
+          return () => clearTimeout(t);
+        }
+      }
+    }
+  }, [gameStatus, countdownValue, difficultyLabel, duration]);
 
   // ── Cleanup on unmount ──
   useEffect(() => {
@@ -772,6 +858,42 @@ const HyperdriveEscape = ({
 
   return (
     <div className="sw-arena-screen">
+      {/* HUD fora da arena para ficar limpo */}
+      <div className="sw-game-hud">
+        <div className="sw-hud-item">
+          <span className="sw-hud-label">TEMPO</span>
+          <span className="sw-hud-value">{g.timeLeft}s</span>
+        </div>
+        <div className="sw-hud-item sw-hud-lives">
+          <span className="sw-hud-label">VIDAS</span>
+          <span className="sw-hud-value">{g.lives}</span>
+        </div>
+        <div className="sw-hud-item">
+          <span className="sw-hud-label">PONTOS</span>
+          <span className="sw-hud-value">{Math.max(0, g.score)}</span>
+        </div>
+        <div className="sw-hud-item">
+          <span className="sw-hud-label">CRISTAIS</span>
+          <span className="sw-hud-value">{g.crystalsCollected}</span>
+        </div>
+        <div className="sw-hud-item">
+          <span className="sw-hud-label">HIPERCRISTAIS</span>
+          <span className="sw-hud-value" style={{ color: '#7dd3fc', textShadow: '0 0 5px rgba(125,211,252,0.5)' }}>{g.hyperCrystalsCollected}</span>
+        </div>
+        <div className="sw-hud-item">
+          <span className="sw-hud-label">DESVIOS</span>
+          <span className="sw-hud-value">{g.obstaclesDodged}</span>
+        </div>
+        <div className="sw-hud-item">
+          <span className="sw-hud-label">COLISOES</span>
+          <span className="sw-hud-value">{g.collisions}</span>
+        </div>
+        <div className="sw-hud-item">
+          <span className="sw-hud-label">DIF.</span>
+          <span className="sw-hud-value sw-hud-value-sm">{difficultyLabel}</span>
+        </div>
+      </div>
+
       <div
         className="sw-arena-shell"
         ref={arenaRef}
@@ -782,45 +904,14 @@ const HyperdriveEscape = ({
         {/* Collision flash */}
         {showFlash && <div className="sw-collision-flash" />}
 
-        {/* HUD */}
-        <div className="sw-game-hud">
-          <div className="sw-hud-row">
-            <div className="sw-hud-item">
-              <span className="sw-hud-label">TEMPO</span>
-              <span className="sw-hud-value">{g.timeLeft}s</span>
-            </div>
-            <div className="sw-hud-item sw-hud-lives">
-              <span className="sw-hud-label">VIDAS</span>
-              <span className="sw-hud-value">{g.lives}</span>
-            </div>
-            <div className="sw-hud-item">
-              <span className="sw-hud-label">PONTOS</span>
-              <span className="sw-hud-value">{Math.max(0, g.score)}</span>
-            </div>
-            <div className="sw-hud-item">
-              <span className="sw-hud-label">CRISTAIS</span>
-              <span className="sw-hud-value">{g.crystalsCollected}</span>
-            </div>
+        {/* Countdown Overlay */}
+        {gameStatus === GAME_STATUS.COUNTDOWN && countdownValue && (
+          <div className="sw-countdown-overlay">
+            <span className="sw-countdown-number">{countdownValue}</span>
           </div>
-          <div className="sw-hud-row">
-            <div className="sw-hud-item">
-              <span className="sw-hud-label">HIPERCRISTAIS</span>
-              <span className="sw-hud-value" style={{ color: '#7dd3fc', textShadow: '0 0 5px rgba(125,211,252,0.5)' }}>{g.hyperCrystalsCollected}</span>
-            </div>
-            <div className="sw-hud-item">
-              <span className="sw-hud-label">DESVIOS</span>
-              <span className="sw-hud-value">{g.obstaclesDodged}</span>
-            </div>
-            <div className="sw-hud-item">
-              <span className="sw-hud-label">COLISOES</span>
-              <span className="sw-hud-value">{g.collisions}</span>
-            </div>
-            <div className="sw-hud-item">
-              <span className="sw-hud-label">DIF.</span>
-              <span className="sw-hud-value sw-hud-value-sm">{difficultyLabel}</span>
-            </div>
-          </div>
-        </div>
+        )}
+
+        {/* HUD removido de dentro da arena para não sobrepor objetos */}
 
         {/* Obstacles with depth effect */}
         {g.obstacles.map((o) => {
@@ -830,7 +921,7 @@ const HyperdriveEscape = ({
           return (
             <div
               key={o.id}
-              className={`sw-obstacle ${o.css}`}
+              className={`sw-obstacle ${o.css}${o.isTargeted ? ' sw-obstacle-targeted' : ''}`}
               style={{
                 left: `${o.x}%`,
                 top: `${o.y}%`,

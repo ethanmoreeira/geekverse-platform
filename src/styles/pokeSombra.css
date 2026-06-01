@@ -2141,3 +2141,23 @@ body.pks-body-intro-bg .pks-page {
   from { opacity: 0; transform: translateY(-2px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Loading em Tela Cheia Temático */
+.pks-loading-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-image:
+    linear-gradient(rgba(3, 7, 18, 0.45), rgba(3, 7, 18, 0.75)),
+    url("../assets/backgrounds/pokemon/pokemon_dark_throw.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 1000;
+}

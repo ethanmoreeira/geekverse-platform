@@ -286,7 +286,7 @@ const ShowDoMultiverso = () => {
             <div className="smv-menu-header">
               <h1 className="smv-brand-title smv-portal-hero-title">Show do Multiverso</h1>
               <p className="smv-brand-subtitle">
-                Escolha um portal, descubra personagens e explore dados de Rick and Morty.
+                Escolha um portal e vença os desafios do multiverso.
               </p>
             </div>
 

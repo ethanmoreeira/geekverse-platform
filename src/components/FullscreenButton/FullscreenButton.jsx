@@ -11,13 +11,20 @@ function FullscreenButton() {
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(Boolean(document.fullscreenElement));
+      const isFs = Boolean(document.fullscreenElement);
+      setIsFullscreen(isFs);
+      if (isFs) {
+        document.body.classList.add('fullscreen-active');
+      } else {
+        document.body.classList.remove('fullscreen-active');
+      }
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
 
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.body.classList.remove('fullscreen-active');
     };
   }, []);
 

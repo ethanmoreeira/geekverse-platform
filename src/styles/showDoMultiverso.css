@@ -1179,11 +1179,12 @@
  }
 
  .smv-json-content {
-   margin-top: 4px;
-   background: var(--gv-bg-input);
-   border: 1px solid var(--gv-border);
-   border-radius: 0 0 var(--gv-radius-sm) var(--gv-radius-sm);
-   overflow: hidden;
+  margin-top: 4px;
+  background: var(--gv-bg-input);
+  border: 1px solid var(--gv-border);
+  border-radius: 0 0 var(--gv-radius-sm) var(--gv-radius-sm);
+  overflow-y: auto;
+  max-height: 200px;
    animation: smv-slideDown 0.2s ease;
  }
 

@@ -250,7 +250,7 @@ const PokeSombra = () => {
         <div className="pks-intro">
           <h1 className="pks-title">PokéSombra</h1>
           <p className="pks-subtitle">
-            Encontre o alvo entre silhuetas antes que o tempo pese contra você.
+            Descubra o Pokémon escondido antes que o tempo acabe.
           </p>
 
           <PokemonLevelSelector onSelectLevel={startGame} />
@@ -260,16 +260,17 @@ const PokeSombra = () => {
   }
 
   // ─── RENDER: LOADING ────────────────────────────────────────────────
-  if (gameStatus === GAME_STATUS.LOADING && !isTransitioning) {
+  const isPreparingGame =
+    gameStatus === GAME_STATUS.LOADING ||
+    (gameStatus === GAME_STATUS.PLAYING && (!boardPokemon.length || !currentTarget));
+
+  if (isPreparingGame) {
     return (
-      <div className="pks-page">
-        <PokemonMusicButton isPlaying={isPlaying} onToggle={toggleMusic} />
-        <div className="pks-error-box" style={{ border: 'none' }}>
-          <ClipLoader color="#ff5e5e" size={50} speedMultiplier={0.8} />
-          <p className="pks-error-text" style={{ marginTop: '16px' }}>
-            {loadingMessage}
-          </p>
-        </div>
+      <div className="pks-loading-screen">
+        <ClipLoader color="#ff5e5e" size={60} speedMultiplier={0.8} />
+        <p className="pks-error-text" style={{ marginTop: '20px', fontSize: '1.2rem', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+          {loadingMessage || 'Preparando PokéSombra...'}
+        </p>
       </div>
     );
   }
@@ -375,11 +376,7 @@ const PokeSombra = () => {
       {/* Overlay de transição (Red flash e fade out) renderizado por cima do jogo */}
       {isTransitioning && (
         <div className="pks-loading-fullscreen" aria-busy="true" aria-label="Carregando jogo">
-          <img
-            src="/src/assets/backgrounds/pokemon/pokemon_dark_throw.png"
-            alt="Carregando PokeSombra"
-            className="pks-loading-bg-img"
-          />
+          {/* Imagem removida pois o caminho absoluto quebrava em produção e a tela de loading já cumpre o papel visual */}
         </div>
       )}
     </div>

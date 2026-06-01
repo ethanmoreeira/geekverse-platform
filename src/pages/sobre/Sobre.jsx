@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuditSessionSummary } from '../../services/auditService';
+import { getAuditSessionSummary, resetAuditSessionSummary, logAuditEvent } from '../../services/auditService';
 import { sendContactEmail, sendAuditEmail } from '../../services/emailService';
 import { hasEmailExportBeenSent, markEmailExportAsSent, AUDIT_SESSION_KEY } from '../../utils/emailExportControl';
-import { logAuditEvent } from '../../services/auditService';
 import { useAuth } from '../../hooks/useAuth';
 import {
   FaArrowLeft,
@@ -18,12 +17,6 @@ const GAMES = [
   { name: 'PokeSombra', desc: 'Desafio de silhuetas usando dados da PokéAPI.', api: 'PokéAPI' },
   { name: 'Show do Multiverso', desc: 'Quiz temático baseado em Rick and Morty.', api: 'Rick and Morty API' },
   { name: 'Fuga do Hiperespaço', desc: 'Jogo espacial com dados da SWAPI.', api: 'SWAPI' }
-];
-
-const TECHS = [
-  'React', 'Vite', 'React Router DOM', 'APIs REST',
-  'Supabase', 'EmailJS', 'localStorage', 'React Icons',
-  'React Spinners', 'CSS Responsivo', 'Git/GitLab', 'Vercel'
 ];
 
 const Sobre = () => {
@@ -79,7 +72,8 @@ const Sobre = () => {
     fetchAuditSummary();
   }, []);
 
-  const handleAuditRefresh = () => {
+  const handleClearAuditSession = () => {
+    resetAuditSessionSummary();
     fetchAuditSummary();
   };
 
@@ -166,7 +160,7 @@ const Sobre = () => {
             src={g8LogoNeon}
             alt="GeekVerse G8 Logo"
             className="about-hero-logo"
-            style={{ mixBlendMode: 'screen', maxWidth: '150px', height: 'auto', display: 'block', margin: '-60px auto 0 auto' }}
+            style={{ mixBlendMode: 'screen', maxWidth: '150px', height: 'auto', display: 'block', margin: '-40px auto 0 auto' }}
           />
           <p className="about-hero-subtitle" style={{ color: '#d8b4fe', marginTop: '-30px' }}>
             Uma SPA em React com jogos interativos, APIs públicas, ranking global e experiências geek.
@@ -203,78 +197,7 @@ const Sobre = () => {
             </div>
           </div>
 
-          {/* Row 2: Tecnologias e Auditoria (50/50) */}
-          <div className="about-row-50-50">
-            {/* Tecnologias Principais */}
-            <div className="about-card about-tech-card">
-              <h2 className="about-card-title">Tecnologias Principais</h2>
-              <div className="about-tech-chips">
-                {TECHS.map((tech, idx) => (
-                  <span key={idx} className="about-tech-chip">{tech}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* Auditoria de Navegação */}
-            <div className="about-card about-audit-card">
-              <h2 className="about-card-title">Auditoria da Sessão</h2>
-              <p className="about-discreet-text" style={{ marginBottom: '10px' }}>
-                O sistema registra eventos importantes da sessão no Supabase.
-                <br />
-                <span style={{ fontSize: '0.8em', opacity: 0.8 }}>Os eventos completos também são registrados no Supabase para fins de auditoria do projeto. Os dados exibidos são contadores agregados. Nenhum nome ou e-mail é exibido nesta tela.</span>
-              </p>
-
-              {!auditSummary ? (
-                <div style={{ padding: '20px 0', textAlign: 'center', color: '#ff6b6b' }}>Resumo de auditoria indisponível no momento.</div>
-              ) : (
-                <div className="about-audit-grid" style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(2, 1fr)', 
-                  gap: '10px',
-                  margin: '15px 0'
-                }}>
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#d8b4fe' }}>{auditSummary.totalEvents}</div>
-                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Eventos registrados</div>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#fca5a5' }}>{auditSummary.gameEnters}</div>
-                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Jogos acessados</div>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#fcd34d' }}>{auditSummary.gameStarts}</div>
-                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Partidas iniciadas</div>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#c4b5fd' }}>{auditSummary.gameFinishes}</div>
-                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Partidas finalizadas</div>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px', textAlign: 'center', gridColumn: 'span 2' }}>
-                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#f9a8d4' }}>{auditSummary.resultExports}</div>
-                    <div style={{ fontSize: '0.7em', textTransform: 'uppercase' }}>Exportações realizadas</div>
-                  </div>
-                </div>
-              )}
-
-              <button onClick={handleAuditRefresh} className="about-submit-button about-audit-btn">
-                Atualizar sessão
-              </button>
-              <button
-                onClick={handleAuditEmailSend}
-                className="about-submit-button about-audit-send-btn"
-                disabled={isSendingAudit}
-              >
-                {isSendingAudit ? 'Enviando...' : 'Enviar auditoria da sessão'}
-              </button>
-              {auditFeedback && (
-                <div className={`about-audit-feedback about-audit-feedback--${auditFeedback.type}`}>
-                  {auditFeedback.text}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Row 3: Contato e Ficha Técnica (60/40) */}
+          {/* Row 2: Contato e Ficha Técnica (60/40) */}
           <div className="about-row-60-40">
             {/* Contato */}
             <div className="about-card about-contact-card">
@@ -337,12 +260,69 @@ const Sobre = () => {
             </div>
           </div>
 
-        </div>
+          {/* Row 3: Auditoria */}
+          <div className="about-row-wide" style={{ display: 'flex', justifyContent: 'center' }}>
+            {/* Auditoria de Navegação */}
+            <div className="about-card about-audit-card" style={{ maxWidth: '800px', width: '100%', padding: '12px' }}>
+              <h2 className="about-card-title" style={{ fontSize: '14px', paddingBottom: '4px' }}>Auditoria da Sessão</h2>
+              <p className="about-discreet-text" style={{ marginBottom: '6px', fontSize: '11px' }}>
+                Os números abaixo representam contadores locais desta sessão. Os eventos completos também são registrados no Supabase.
+              </p>
 
-        <div className="about-actions">
-          <button className="gv-btn-back" onClick={() => navigate('/app')}>
-            <FaArrowLeft /> Voltar ao Dashboard
-          </button>
+              {!auditSummary ? (
+                <div style={{ padding: '5px 0', textAlign: 'center', color: '#ff6b6b', fontSize: '12px' }}>Resumo indisponível.</div>
+              ) : (
+                <div className="about-audit-badges" style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  justifyContent: 'center',
+                  marginBottom: '8px'
+                }}>
+                  <div className="audit-badge">
+                    <span className="audit-badge-val" style={{color: '#d8b4fe'}}>{auditSummary.totalEvents}</span>
+                    <span className="audit-badge-label">Eventos</span>
+                  </div>
+                  <div className="audit-badge">
+                    <span className="audit-badge-val" style={{color: '#fca5a5'}}>{auditSummary.gameEnters}</span>
+                    <span className="audit-badge-label">Acessos</span>
+                  </div>
+                  <div className="audit-badge">
+                    <span className="audit-badge-val" style={{color: '#fcd34d'}}>{auditSummary.gameStarts}</span>
+                    <span className="audit-badge-label">Iniciadas</span>
+                  </div>
+                  <div className="audit-badge">
+                    <span className="audit-badge-val" style={{color: '#c4b5fd'}}>{auditSummary.gameFinishes}</span>
+                    <span className="audit-badge-label">Finalizadas</span>
+                  </div>
+                  <div className="audit-badge">
+                    <span className="audit-badge-val" style={{color: '#f9a8d4'}}>{auditSummary.resultExports}</span>
+                    <span className="audit-badge-label">Exportações</span>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button onClick={handleClearAuditSession} className="about-submit-button about-audit-btn" style={{ flex: '0 1 auto', margin: 0 }}>
+                  Limpar sessão local
+                </button>
+                <button
+                  onClick={handleAuditEmailSend}
+                  className="about-submit-button about-audit-send-btn"
+                  disabled={isSendingAudit}
+                  style={{ flex: '0 1 auto', margin: 0 }}
+                >
+                  {isSendingAudit ? 'Enviando...' : 'Enviar auditoria'}
+                </button>
+              </div>
+              {auditFeedback && (
+                <div className={`about-audit-feedback about-audit-feedback--${auditFeedback.type}`}>
+                  {auditFeedback.text}
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
     </>
