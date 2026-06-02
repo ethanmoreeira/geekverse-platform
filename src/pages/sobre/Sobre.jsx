@@ -5,8 +5,7 @@ import { sendContactEmail, sendAuditEmail } from '../../services/emailService';
 import { hasEmailExportBeenSent, markEmailExportAsSent, AUDIT_SESSION_KEY } from '../../utils/emailExportControl';
 import { useAuth } from '../../hooks/useAuth';
 import {
-  FaArrowLeft,
-  FaPlayCircle
+  FaArrowLeft
 } from 'react-icons/fa';
 import './Sobre.css';
 import bgImage from '../../assets/backgrounds/sobre/school_cosmic_purple_sky.png';
@@ -167,159 +166,143 @@ const Sobre = () => {
           </p>
         </div>
 
-        <div className="about-grid">
+        <div className="sobre-content">
 
-          {/* Row 1: Jogos (65%) e Vídeo (35%) */}
-          <div className="about-row-65-35">
-            {/* Jogos do Projeto */}
-            <div className="about-card about-games-list-card">
-              <h2 className="about-card-title">Jogos do Projeto</h2>
-              <div className="about-games-grid">
-                {GAMES.map((game, idx) => (
-                  <div key={idx} className="about-game-item">
-                    <div className="about-game-header">
-                      <strong>{idx + 1}. {game.name}</strong>
-                      <span className="about-game-api">API: {game.api}</span>
-                    </div>
-                    <p>{game.desc}</p>
+          {/* Card 1: Jogos do Projeto */}
+          <div className="about-card about-games-list-card">
+            <h2 className="about-card-title">Jogos do Projeto</h2>
+            <div className="about-games-grid">
+              {GAMES.map((game, idx) => (
+                <div key={idx} className="about-game-item">
+                  <div className="about-game-header">
+                    <strong>{idx + 1}. {game.name}</strong>
+                    <span className="about-game-api">API: {game.api}</span>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Vídeo Demonstrativo */}
-            <div className="about-card about-video-card">
-              <h2 className="about-card-title">Vídeo Demonstrativo</h2>
-              <p className="about-discreet-text">Espaço reservado para um vídeo curto de apresentação do GeekVerse G8.</p>
-              <div className="about-video-placeholder">
-                <FaPlayCircle size={28} className="about-video-icon" />
-              </div>
+                  <p>{game.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Row 2: Contato e Ficha Técnica (60/40) */}
-          <div className="about-row-60-40">
-            {/* Contato */}
-            <div className="about-card about-contact-card">
-              <h2 className="about-card-title">Contato</h2>
-              <p className="about-contact-support">Use o formulário para enviar dúvidas, sugestões ou observações sobre o projeto GeekVerse G8.</p>
+          {/* Card 2: Contato */}
+          <div className="about-card about-contact-card">
+            <h2 className="about-card-title">Contato</h2>
+            <p className="about-contact-support" style={{ fontSize: '13px', color: '#e9d5ff', marginBottom: '8px' }}>
+              Envie dúvidas, sugestões ou observações sobre o projeto GeekVerse G8.
+            </p>
 
-              {contactFeedback && (
-                <div className={`about-contact-feedback about-contact-feedback--${contactFeedback.type}`}>
-                  {contactFeedback.text}
-                </div>
-              )}
+            {contactFeedback && (
+              <div className={`about-contact-feedback about-contact-feedback--${contactFeedback.type}`}>
+                {contactFeedback.text}
+              </div>
+            )}
 
-              <form className="about-contact-form" onSubmit={handleSubmit}>
-                <div className="about-form-row">
-                  <div className="about-form-group">
-                    <label>Nome</label>
-                    <input type="text" name="name" value={formData.name} onChange={handleChange} required disabled={isSending} />
-                  </div>
-                  <div className="about-form-group">
-                    <label>E-mail</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} required disabled={isSending} />
-                  </div>
+            <form className="about-contact-form" onSubmit={handleSubmit}>
+              <div className="about-form-row">
+                <div className="about-form-group">
+                  <label>Nome</label>
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} required disabled={isSending} />
                 </div>
                 <div className="about-form-group">
-                  <label>Assunto</label>
-                  <input type="text" name="subject" value={formData.subject} onChange={handleChange} required disabled={isSending} />
-                </div>
-                <div className="about-form-group">
-                  <label>Mensagem</label>
-                  <textarea name="message" rows={2} value={formData.message} onChange={handleChange} required disabled={isSending}></textarea>
-                </div>
-                <button type="submit" className="about-submit-button about-contact-submit" disabled={isSending}>
-                  {isSending ? 'Enviando...' : 'Enviar mensagem'}
-                </button>
-              </form>
-            </div>
-
-            {/* Ficha Técnica */}
-            <div className="about-card about-project-info">
-              <h2 className="about-card-title">Ficha Técnica do Projeto</h2>
-              <div className="about-card-content about-ficha-grid">
-                <div className="about-info-grid">
-                  <p><strong>Grupo:</strong> G8</p>
-                  <p><strong>Disciplina:</strong> Desenvolvimento Web Front-End</p>
-                  <p><strong>Projeto:</strong> Trabalho Final de Integração</p>
-                  <p><strong>Tema:</strong> Jogos interativos com APIs geek</p>
-                </div>
-
-                <div className="about-members-list">
-                  <strong>Integrantes em ordem alfabética:</strong>
-                  <ul>
-                    <li>Gabriel Fagundes Motta</li>
-                    <li>Ítalo Dias Moreira Campos</li>
-                    <li>Julyanne Lauriano Genevain</li>
-                    <li>Rakel Garcia da Silva</li>
-                    <li>Raphaell Reiff Galoni</li>
-                  </ul>
+                  <label>E-mail</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} required disabled={isSending} />
                 </div>
               </div>
-            </div>
+              <div className="about-form-group">
+                <label>Assunto</label>
+                <input type="text" name="subject" value={formData.subject} onChange={handleChange} required disabled={isSending} />
+              </div>
+              <div className="about-form-group">
+                <label>Mensagem</label>
+                <textarea name="message" rows={2} value={formData.message} onChange={handleChange} required disabled={isSending}></textarea>
+              </div>
+              <button type="submit" className="about-submit-button about-contact-submit" disabled={isSending}>
+                {isSending ? 'Enviando...' : 'Enviar mensagem'}
+              </button>
+            </form>
           </div>
 
-          {/* Row 3: Auditoria */}
-          <div className="about-row-wide" style={{ display: 'flex', justifyContent: 'center' }}>
-            {/* Auditoria de Navegação */}
-            <div className="about-card about-audit-card" style={{ maxWidth: '800px', width: '100%', padding: '12px' }}>
-              <h2 className="about-card-title" style={{ fontSize: '14px', paddingBottom: '4px' }}>Auditoria da Sessão</h2>
-              <p className="about-discreet-text" style={{ marginBottom: '6px', fontSize: '11px' }}>
-                Os números abaixo representam contadores locais desta sessão. Os eventos completos também são registrados no Supabase.
-              </p>
+          {/* Card 3: Auditoria da Sessão */}
+          <div className="about-card about-audit-card">
+            <h2 className="about-card-title" style={{ fontSize: '14px', paddingBottom: '4px' }}>Auditoria da Sessão</h2>
+            <p className="about-discreet-text" style={{ marginBottom: '6px', fontSize: '11px' }}>
+              Os números abaixo representam contadores locais desta sessão. Os eventos completos também são registrados no Supabase para auditoria do projeto. Nenhum nome ou e-mail é exibido nesta área.
+            </p>
 
-              {!auditSummary ? (
-                <div style={{ padding: '5px 0', textAlign: 'center', color: '#ff6b6b', fontSize: '12px' }}>Resumo indisponível.</div>
-              ) : (
-                <div className="about-audit-badges" style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '8px',
-                  justifyContent: 'center',
-                  marginBottom: '8px'
-                }}>
-                  <div className="audit-badge">
-                    <span className="audit-badge-val" style={{color: '#d8b4fe'}}>{auditSummary.totalEvents}</span>
-                    <span className="audit-badge-label">Eventos</span>
-                  </div>
-                  <div className="audit-badge">
-                    <span className="audit-badge-val" style={{color: '#fca5a5'}}>{auditSummary.gameEnters}</span>
-                    <span className="audit-badge-label">Acessos</span>
-                  </div>
-                  <div className="audit-badge">
-                    <span className="audit-badge-val" style={{color: '#fcd34d'}}>{auditSummary.gameStarts}</span>
-                    <span className="audit-badge-label">Iniciadas</span>
-                  </div>
-                  <div className="audit-badge">
-                    <span className="audit-badge-val" style={{color: '#c4b5fd'}}>{auditSummary.gameFinishes}</span>
-                    <span className="audit-badge-label">Finalizadas</span>
-                  </div>
-                  <div className="audit-badge">
-                    <span className="audit-badge-val" style={{color: '#f9a8d4'}}>{auditSummary.resultExports}</span>
-                    <span className="audit-badge-label">Exportações</span>
-                  </div>
+            {!auditSummary ? (
+              <div style={{ padding: '5px 0', textAlign: 'center', color: '#ff6b6b', fontSize: '12px' }}>Resumo indisponível.</div>
+            ) : (
+              <div className="about-audit-badges" style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '8px',
+                justifyContent: 'center',
+                marginBottom: '8px'
+              }}>
+                <div className="audit-badge">
+                  <span className="audit-badge-val" style={{ color: '#d8b4fe' }}>{auditSummary.totalEvents}</span>
+                  <span className="audit-badge-label">Eventos</span>
                 </div>
-              )}
-
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <button onClick={handleClearAuditSession} className="about-submit-button about-audit-btn" style={{ flex: '0 1 auto', margin: 0 }}>
-                  Limpar sessão local
-                </button>
-                <button
-                  onClick={handleAuditEmailSend}
-                  className="about-submit-button about-audit-send-btn"
-                  disabled={isSendingAudit}
-                  style={{ flex: '0 1 auto', margin: 0 }}
-                >
-                  {isSendingAudit ? 'Enviando...' : 'Enviar auditoria'}
-                </button>
+                <div className="audit-badge">
+                  <span className="audit-badge-val" style={{ color: '#fca5a5' }}>{auditSummary.gameEnters}</span>
+                  <span className="audit-badge-label">Jogos acessados</span>
+                </div>
+                <div className="audit-badge">
+                  <span className="audit-badge-val" style={{ color: '#fcd34d' }}>{auditSummary.gameStarts}</span>
+                  <span className="audit-badge-label">Jogos iniciados</span>
+                </div>
+                <div className="audit-badge">
+                  <span className="audit-badge-val" style={{ color: '#c4b5fd' }}>{auditSummary.gameFinishes}</span>
+                  <span className="audit-badge-label">Jogos finalizados</span>
+                </div>
+                <div className="audit-badge">
+                  <span className="audit-badge-val" style={{ color: '#f9a8d4' }}>{auditSummary.resultExports}</span>
+                  <span className="audit-badge-label">Exportações</span>
+                </div>
               </div>
-              {auditFeedback && (
-                <div className={`about-audit-feedback about-audit-feedback--${auditFeedback.type}`}>
-                  {auditFeedback.text}
-                </div>
-              )}
+            )}
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button onClick={handleClearAuditSession} className="about-submit-button about-audit-btn" style={{ flex: '0 1 auto', margin: 0 }}>
+                Limpar local
+              </button>
+              <button
+                onClick={handleAuditEmailSend}
+                className="about-submit-button about-audit-send-btn"
+                disabled={isSendingAudit}
+                style={{ flex: '0 1 auto', margin: 0 }}
+              >
+                {isSendingAudit ? 'Enviando...' : 'Enviar auditoria'}
+              </button>
+            </div>
+            {auditFeedback && (
+              <div className={`about-audit-feedback about-audit-feedback--${auditFeedback.type}`}>
+                {auditFeedback.text}
+              </div>
+            )}
+          </div>
+
+          {/* Card 4: Informações do Grupo */}
+          <div className="about-card about-project-info">
+            <h2 className="about-card-title">Informações do Grupo</h2>
+            <div className="about-card-content about-ficha-grid">
+              <div className="about-info-grid">
+                <p><strong>Grupo:</strong> G8</p>
+                <p><strong>Disciplina:</strong> Desenvolvimento Web Front-End</p>
+                <p><strong>Projeto:</strong> Trabalho Final de Integração</p>
+                <p><strong>Tema:</strong> Jogos interativos com APIs geek</p>
+              </div>
+
+              <div className="about-members-list">
+                <strong>Integrantes em ordem alfabética:</strong>
+                <ul>
+                  <li>Gabriel Fagundes Motta</li>
+                  <li>Ítalo Dias Moreira Campos</li>
+                  <li>Julyanne Lauriano Genevain</li>
+                  <li>Rakel Garcia da Silva</li>
+                  <li>Raphaell Reiff Galoni</li>
+                </ul>
+              </div>
             </div>
           </div>
 

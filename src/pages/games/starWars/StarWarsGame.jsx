@@ -111,6 +111,16 @@ const StarWarsGame = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Splash de entrada obrigatório para transição visual
+  const [showEntrySplash, setShowEntrySplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowEntrySplash(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const hasLoggedEnter = useRef(false);
 
   useEffect(() => {
@@ -364,7 +374,7 @@ const StarWarsGame = () => {
       )}
 
       {/* ── LOADING ── */}
-      {loading && (
+      {(loading || showEntrySplash) && (
         <section
           className="starwars-transition-screen"
           style={{ 
@@ -380,7 +390,7 @@ const StarWarsGame = () => {
       )}
 
       {/* ── ERROR ── */}
-      {error && !loading && (
+      {error && !loading && !showEntrySplash && (
         <div className="sw-error">
           <FaExclamationTriangle className="sw-error-icon" />
           <p>{error}</p>
@@ -391,7 +401,7 @@ const StarWarsGame = () => {
       )}
 
       {/* ── BUILDER PHASE ── */}
-      {!loading && !error && missionData && gamePhase === GAME_PHASES.BUILDER && (
+      {!loading && !showEntrySplash && !error && missionData && gamePhase === GAME_PHASES.BUILDER && (
         <div className="sw-builder-layout">
 
           <div className="sw-builder-main">

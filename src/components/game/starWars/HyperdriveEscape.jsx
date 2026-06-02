@@ -20,9 +20,8 @@ import { logAuditEvent } from '../../../services/auditService';
 import spaceshipSpriteImg from '../../../assets/backgrounds/star-wars/spaceship_sprite_topdown.png';
 import { stopAllFugaMusic, switchToFugaArenaMusic } from '../../../services/audioService';
 
-// GAMEPAD EXPERIMENT START
+// Controle experimental de gamepad — usado apenas para mover a nave
 import { useGamepadControls } from '../../../experimental/gamepad/useGamepadControls';
-// GAMEPAD EXPERIMENT END
 
 // ─── Constantes ─────────────────────────────────────────────────────
 
@@ -54,7 +53,7 @@ const TARGETED_OBSTACLE_CHANCE_BY_LEVEL = {
 // ─── Helpers ────────────────────────────────────────────────────────
 
 const pickObstacleType = (planetDanger) => {
-  // Higher danger = more large asteroids
+  // Maior perigo do planeta = mais asteroides grandes
   const adjusted = OBSTACLE_TYPES.map(o => ({
     ...o,
     weight: o.type === 'large' || o.type === 'debris'
@@ -72,11 +71,11 @@ const pickObstacleType = (planetDanger) => {
 
 const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
 
-// Depth scale: objects start small and grow as they approach
+// Escala de profundidade: objetos começam pequenos e crescem ao se aproximar
 const getDepthScale = (progress) => 0.3 + progress * 0.7; // 0.3 → 1.0
 const getDepthOpacity = (progress) => 0.2 + progress * 0.8; // 0.2 → 1.0
 
-// ─── Star streaks for background ────────────────────────────────────
+// ─── Rastros de estrelas para o fundo ───────────────────────────────
 
 const StarField = () => {
   const stars = useMemo(() => {
@@ -137,9 +136,8 @@ const HyperdriveEscape = ({
   const arenaRef = useRef(null);
   const tickRef = useRef(null);
 
-  // GAMEPAD EXPERIMENT START
+  // Controle experimental de gamepad — apenas movimento da nave
   const { gamepadInputRef } = useGamepadControls();
-  // GAMEPAD EXPERIMENT END
 
   // ── Parâmetros derivados de missionStats (com fallbacks seguros) ──
   const ms = missionStats || {};
@@ -163,9 +161,9 @@ const HyperdriveEscape = ({
   const combinationSummary = ms.combinationSummary || {};
   const difficultyLabel = ms.difficultyLabel || 'Fácil';
 
-  // Ship movement params derived from stats (suavizado)
+  // Parâmetros de movimento da nave derivados das stats (suavizado)
   const diffFactor = planetDanger >= 3 ? 1.0 : (planetDanger >= 2 ? 0.70 : 0.60);
-  const maxMoveSpeed = (0.35 + finalSpeed * 0.035) * diffFactor; // px/frame in %
+  const maxMoveSpeed = (0.35 + finalSpeed * 0.035) * diffFactor; // % por frame
   const accel = (0.025 + finalAcceleration * 0.015) * diffFactor;
   const friction = 0.80 + finalHandling * 0.003; // menor = para mais rápido = mais controle
   const hitboxHalf = shipHitboxSize / 2;
@@ -173,14 +171,14 @@ const HyperdriveEscape = ({
   // ── Hypercrystal Schedule Helper ──
   const generateHyperCrystalSchedule = (totalDuration, diffLabel) => {
     const l = diffLabel.toLowerCase();
-    let quota = 2; // Default for easy
+    let quota = 2; // Padrão para fácil
     if (l.includes('médio') || l.includes('medio')) quota = 4;
     if (l.includes('difícil') || l.includes('dificil')) quota = 6;
     
     const schedule = [];
     const blockTime = totalDuration / quota;
     for (let i = 0; i < quota; i++) {
-       const minTime = i * blockTime + (blockTime * 0.15); // avoid exact borders
+       const minTime = i * blockTime + (blockTime * 0.15); // evita bordas exatas
        const maxTime = (i + 1) * blockTime - (blockTime * 0.15); 
        schedule.push(minTime + Math.random() * (maxTime - minTime));
     }
@@ -254,7 +252,7 @@ const HyperdriveEscape = ({
     const remaining = Math.max(0, duration - elapsed);
     g.timeLeft = Math.ceil(remaining);
 
-    // ── Move ship with acceleration ──
+    // ── Mover a nave com aceleração ──
     const keys = g.keysDown;
     let dirX = 0, dirY = 0;
     if (keys['ArrowLeft'] || keys['a'] || keys['A']) dirX -= 1;
@@ -262,11 +260,11 @@ const HyperdriveEscape = ({
     if (keys['ArrowUp'] || keys['w'] || keys['W']) dirY -= 1;
     if (keys['ArrowDown'] || keys['s'] || keys['S']) dirY += 1;
 
-    // Mobile overrides
+    // Sobrescreve com direção mobile, se houver
     if (g.mobileDir.x !== 0) dirX = g.mobileDir.x;
     if (g.mobileDir.y !== 0) dirY = g.mobileDir.y;
 
-    // GAMEPAD EXPERIMENT START
+    // Integração com gamepad experimental (apenas movimento)
     if (gamepadInputRef && gamepadInputRef.current) {
       dirX += gamepadInputRef.current.moveX;
       dirY += gamepadInputRef.current.moveY;
@@ -275,9 +273,8 @@ const HyperdriveEscape = ({
       dirX = Math.max(-1, Math.min(1, dirX));
       dirY = Math.max(-1, Math.min(1, dirY));
     }
-    // GAMEPAD EXPERIMENT END
 
-    // Apply acceleration
+    // Aplicar aceleração
     if (dirX !== 0) {
       g.velX += dirX * accel;
     } else {
@@ -289,11 +286,11 @@ const HyperdriveEscape = ({
       g.velY *= (1 - (1 - friction) * 4);
     }
 
-    // Clamp velocity
+    // Limitar velocidade máxima
     g.velX = clamp(g.velX, -maxMoveSpeed, maxMoveSpeed);
     g.velY = clamp(g.velY, -maxMoveSpeed, maxMoveSpeed);
 
-    // Apply velocity
+    // Aplicar velocidade
     g.shipX = clamp(g.shipX + g.velX, hitboxHalf + 1, ARENA_W - hitboxHalf - 1);
     g.shipY = clamp(g.shipY + g.velY, 15, ARENA_H - 5);
 
@@ -303,7 +300,7 @@ const HyperdriveEscape = ({
     if (now - g.lastObstacleSpawn > finalSpawnRate) {
       g.lastObstacleSpawn = now;
       const oType = pickObstacleType(planetDanger);
-      const x = 10 + Math.random() * 80; // spawn across width
+      const x = 10 + Math.random() * 80; // distribui pela largura
       const speedVariance = 0.8 + Math.random() * 0.4;
       const computedSpeed = obstacleSpeed * oType.speedMult * speedVariance;
 
@@ -326,7 +323,7 @@ const HyperdriveEscape = ({
       g.obstacles.push({
         id: now + Math.random(),
         x,
-        y: -2, // start above arena
+        y: -2, // começa acima da arena
         speed: computedSpeed,
         isTargeted,
         velX,
@@ -337,7 +334,7 @@ const HyperdriveEscape = ({
 
     // ── Spawn crystals and hypercrystals ──
     
-    // Independent Hypercrystal spawn
+    // Spawn independente de hipercristais
     if (g.hyperCrystalSchedule.length > 0 && elapsed >= g.hyperCrystalSchedule[0]) {
       g.hyperCrystalSchedule.shift(); // Remove da fila
       g.hyperCrystalsSpawned += 1;
@@ -355,7 +352,7 @@ const HyperdriveEscape = ({
       });
     }
 
-    // Common Crystal spawn
+    // Spawn de cristais comuns
     if (now - g.lastCrystalSpawn > crystalSpawnRate) {
       g.lastCrystalSpawn = now;
       g.crystals.push({
@@ -367,7 +364,7 @@ const HyperdriveEscape = ({
       });
     }
 
-    // ── Move obstacles & check collisions ──
+    // ── Mover obstáculos e verificar colisões ──
     const shipL = g.shipX - hitboxHalf;
     const shipR = g.shipX + hitboxHalf;
     const shipT = g.shipY - hitboxHalf;
@@ -391,7 +388,7 @@ const HyperdriveEscape = ({
         continue;
       }
 
-      // Collision check
+      // Verificar colisão
       const oL = o.x - o.w / 2;
       const oR = o.x + o.w / 2;
       const oT = o.y - o.h / 2;
@@ -408,7 +405,7 @@ const HyperdriveEscape = ({
     }
     g.obstacles = aliveObstacles;
 
-    // ── Move crystals & check collection ──
+    // ── Mover cristais e verificar coleta ──
     g.crystals = g.crystals.filter(c => {
       c.y += c.speed * 0.14;
       if (c.y > 105) {
@@ -439,10 +436,10 @@ const HyperdriveEscape = ({
       return true;
     });
 
-    // Clean old feedbacks
+    // Limpar feedbacks antigos
     g.feedbacks = g.feedbacks.filter(f => now - f.created < 800);
 
-    // ── End conditions ──
+    // ── Condições de fim de jogo ──
     if (g.lives <= 0) {
       g.status = GAME_STATUS.LOST;
       setGameStatus(GAME_STATUS.LOST);
@@ -460,10 +457,10 @@ const HyperdriveEscape = ({
       return;
     }
 
-    // ── Trigger re-render ──
+    // ── Disparar re-render ──
     setRenderTick(t => t + 1);
 
-    // Schedule next frame
+    // Agendar próximo frame
     g.frameId = requestAnimationFrame(tickRef.current);
   };
 
@@ -590,7 +587,7 @@ const HyperdriveEscape = ({
     // Gerar identificador único desta partida para controle de envio de e-mail
     setMatchKey(`${Date.now()}`);
 
-    // Map label back to ranking key
+    // Converter rótulo de dificuldade para chave do ranking
     const labelToKey = { 'fácil': 'easy', 'médio': 'medium', 'difícil': 'challenge' };
     const diffKey = labelToKey[difficultyLabel.toLowerCase()] || 'easy';
     const survived = duration - (g.timeLeft || 0);
@@ -652,7 +649,7 @@ const HyperdriveEscape = ({
     gameRef.current.mobileDir = { x: 0, y: 0 };
   };
 
-  // ── Read game state for rendering ──
+  // ── Ler estado do jogo para renderização ──
   const g = gameRef.current;
   const timeSurvived = duration - (g.timeLeft || 0);
 
@@ -746,7 +743,7 @@ const HyperdriveEscape = ({
             </div>
           </div>
 
-          {/* Effects & Synergies */}
+          {/* Efeitos e sinergias */}
           {activeEffects.length > 0 && (
             <details className="sw-result-effects-details">
               <summary className="sw-result-effects-summary">Ver efeitos da build</summary>

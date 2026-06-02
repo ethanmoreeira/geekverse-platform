@@ -21,7 +21,7 @@ import StarWarsGame from './pages/games/starWars/StarWarsGame';
 import Ranking from './pages/ranking/Ranking';
 import RankingGameDetails from './pages/ranking/RankingGameDetails';
 import Sobre from './pages/sobre/Sobre';
-import NotFound from './pages/NotFound';
+import NotFound from './pages/notFound/NotFound';
 
 import './App.css';
 import FullscreenButton from './components/FullscreenButton/FullscreenButton';

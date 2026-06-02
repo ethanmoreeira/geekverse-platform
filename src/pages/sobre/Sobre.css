@@ -16,19 +16,23 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(15, 15, 26, 0.15); /* Fundo mais visível */
+  background: rgba(15, 15, 26, 0.15);
+  /* Fundo mais visível */
 }
 
 .about-page {
   position: relative;
   width: 100%;
-  max-width: 1080px; /* Reduzido para ficar mais compacto */
-  margin: -40px auto 0 auto; /* Sobe o container inteiro */
+  max-width: 1080px;
+  /* Reduzido para ficar mais compacto */
+  margin: -40px auto 0 auto;
+  /* Sobe o container inteiro */
   padding: 10px 20px 20px 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  color: #f8f5ff; /* Texto comum mais claro */
+  color: #e9d5ff;
+  /* Texto comum roxo claro */
 }
 
 .about-hero {
@@ -36,7 +40,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px; /* Reduzido */
+  gap: 8px;
+  /* Reduzido */
   padding: 0 0 10px 0;
 }
 
@@ -46,58 +51,42 @@
   height: auto;
   display: block;
   mix-blend-mode: screen;
-  margin: -40px auto 0 auto; /* Ajuste sutil */
+  margin: -40px auto 0 auto;
+  /* Ajuste sutil */
 }
 
 .about-hero-subtitle {
   font-size: 15px;
   color: #d8b4fe;
   max-width: 600px;
-  margin-top: -40px; /* Ajuste sutil para colar na logo */
+  margin-top: -40px;
+  /* Ajuste sutil para colar na logo */
 }
 
-.about-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px; /* Reduzido */
-}
-
-/* Rows Layouts */
-.about-row-65-35 {
+.sobre-content {
+  max-width: 1040px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: 65fr 35fr;
-  gap: 16px;
-}
-
-.about-row-60-40 {
-  display: grid;
-  grid-template-columns: 60fr 40fr;
-  gap: 16px;
-  align-items: stretch;
-}
-
-.about-row-50-50 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.about-row-wide {
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 18px;
   width: 100%;
 }
 
 /* Common Card Style */
 .about-card {
-  background: rgba(18, 10, 35, 0.68); /* Transparência glassmorphism segura */
+  background: rgba(18, 10, 35, 0.68);
+  /* Transparência glassmorphism segura */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(190, 120, 255, 0.28);
   border-radius: var(--gv-radius);
-  padding: 15px; /* Menos padding */
+  padding: 15px;
+  /* Menos padding */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Menos gap interno */
+  gap: 10px;
+  /* Menos gap interno */
   transition: transform 0.3s ease, border-color 0.3s ease;
   height: 100%;
 }
@@ -113,7 +102,8 @@
   gap: 8px;
   font-size: 16px;
   font-weight: 700;
-  color: #c084fc; /* Roxo/lavanda para títulos */
+  color: #c084fc;
+  /* Roxo/lavanda para títulos */
   text-shadow: 0 0 8px rgba(216, 180, 254, 0.3);
   border-bottom: 1px solid rgba(216, 180, 254, 0.15);
   padding-bottom: 8px;
@@ -121,7 +111,8 @@
 }
 
 .about-card p {
-  color: #f8f5ff; /* Texto comum mais claro */
+  color: #d8b4fe;
+  /* Roxo claro */
   line-height: 1.4;
   font-size: 13px;
   margin: 0;
@@ -136,8 +127,8 @@
 }
 
 .about-ficha-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
@@ -149,7 +140,7 @@
 }
 
 .about-info-grid p {
-  color: #f8f5ff;
+  color: #e9d5ff;
   display: flex;
   align-items: center;
 }
@@ -184,7 +175,7 @@
 }
 
 .about-members-list li {
-  color: #f8f5ff;
+  color: #d8b4fe;
   font-size: 13px;
   position: relative;
   padding-left: 10px;
@@ -227,14 +218,14 @@
 
 .about-game-item p {
   font-size: 11px;
-  color: #f8f5ff;
+  color: #e9d5ff;
   margin: 0;
 }
 
 .about-game-api {
   display: inline-block;
   font-size: 9px;
-  color: #f8f5ff;
+  color: #f3e8ff;
   background: rgba(168, 85, 247, 0.4);
   padding: 2px 4px;
   border-radius: 4px;
@@ -247,35 +238,6 @@
 .about-discreet-text {
   font-size: 12px !important;
   color: #c4b5fd !important;
-}
-
-/* Video Placeholder */
-.about-video-placeholder {
-  flex: 1;
-  min-height: 50px;
-  background: rgba(12, 14, 28, 0.15);
-  border: 1px dashed rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  margin-top: 4px;
-  padding: 10px;
-}
-
-.about-video-placeholder:hover {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.about-video-icon {
-  color: rgba(216, 180, 254, 0.5);
-  transition: color 0.3s ease;
-}
-
-.about-video-placeholder:hover .about-video-icon {
-  color: rgba(216, 180, 254, 0.9);
 }
 
 /* Audit Card */
@@ -339,7 +301,8 @@
 .about-contact-form {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Form mais compacto */
+  gap: 8px;
+  /* Form mais compacto */
   margin-top: 4px;
 }
 
@@ -366,13 +329,16 @@
 .about-form-group input,
 .about-form-group textarea {
   width: 100%;
-  padding: 6px 10px; /* Reduzido para input menor */
+  padding: 6px 10px;
+  /* Reduzido para input menor */
   background: rgba(3, 5, 16, 0.72);
   border: 1px solid rgba(180, 120, 255, 0.25);
   border-radius: 6px;
-  color: #f8f5ff; /* Mais claro */
+  color: #d8b4fe;
+  /* Roxo claro */
   font-family: inherit;
-  font-size: 12px; /* Mais compacto */
+  font-size: 12px;
+  /* Mais compacto */
   transition: all 0.3s ease;
 }
 
@@ -393,7 +359,7 @@
   background: rgba(168, 85, 247, 0.15);
   border: 1px solid rgba(168, 85, 247, 0.4);
   border-radius: 6px;
-  color: #f8f5ff;
+  color: #d8b4fe;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -437,8 +403,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .about-actions {
@@ -455,7 +428,7 @@
   background: rgba(255, 255, 255, 0.05);
   padding: 4px 8px;
   border-radius: 4px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .audit-badge-val {
@@ -471,13 +444,13 @@
 
 /* Responsiveness */
 @media (max-width: 900px) {
-  .about-row-65-35,
-  .about-row-60-40,
-  .about-row-50-50,
-  .about-form-row {
+  .sobre-content {
+    max-width: 100%;
     grid-template-columns: 1fr;
   }
 
+  .about-form-row,
+  .about-ficha-grid,
   .about-games-grid {
     grid-template-columns: 1fr;
   }
