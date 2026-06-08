@@ -67,47 +67,57 @@
   max-width: 1040px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
   gap: 18px;
   width: 100%;
 }
 
-/* Common Card Style */
+/* Full-width cards span both columns */
+.about-full-width {
+  grid-column: 1 / -1;
+}
+
+/* ==================== */
+/* Common Card Style    */
+/* ==================== */
 .about-card {
-  background: rgba(18, 10, 35, 0.68);
-  /* Transparência glassmorphism segura */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(190, 120, 255, 0.28);
+  background: rgba(18, 10, 38, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(190, 130, 255, 0.22);
   border-radius: var(--gv-radius);
-  padding: 15px;
-  /* Menos padding */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  /* Menos gap interno */
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.35s ease, box-shadow 0.35s ease;
   height: 100%;
 }
 
 .about-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(190, 120, 255, 0.5);
+  border-color: rgba(190, 130, 255, 0.45);
+  box-shadow:
+    0 8px 32px rgba(139, 92, 246, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .about-card-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  color: #c084fc;
-  /* Roxo/lavanda para títulos */
-  text-shadow: 0 0 8px rgba(216, 180, 254, 0.3);
-  border-bottom: 1px solid rgba(216, 180, 254, 0.15);
+  color: #c4a1ff;
+  text-shadow: 0 0 10px rgba(196, 161, 255, 0.25);
+  border-bottom: 1px solid rgba(216, 180, 254, 0.12);
   padding-bottom: 8px;
   margin: 0;
+  letter-spacing: 0.3px;
 }
 
 .about-card p {
@@ -118,7 +128,9 @@
   margin: 0;
 }
 
-/* Info Project (Ficha Técnica) */
+/* ================================ */
+/* Info Project (Ficha Técnica)     */
+/* ================================ */
 
 .about-project-info .about-card-content {
   display: flex;
@@ -146,23 +158,23 @@
 }
 
 .about-info-grid strong {
-  color: #c084fc;
+  color: #c4a1ff;
   width: 80px;
   flex-shrink: 0;
 }
 
 .about-members-list {
-  background: rgba(12, 14, 28, 0.15);
+  background: rgba(12, 14, 28, 0.18);
   padding: 12px 16px;
-  border-radius: 6px;
-  border-left: 2px solid #a855f7;
+  border-radius: 8px;
+  border-left: 2px solid rgba(168, 85, 247, 0.6);
 }
 
 .about-members-list strong {
   display: block;
-  color: #c084fc;
+  color: #c4a1ff;
   margin-bottom: 8px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .about-members-list ul {
@@ -171,14 +183,19 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .about-members-list li {
   color: #d8b4fe;
   font-size: 13px;
   position: relative;
-  padding-left: 10px;
+  padding-left: 12px;
+  transition: color 0.2s ease;
+}
+
+.about-members-list li:hover {
+  color: #ede4ff;
 }
 
 .about-members-list li::before {
@@ -188,21 +205,38 @@
   color: #a855f7;
 }
 
-/* Games List */
+/* ==================== */
+/* Games List — Compact */
+/* ==================== */
+.about-games-list-card {
+  padding: 12px 14px;
+}
+
+.about-games-list-card .about-card-title {
+  font-size: 14px;
+  padding-bottom: 6px;
+}
+
 .about-games-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
 .about-game-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  background: rgba(12, 14, 28, 0.15);
-  padding: 10px 12px;
+  gap: 2px;
+  background: rgba(12, 14, 28, 0.18);
+  padding: 6px 10px;
   border-radius: 6px;
-  border-left: 2px solid rgba(167, 139, 250, 0.4);
+  border-left: 2px solid rgba(167, 139, 250, 0.35);
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.about-game-item:hover {
+  background: rgba(12, 14, 28, 0.3);
+  border-left-color: rgba(167, 139, 250, 0.6);
 }
 
 .about-game-header {
@@ -212,24 +246,26 @@
 }
 
 .about-game-item strong {
-  font-size: 12px;
+  font-size: 11px;
   color: #d8b4fe;
 }
 
 .about-game-item p {
-  font-size: 11px;
-  color: #e9d5ff;
+  font-size: 10px;
+  color: #c4b5fd;
   margin: 0;
+  line-height: 1.35;
 }
 
 .about-game-api {
   display: inline-block;
-  font-size: 9px;
+  font-size: 8px;
   color: #f3e8ff;
-  background: rgba(168, 85, 247, 0.4);
-  padding: 2px 4px;
+  background: rgba(168, 85, 247, 0.35);
+  padding: 1px 5px;
   border-radius: 4px;
   font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 
@@ -240,33 +276,48 @@
   color: #c4b5fd !important;
 }
 
-/* Audit Card */
+/* ==================== */
+/* Audit Card           */
+/* ==================== */
+.about-audit-card {
+  padding: 14px 18px;
+  gap: 8px;
+}
+
+.about-audit-card .about-card-title {
+  font-size: 14px;
+  padding-bottom: 5px;
+}
 .about-audit-btn {
   margin-top: auto;
-  background: rgba(34, 197, 94, 0.15) !important;
-  border-color: rgba(34, 197, 94, 0.5) !important;
+  background: rgba(34, 197, 94, 0.12) !important;
+  border-color: rgba(34, 197, 94, 0.4) !important;
   color: #22c55e !important;
-  padding: 6px 10px;
+  padding: 6px 12px;
   font-size: 11px;
+  transition: all 0.25s ease;
 }
 
 .about-audit-btn:hover {
-  background: rgba(34, 197, 94, 0.3) !important;
+  background: rgba(34, 197, 94, 0.25) !important;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.15);
 }
 
 /* Audit Send Email Button */
 .about-audit-send-btn {
   margin-top: 4px;
-  background: rgba(139, 92, 246, 0.15) !important;
-  border-color: rgba(139, 92, 246, 0.45) !important;
+  background: rgba(139, 92, 246, 0.12) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
   color: #c4b5fd !important;
-  padding: 6px 10px;
+  padding: 6px 12px;
   font-size: 11px;
+  transition: all 0.25s ease;
 }
 
 .about-audit-send-btn:hover {
-  background: rgba(139, 92, 246, 0.3) !important;
-  border-color: rgba(139, 92, 246, 0.7) !important;
+  background: rgba(139, 92, 246, 0.28) !important;
+  border-color: rgba(139, 92, 246, 0.65) !important;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.12);
 }
 
 .about-audit-send-btn:disabled {
@@ -281,23 +332,25 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
-  margin-top: 4px;
+  margin-top: 6px;
   animation: fadeIn 0.3s ease;
 }
 
 .about-audit-feedback--success {
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.4);
   color: #4ade80;
 }
 
 .about-audit-feedback--error {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
   color: #f87171;
 }
 
-/* Contact Form */
+/* ==================== */
+/* Contact Form         */
+/* ==================== */
 .about-contact-form {
   display: flex;
   flex-direction: column;
@@ -322,23 +375,20 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  color: #c084fc;
+  color: #c4a1ff;
   letter-spacing: 0.5px;
 }
 
 .about-form-group input,
 .about-form-group textarea {
   width: 100%;
-  padding: 6px 10px;
-  /* Reduzido para input menor */
-  background: rgba(3, 5, 16, 0.72);
-  border: 1px solid rgba(180, 120, 255, 0.25);
+  padding: 7px 10px;
+  background: rgba(3, 5, 16, 0.6);
+  border: 1px solid rgba(180, 120, 255, 0.2);
   border-radius: 6px;
-  color: #d8b4fe;
-  /* Roxo claro */
+  color: #e0d0ff;
   font-family: inherit;
   font-size: 12px;
-  /* Mais compacto */
   transition: all 0.3s ease;
 }
 
@@ -346,8 +396,13 @@
 .about-form-group textarea:focus {
   outline: none;
   border-color: #c084fc;
-  box-shadow: 0 0 8px rgba(192, 132, 252, 0.3);
-  background: rgba(3, 5, 16, 0.9);
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.2);
+  background: rgba(3, 5, 16, 0.85);
+}
+
+.about-form-group input::placeholder,
+.about-form-group textarea::placeholder {
+  color: rgba(196, 161, 255, 0.35);
 }
 
 .about-submit-button {
@@ -355,25 +410,26 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 12px;
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.4);
+  padding: 8px 14px;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.35);
   border-radius: 6px;
   color: #d8b4fe;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   font-size: 12px;
 }
 
 .about-submit-button:hover {
-  background: rgba(168, 85, 247, 0.3);
-  border-color: rgba(168, 85, 247, 0.8);
+  background: rgba(168, 85, 247, 0.25);
+  border-color: rgba(168, 85, 247, 0.7);
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.12);
 }
 
 .about-contact-submit {
   align-self: flex-start;
-  padding: 8px 16px;
+  padding: 8px 18px;
 }
 
 .about-contact-submit:disabled {
@@ -391,14 +447,14 @@
 }
 
 .about-contact-feedback--success {
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.4);
   color: #4ade80;
 }
 
 .about-contact-feedback--error {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
   color: #f87171;
 }
 
@@ -420,15 +476,23 @@
   margin-top: 10px;
 }
 
-/* Audit Badges */
+/* ==================== */
+/* Audit Badges         */
+/* ==================== */
 .audit-badge {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px 9px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.audit-badge:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .audit-badge-val {
@@ -442,20 +506,62 @@
   color: #e9d5ff;
 }
 
-/* Responsiveness */
+/* ==================== */
+/* Responsiveness       */
+/* ==================== */
 @media (max-width: 900px) {
   .sobre-content {
     max-width: 100%;
     grid-template-columns: 1fr;
   }
 
+  .about-full-width {
+    grid-column: 1;
+  }
+
   .about-form-row,
-  .about-ficha-grid,
-  .about-games-grid {
+  .about-ficha-grid {
     grid-template-columns: 1fr;
+  }
+
+  .about-games-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
   .about-contact-submit {
     align-self: stretch;
+  }
+
+  .about-page {
+    padding: 10px 12px 20px 12px;
+  }
+
+  .about-card {
+    padding: 14px;
+  }
+
+  .about-games-list-card {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 580px) {
+  .about-games-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-page {
+    padding: 8px 8px 16px 8px;
+  }
+
+  .about-card {
+    padding: 12px;
+  }
+
+  .about-hero-subtitle {
+    font-size: 13px;
+    padding: 0 8px;
   }
 }

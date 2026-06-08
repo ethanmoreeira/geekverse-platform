@@ -2,7 +2,7 @@
 // Tela de resumo completo da missão com todos os stats calculados.
 // Inclui seção "Efeitos da Combinação" com atributos finais e sinergias.
 
-import { FaArrowLeft, FaRocket } from 'react-icons/fa';
+// Imports de ícones removidos — não usados neste componente.
 
 const StatRow = ({ label, value, unit }) => (
   <div className="sw-summary-stat">
@@ -18,10 +18,10 @@ const MissionSummary = ({
   pilot,
   planet,
   vehicle,
-  difficulty,
+  difficulty: _difficulty,
   missionStats,
   onStartArena,
-  onBackToBuilder,
+  onBackToBuilder: _onBackToBuilder,
 }) => {
   if (!missionStats) return null;
 

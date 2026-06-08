@@ -3,14 +3,13 @@
 // Exibe cards dos 4 jogos oficiais.
 // Estilo arcade geek com grid responsivo.
 
-import { useEffect } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import {
   GiMagicSwirl,
   GiSwordsPower,
   GiPortal,
   GiSpaceship,
-  GiJoystick,
 } from 'react-icons/gi';
 import harryCardBg from '../../assets/backgrounds/harry-potter/harry-logout-bg.png';
 import rickCardBg from '../../assets/backgrounds/rick-morty/image.png';
@@ -19,13 +18,6 @@ import starWarsBg from '../../assets/backgrounds/star-wars/star_wars_space_wallp
 import dashboardBg from '../../assets/backgrounds/dashboard/geekverse_g8_dashboard_background.png';
 import g8LogoV10 from '../../assets/backgrounds/dashboard/g8_logo_v10.png';
 import geekverseLogoFinal from '../../assets/backgrounds/dashboard/geekverse_logo_cropped.png';
-import {
-  FaGamepad,
-  FaRocket,
-  FaCode,
-  FaRoute,
-  FaEnvelope,
-} from 'react-icons/fa';
 
 const GAMES = [
   {
@@ -71,15 +63,6 @@ const GAMES = [
     color: '#3b82f6', // Azul
     bgImage: starWarsBg,
   },
-];
-
-
-
-const TECH_BADGES = [
-  { label: 'React', icon: FaCode },
-  { label: 'Rotas Privadas', icon: FaRoute },
-  { label: '4 APIs Públicas', icon: FaRocket },
-  { label: 'EmailJS', icon: FaEnvelope },
 ];
 
 import { playFugaMusic } from '../../services/audioService';

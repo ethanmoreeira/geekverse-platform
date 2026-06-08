@@ -1,4 +1,3 @@
-import React from 'react';
 import { PropagateLoader } from 'react-spinners';
 import bgImage from '../../assets/backgrounds/harry-potter/harry-logout-bg.png';
 import '../../styles/games.css';

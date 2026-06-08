@@ -2,7 +2,7 @@
 // Preview da tela de resultado futura.
 // Mostra esqueleto de como será exibido o resultado do jogo.
 
-import { FaArrowLeft, FaRedo, FaTrophy } from 'react-icons/fa';
+import { FaRedo, FaTrophy } from 'react-icons/fa';
 
 const StarWarsResultPreview = ({ missionStats, starship, pilot, planet, onBackToBuilder }) => {
   return (

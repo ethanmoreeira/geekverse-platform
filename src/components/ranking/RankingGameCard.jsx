@@ -43,7 +43,7 @@ const RankingGameCard = ({ game }) => {
   const navigate = useNavigate();
 
   const title = TITLES[game.id] || game.name;
-  const criterion = CRITERIA[game.id] || game.criterion;
+  const _criterion = CRITERIA[game.id] || game.criterion;
   const bgImage = BACKGROUNDS[game.id] || '';
   const themeColor = THEME_COLORS[game.id] || game.color;
 

@@ -2,10 +2,10 @@
 // Esqueleto visual da futura arena do jogo (sem física/canvas).
 // Apenas mostra o layout visual que será usado no futuro.
 
-import { FaArrowLeft, FaPlay } from 'react-icons/fa';
+import { FaPlay } from 'react-icons/fa';
 import { GiSpaceship } from 'react-icons/gi';
 
-const HyperdriveArenaPreview = ({ missionStats, starship, onSimulateResult, onBackToBuilder }) => {
+const HyperdriveArenaPreview = ({ missionStats, starship, onSimulateResult, onBackToBuilder: _onBackToBuilder }) => {
   return (
     <div className="sw-arena-preview">
       {/* Arena visual (esqueleto) */}

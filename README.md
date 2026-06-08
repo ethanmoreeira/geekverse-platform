@@ -335,8 +335,5 @@ APIs e ferramentas usadas no projeto:
 
 Os créditos adicionais de áudio e recursos visuais estão documentados no arquivo `CREDITOS_AUDIO.md`, se aplicável.
 
-## Status do projeto
 
-Projeto em fase final de entrega, com funcionalidades principais implementadas, documentação em revisão e deploy em preparação.
 
-Este README documenta a estrutura, as funcionalidades e os principais requisitos técnicos do projeto GeekVerse G8.

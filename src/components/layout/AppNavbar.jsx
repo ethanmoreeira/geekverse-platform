@@ -3,7 +3,7 @@
 // Links para Dashboard, jogos, ranking, exportar e sobre.
 // Botão Sair.
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -12,12 +12,12 @@ import {
   FaInfoCircle,
   FaSignOutAlt,
 } from 'react-icons/fa';
-import { GiJoystick } from 'react-icons/gi';
+
 import g8LogoV10 from '../../assets/backgrounds/dashboard/g8_logo_v10.png';
 import ThemedLogoutScreen from '../feedback/ThemedLogoutScreen';
 
 const AppNavbar = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 

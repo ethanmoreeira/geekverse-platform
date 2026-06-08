@@ -168,8 +168,8 @@ const Sobre = () => {
 
         <div className="sobre-content">
 
-          {/* Card 1: Jogos do Projeto */}
-          <div className="about-card about-games-list-card">
+          {/* Card 1: Jogos do Projeto — full width */}
+          <div className="about-card about-games-list-card about-full-width">
             <h2 className="about-card-title">Jogos do Projeto</h2>
             <div className="about-games-grid">
               {GAMES.map((game, idx) => (
@@ -222,11 +222,35 @@ const Sobre = () => {
             </form>
           </div>
 
-          {/* Card 3: Auditoria da Sessão */}
-          <div className="about-card about-audit-card">
-            <h2 className="about-card-title" style={{ fontSize: '14px', paddingBottom: '4px' }}>Auditoria da Sessão</h2>
-            <p className="about-discreet-text" style={{ marginBottom: '6px', fontSize: '11px' }}>
-              Os números abaixo representam contadores locais desta sessão. Os eventos completos também são registrados no Supabase para auditoria do projeto. Nenhum nome ou e-mail é exibido nesta área.
+          {/* Card 3: Informações do Grupo */}
+          <div className="about-card about-project-info">
+            <h2 className="about-card-title">Informações do Grupo</h2>
+            <div className="about-card-content about-ficha-grid">
+              <div className="about-info-grid">
+                <p><strong>Grupo:</strong> G8</p>
+                <p><strong>Disciplina:</strong> Desenvolvimento Web Front-End</p>
+                <p><strong>Projeto:</strong> Trabalho Final de Integração</p>
+                <p><strong>Tema:</strong> Jogos interativos com APIs geek</p>
+              </div>
+
+              <div className="about-members-list">
+                <strong>Integrantes:</strong>
+                <ul>
+                  <li>Gabriel Fagundes Motta</li>
+                  <li>Ítalo Dias Moreira Campos</li>
+                  <li>Julyanne Lauriano Genevain</li>
+                  <li>Rakel Garcia da Silva</li>
+                  <li>Raphaell Reiff Galoni</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: Auditoria da Sessão — full width */}
+          <div className="about-card about-audit-card about-full-width">
+            <h2 className="about-card-title">Auditoria da Sessão</h2>
+            <p className="about-discreet-text" style={{ marginBottom: '4px', fontSize: '11px' }}>
+              Contadores locais desta sessão. Eventos completos também são registrados no Supabase para auditoria do projeto.
             </p>
 
             {!auditSummary ? (
@@ -237,7 +261,7 @@ const Sobre = () => {
                 flexWrap: 'wrap',
                 gap: '8px',
                 justifyContent: 'center',
-                marginBottom: '8px'
+                marginBottom: '6px'
               }}>
                 <div className="audit-badge">
                   <span className="audit-badge-val" style={{ color: '#d8b4fe' }}>{auditSummary.totalEvents}</span>
@@ -280,30 +304,6 @@ const Sobre = () => {
                 {auditFeedback.text}
               </div>
             )}
-          </div>
-
-          {/* Card 4: Informações do Grupo */}
-          <div className="about-card about-project-info">
-            <h2 className="about-card-title">Informações do Grupo</h2>
-            <div className="about-card-content about-ficha-grid">
-              <div className="about-info-grid">
-                <p><strong>Grupo:</strong> G8</p>
-                <p><strong>Disciplina:</strong> Desenvolvimento Web Front-End</p>
-                <p><strong>Projeto:</strong> Trabalho Final de Integração</p>
-                <p><strong>Tema:</strong> Jogos interativos com APIs geek</p>
-              </div>
-
-              <div className="about-members-list">
-                <strong>Integrantes em ordem alfabética:</strong>
-                <ul>
-                  <li>Gabriel Fagundes Motta</li>
-                  <li>Ítalo Dias Moreira Campos</li>
-                  <li>Julyanne Lauriano Genevain</li>
-                  <li>Rakel Garcia da Silva</li>
-                  <li>Raphaell Reiff Galoni</li>
-                </ul>
-              </div>
-            </div>
           </div>
 
         </div>
