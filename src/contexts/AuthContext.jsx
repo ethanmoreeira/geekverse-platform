@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
           setUser(parsed);
         }
       }
-    } catch (err) {
+    } catch {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(USER_STORAGE_KEY);
     }

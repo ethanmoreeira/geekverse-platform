@@ -123,7 +123,7 @@ const getUserData = () => {
         user_email: parsed.email || ''
       };
     }
-  } catch (e) {
+  } catch {
     // Silently ignore parsing errors
   }
   return { user_name: 'Visitante', user_email: '' };
@@ -198,7 +198,7 @@ export const getAuditSessionSummary = () => {
     if (data) {
       return JSON.parse(data);
     }
-  } catch (err) {
+  } catch {
     // Ignore
   }
   return {
@@ -224,7 +224,7 @@ export const incrementAuditSessionSummary = (eventType) => {
     if (eventType === 'result_export' || eventType === 'result_email_send') summary.resultExports += 1;
 
     sessionStorage.setItem('geekverse_audit_session_summary', JSON.stringify(summary));
-  } catch (err) {
+  } catch {
     // Ignore
   }
 };
@@ -235,7 +235,7 @@ export const incrementAuditSessionSummary = (eventType) => {
 export const resetAuditSessionSummary = () => {
   try {
     sessionStorage.removeItem('geekverse_audit_session_summary');
-  } catch (err) {
+  } catch {
     // Ignore
   }
 };

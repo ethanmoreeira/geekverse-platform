@@ -333,7 +333,6 @@ APIs e ferramentas usadas no projeto:
 - Supabase
 - EmailJS
 
-Os créditos adicionais de áudio e recursos visuais estão documentados no arquivo `CREDITOS_AUDIO.md`, se aplicável.
 
 
 

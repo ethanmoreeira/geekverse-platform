@@ -4,13 +4,6 @@
 // Apenas UI e evento, não busca API.
 
 import { POKEMON_LEVELS } from '../../data/pokemonGameConfig';
-import { FaStar, FaBolt, FaSkull } from 'react-icons/fa';
-
-const LEVEL_ICONS = {
-  easy: FaStar,
-  medium: FaBolt,
-  hard: FaSkull,
-};
 
 const LEVEL_COLORS = {
   easy: '#22c55e',
@@ -22,7 +15,6 @@ const PokemonLevelSelector = ({ onSelectLevel }) => {
   return (
     <div className="pks-level-grid">
       {Object.values(POKEMON_LEVELS).map((level) => {
-        const _Icon = LEVEL_ICONS[level.id];
         const color = LEVEL_COLORS[level.id];
         return (
           <div key={level.id} className="pks-level-item">

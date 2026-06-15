@@ -5,10 +5,8 @@
 import { useState } from 'react';
 
 import { FaTrophy, FaRedo, FaArrowLeft, FaClock, FaExclamationTriangle, FaLightbulb, FaStopwatch, FaFileExport } from 'react-icons/fa';
-import { GiPodiumWinner } from 'react-icons/gi';
 import JsonViewer from '../feedback/JsonViewer';
 import { translateType } from '../../data/pokemonGameConfig';
-import { exportJsonFile } from '../../utils/exportResult';
 import { sendGameResultEmail } from '../../services/emailService';
 import { hasEmailExportBeenSent, markEmailExportAsSent, buildResultKey } from '../../utils/emailExportControl';
 import { useAuth } from '../../hooks/useAuth';
@@ -29,7 +27,6 @@ const PokemonResultScreen = ({
   hintsUsed,
   onPlayAgain,
   onChooseLevel,
-  onBack,
 }) => {
   const { user } = useAuth();
   const finalTime = elapsedSeconds + penaltySeconds;
@@ -178,8 +175,8 @@ const PokemonResultScreen = ({
                 // Marcar como enviado APENAS após sucesso
                 markEmailExportAsSent(exportKey);
                 setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
-                try { logAuditEvent({ eventType: 'result_email_send', description: 'E-mail de resultado enviado para PokeSombra', gameId: 'pokesombra', gameName: 'PokeSombra' }); } catch (_) { }
-              } catch (err) {
+                try { logAuditEvent({ eventType: 'result_email_send', description: 'E-mail de resultado enviado para PokeSombra', gameId: 'pokesombra', gameName: 'PokeSombra' }); } catch { /* auditoria opcional */ }
+              } catch {
                 setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
               } finally {
                 setIsExporting(false);

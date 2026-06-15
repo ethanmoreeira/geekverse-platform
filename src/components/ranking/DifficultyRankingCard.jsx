@@ -10,7 +10,6 @@ import RankingList from './RankingList';
 import UserPositionCard from './UserPositionCard';
 import {
   getTopTen,
-  getRankedResults,
   getUserPosition,
   fetchTopTen,
   fetchRankedResults,

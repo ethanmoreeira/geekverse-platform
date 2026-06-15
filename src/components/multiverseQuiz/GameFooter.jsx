@@ -16,11 +16,6 @@ const formatNumber = (value) =>
 const GameFooter = ({
   difficulty,
   score,
-  showResult,
-  gameOver,
-  onNextQuestion,
-  onRestart,
-  onBack,
 }) => {
   const config = DIFFICULTY_MAP[difficulty] || DIFFICULTY_MAP.easy;
 

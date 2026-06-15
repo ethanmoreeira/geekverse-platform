@@ -34,7 +34,6 @@ const AnswerCard = ({
   disabled,
   onClick,
   index,
-  questionFocus,
   isEliminated,
 }) => {
   const letter = String.fromCharCode(65 + index); // A, B, C, D

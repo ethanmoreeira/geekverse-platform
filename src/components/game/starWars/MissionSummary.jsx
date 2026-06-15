@@ -18,10 +18,8 @@ const MissionSummary = ({
   pilot,
   planet,
   vehicle,
-  difficulty: _difficulty,
   missionStats,
   onStartArena,
-  onBackToBuilder: _onBackToBuilder,
 }) => {
   if (!missionStats) return null;
 

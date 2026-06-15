@@ -32,7 +32,6 @@ const getArenaLayout = (boardPokemon) => {
     return null;
   }
 
-  const bottom = total - top - side * 2;
 
   return {
     topCards:    boardPokemon.slice(0, top),

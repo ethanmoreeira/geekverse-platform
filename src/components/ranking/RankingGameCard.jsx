@@ -32,18 +32,11 @@ const TITLES = {
   'fuga-hiperespaco': 'Fuga do Hiperespaço',
 };
 
-const CRITERIA = {
-  'harry-memory': 'Menor tempo vence. Empate por tentativas.',
-  'pokesombra': 'Menor tempo final vence. Empate por erros.',
-  'show-multiverso': 'Maior pontuação vence. Empate por dicas e erros.',
-  'fuga-hiperespaco': 'Maior pontuação vence. Empate por colisões.',
-};
 
 const RankingGameCard = ({ game }) => {
   const navigate = useNavigate();
 
   const title = TITLES[game.id] || game.name;
-  const _criterion = CRITERIA[game.id] || game.criterion;
   const bgImage = BACKGROUNDS[game.id] || '';
   const themeColor = THEME_COLORS[game.id] || game.color;
 

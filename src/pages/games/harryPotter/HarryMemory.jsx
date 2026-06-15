@@ -386,8 +386,8 @@ const HarryMemory = () => {
                       // Marcar como enviado APENAS após sucesso
                       markEmailExportAsSent(exportKey);
                       setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
-                      try { logAuditEvent({ eventType: 'result_email_send', description: 'E-mail de resultado enviado para Memória dos Bruxos', gameId: 'memoria-bruxos', gameName: 'Memória dos Bruxos' }); } catch (_) {}
-                    } catch (err) {
+                      try { logAuditEvent({ eventType: 'result_email_send', description: 'E-mail de resultado enviado para Memória dos Bruxos', gameId: 'memoria-bruxos', gameName: 'Memória dos Bruxos' }); } catch { /* auditoria opcional */ }
+                    } catch {
                       setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
                     } finally {
                       setIsExporting(false);

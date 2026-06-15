@@ -7,13 +7,11 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  FaArrowLeft, FaRedo, FaTrophy, FaSkullCrossbones,
-  FaChevronLeft, FaChevronRight, FaChevronUp, FaChevronDown, FaShare, FaFileExport
+  FaArrowLeft, FaRedo,
+  FaChevronLeft, FaChevronRight, FaChevronUp, FaChevronDown, FaFileExport
 } from 'react-icons/fa';
-import { GiSpaceship } from 'react-icons/gi';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
-import { exportJsonFile } from '../../../utils/exportResult';
 import { sendGameResultEmail } from '../../../services/emailService';
 import { hasEmailExportBeenSent, markEmailExportAsSent, buildResultKey } from '../../../utils/emailExportControl';
 import { logAuditEvent } from '../../../services/auditService';
@@ -112,12 +110,7 @@ const StarField = () => {
 
 const HyperdriveEscape = ({
   missionStats,
-  starship,
-  pilot,
-  planet,
-  vehicle,
   onBackToBuilder,
-  onPlayAgain,
 }) => {
   // ── Estado para render ──
   const [gameStatus, setGameStatus] = useState(GAME_STATUS.READY);
@@ -149,7 +142,6 @@ const HyperdriveEscape = ({
   const finalLives = ms.finalLives || 3;
   const finalSpeed = ms.finalSpeed || 10;
   const finalAcceleration = ms.finalAcceleration || 0.8;
-  const finalShield = ms.finalShield || 5;
   const shipHitboxSize = ms.shipHitboxSize || 7;
   const crystalValue = ms.crystalValue || 100;
   const collectionRadius = ms.collectionRadius || 30;
@@ -158,7 +150,6 @@ const HyperdriveEscape = ({
   const planetDanger = ms.planetDanger || 1;
   const synergyBonus = ms.synergyBonus || 0;
   const activeEffects = ms.activeEffects || [];
-  const combinationSummary = ms.combinationSummary || {};
   const difficultyLabel = ms.difficultyLabel || 'Fácil';
 
   // Parâmetros de movimento da nave derivados das stats (suavizado)
@@ -546,7 +537,7 @@ const HyperdriveEscape = ({
                   startedAt: new Date().toISOString()
                 }
               });
-            } catch (e) {}
+            } catch { /* auditoria opcional */ }
 
             // Libera a engine
             g.frameId = requestAnimationFrame(tickRef.current);
@@ -805,8 +796,8 @@ const HyperdriveEscape = ({
                   // Marcar como enviado APENAS após sucesso
                   markEmailExportAsSent(exportKey);
                   setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
-                  try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Fuga do Hiperespaço`, gameId: 'fuga-hiperespaco', gameName: 'Fuga do Hiperespaço' }); } catch (_) {}
-                } catch (err) {
+                  try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Fuga do Hiperespaço`, gameId: 'fuga-hiperespaco', gameName: 'Fuga do Hiperespaço' }); } catch { /* auditoria opcional */ }
+                } catch {
                   setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
                 } finally {
                   setIsExporting(false);

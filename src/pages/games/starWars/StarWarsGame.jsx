@@ -23,18 +23,11 @@ import HyperdriveEscape from '../../../components/game/starWars/HyperdriveEscape
 // Ícones
 import {
   FaArrowLeft,
-  FaRocket,
   FaExclamationTriangle,
   FaRedo,
   FaPause,
 } from 'react-icons/fa';
-import {
-  GiSpaceship,
-  GiPerson,
-  GiPlanetCore,
-  GiCartwheel,
-  GiCrossedSwords,
-} from 'react-icons/gi';
+
 
 // CSS
 import '../../../styles/starWars.css';
@@ -53,14 +46,7 @@ const GAME_PHASES = {
 
 // ─── Badges do Hero ─────────────────────────────────────────────────
 
-const HERO_BADGES = [
-  'SWAPI',
-  'Naves',
-  'Pilotos',
-  'Planetas',
-  'Equipamentos',
-  'Missão Dinâmica',
-];
+
 
 // ─── Passos do Builder ──────────────────────────────────────────────
 
@@ -88,13 +74,7 @@ const STEP_LABELS = {
   [BUILDER_STEPS.DIFFICULTY]: 'Dif.',
 };
 
-const STEP_LABELS_FULL = {
-  [BUILDER_STEPS.STARSHIP]: 'Nave',
-  [BUILDER_STEPS.PILOT]: 'Piloto',
-  [BUILDER_STEPS.PLANET]: 'Planeta',
-  [BUILDER_STEPS.EQUIPMENT]: 'Equipamento',
-  [BUILDER_STEPS.DIFFICULTY]: 'Dificuldade',
-};
+
 
 const DIFFICULTY_LABELS = {
   easy: 'Fácil',
@@ -247,12 +227,7 @@ const StarWarsGame = () => {
     }
   };
 
-  const handlePrevStep = () => {
-    if (currentStepIndex > 0) {
-      setActiveBuilderStep(STEP_ORDER[currentStepIndex - 1]);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
+
 
   const handleStepClick = (step) => {
     // Permitir clicar em qualquer step, mas é bom UX só permitir se o anterior estiver preenchido ou se for step anterior

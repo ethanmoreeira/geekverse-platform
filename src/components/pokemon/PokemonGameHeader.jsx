@@ -4,7 +4,7 @@
 // Layout compacto em linha unica quando possivel.
 // O botao de acao "Dica (+Xs)" foi removido — o jogador clica diretamente nos tiles do mosaico.
 
-import { FaClock, FaBullseye, FaExclamationTriangle, FaLightbulb, FaLayerGroup, FaStopwatch } from 'react-icons/fa';
+import { FaBullseye, FaLayerGroup } from 'react-icons/fa';
 import { MAX_HINTS_PER_TARGET } from '../../data/pokemonGameConfig';
 
 const formatTime = (seconds) => {
@@ -21,7 +21,6 @@ const PokemonGameHeader = ({
   elapsedSeconds,
   penaltySeconds,
   mistakes,
-  hintsUsed,
   // Contador de dicas do alvo atual
   currentHintIndex,
 }) => {

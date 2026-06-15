@@ -414,9 +414,7 @@ const MOCK_NAMES = [
   'Kaio', 'Beatriz', 'Gabriel', 'Manuela', 'Rafael',
 ];
 
-function randomItem(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+
 
 function randomBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;

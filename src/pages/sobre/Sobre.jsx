@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { getAuditSessionSummary, resetAuditSessionSummary, logAuditEvent } from '../../services/auditService';
 import { sendContactEmail, sendAuditEmail } from '../../services/emailService';
 import { hasEmailExportBeenSent, markEmailExportAsSent, AUDIT_SESSION_KEY } from '../../utils/emailExportControl';
 import { useAuth } from '../../hooks/useAuth';
-import {
-  FaArrowLeft
-} from 'react-icons/fa';
+
 import './Sobre.css';
 import bgImage from '../../assets/backgrounds/sobre/school_cosmic_purple_sky.png';
 import g8LogoNeon from '../../assets/backgrounds/sobre/g8_logo_neon.png';
@@ -19,7 +17,7 @@ const GAMES = [
 ];
 
 const Sobre = () => {
-  const navigate = useNavigate();
+
 
   const [formData, setFormData] = useState({
     name: '',

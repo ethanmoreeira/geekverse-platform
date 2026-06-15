@@ -15,7 +15,6 @@ import { FaLightbulb } from 'react-icons/fa';
 import {
   MAX_HINTS_PER_TARGET,
   MOSAIC_TOTAL_TILES,
-  MOSAIC_GRID_SIZE,
   HINT_PENALTY_TABLE,
 } from '../../data/pokemonGameConfig';
 

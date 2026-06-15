@@ -104,7 +104,7 @@ export const getPokemonById = async (id) => {
     try {
       const speciesResponse = await apiClient.get(`${POKE_API_BASE}/pokemon-species/${id}`);
       speciesData = speciesResponse.data;
-    } catch (e) {
+    } catch {
       console.warn(`[PokeAPI] Falha ao buscar species ID ${id}`);
     }
 

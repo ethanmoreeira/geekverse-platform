@@ -54,7 +54,6 @@ const ShowDoMultiverso = () => {
 
   const {
     gamePhase,
-    setGamePhase, // Only needed for handleBackToMenu internally, mas vamos expor se precisar
     selectedMode,
     questions,
     currentQuestionIndex,
@@ -518,8 +517,8 @@ const ShowDoMultiverso = () => {
                       // Marcar como enviado APENAS após sucesso
                       markEmailExportAsSent(exportKey);
                       setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
-                      try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Show do Multiverso`, gameId: 'show-multiverso', gameName: 'Show do Multiverso' }); } catch (_) {}
-                    } catch (err) {
+                      try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Show do Multiverso`, gameId: 'show-multiverso', gameName: 'Show do Multiverso' }); } catch { /* auditoria opcional */ }
+                    } catch {
                       setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
                     } finally {
                       setIsExporting(false);
