@@ -1,4 +1,4 @@
-// RankingGameCard.jsx
+
 // Card de jogo na página principal do ranking (/app/ranking).
 // Mostra o universo com design limpo, moderno e imersivo.
 

@@ -1,4 +1,4 @@
-// rickMortyApi.js
+
 // Serviço de integração com a Rick and Morty API.
 // Funções seguras para buscar personagens, episódios e locais.
 // URL base: https://rickandmortyapi.com/api
@@ -7,10 +7,7 @@ const RM_API_BASE = 'https://rickandmortyapi.com/api';
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
-/**
- * Faz fetch e valida response.ok. Retorna JSON.
- * Lança erro amigável em caso de falha.
- */
+// Função de segurança: se a API der erro ou cair, isso avisa o código em vez de explodir a tela
 const safeFetch = async (url, label = 'recurso') => {
   const response = await fetch(url);
   if (!response.ok) {
@@ -21,10 +18,8 @@ const safeFetch = async (url, label = 'recurso') => {
   return response.json();
 };
 
-/**
- * Normaliza a resposta da API para sempre retornar um array.
- * A API retorna objeto único para IDs únicos, ou { results: [] } para buscas.
- */
+// Padronizador: às vezes a API manda um objeto solto, às vezes manda uma lista.
+// Essa função obriga a sempre retornar uma lista (Array) pra facilitar a nossa vida no código.
 const normalizeToArray = (data) => {
   if (Array.isArray(data)) return data;
   if (data && data.results) return data.results;
@@ -34,11 +29,7 @@ const normalizeToArray = (data) => {
 
 // ─── Personagens ────────────────────────────────────────────────────
 
-/**
- * Busca um personagem pelo ID.
- * @param {number} id
- * @returns {Promise<Object>}
- */
+// Passo 1: Busca apenas 1 personagem pelo seu número de ID (ex: 1 é o Rick)
 export const getCharacterById = async (id) => {
   const data = await safeFetch(
     `${RM_API_BASE}/character/${id}`,
@@ -47,11 +38,7 @@ export const getCharacterById = async (id) => {
   return data;
 };
 
-/**
- * Busca múltiplos personagens por IDs.
- * @param {number[]} ids
- * @returns {Promise<Object[]>}
- */
+// Passo 2: Busca vários personagens de uma vez só usando uma lista de IDs
 export const getCharactersByIds = async (ids) => {
   if (!ids || ids.length === 0) return [];
   const data = await safeFetch(
@@ -61,12 +48,8 @@ export const getCharactersByIds = async (ids) => {
   return normalizeToArray(data);
 };
 
-/**
- * Busca personagens por nomes (usa o endpoint de filtro da API).
- * Retorna um array com o primeiro resultado para cada nome.
- * @param {string[]} names
- * @returns {Promise<Array<Object|null>>}
- */
+// Passo 3: Busca personagens pelo Nome.
+// O quiz usa isso para carregar personagens específicos (ex: pegar a foto do 'Evil Morty')
 export const getCharactersByNames = async (names) => {
   if (!names || names.length === 0) return [];
   const results = await Promise.all(
@@ -86,12 +69,8 @@ export const getCharactersByNames = async (names) => {
   return results;
 };
 
-/**
- * Busca personagens aleatórios da API.
- * Usa a página de info para saber o total e então gera IDs aleatórios.
- * @param {number} quantity - Quantidade de personagens desejados.
- * @returns {Promise<Object[]>}
- */
+// Passo 4: Sorteia personagens aleatórios.
+// Primeiro descobre quantos existem no total (hoje são mais de 800), e depois sorteia.
 export const getRandomCharacters = async (quantity) => {
   // Primeiro, descobrir o total de personagens
   const info = await safeFetch(
@@ -113,70 +92,7 @@ export const getRandomCharacters = async (quantity) => {
   return characters.filter((c) => c && c.image);
 };
 
-// ─── Episódios ──────────────────────────────────────────────────────
 
-/**
- * Busca um episódio pelo ID.
- * @param {number} id
- * @returns {Promise<Object>}
- */
-export const getEpisodeById = async (id) => {
-  const data = await safeFetch(
-    `${RM_API_BASE}/episode/${id}`,
-    `episódio #${id}`
-  );
-  return data;
-};
-
-/**
- * Busca um episódio aleatório.
- * @returns {Promise<Object>}
- */
-export const getRandomEpisode = async () => {
-  const info = await safeFetch(`${RM_API_BASE}/episode`, 'lista de episódios');
-  const totalEpisodes = info.info?.count || 51;
-  const randomId = Math.floor(Math.random() * totalEpisodes) + 1;
-  return getEpisodeById(randomId);
-};
-
-// ─── Locais ─────────────────────────────────────────────────────────
-
-/**
- * Busca um local pelo ID.
- * @param {number} id
- * @returns {Promise<Object>}
- */
-export const getLocationById = async (id) => {
-  const data = await safeFetch(
-    `${RM_API_BASE}/location/${id}`,
-    `local #${id}`
-  );
-  return data;
-};
-
-/**
- * Busca um local aleatório.
- * @returns {Promise<Object>}
- */
-export const getRandomLocation = async () => {
-  const info = await safeFetch(`${RM_API_BASE}/location`, 'lista de locais');
-  const totalLocations = info.info?.count || 126;
-  const randomId = Math.floor(Math.random() * totalLocations) + 1;
-  return getLocationById(randomId);
-};
-
-// ─── Helpers de extração de IDs ─────────────────────────────────────
-
-/**
- * Extrai o ID numérico de uma URL da API Rick and Morty.
- * Ex: "https://rickandmortyapi.com/api/character/1" → 1
- */
-export const extractIdFromUrl = (url) => {
-  if (!url) return null;
-  const parts = url.split('/');
-  const id = parseInt(parts[parts.length - 1], 10);
-  return isNaN(id) ? null : id;
-};
 
 // ─── Exports legados (compatibilidade) ──────────────────────────────
 

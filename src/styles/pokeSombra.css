@@ -1,8 +1,8 @@
-/* pokeSombra.css */
+
 /* Estilos do jogo PokeSombra - Cacada visual por silhuetas. */
 /* Prefixo: pks- para evitar conflitos com outros jogos. */
 
-/* ─── PAGE ────────────────────────────────────────────────────────── */
+/* PÁGINA PRINCIPAL */
 .pks-page {
   height: 100%;
   min-height: calc(100vh - 80px);
@@ -140,7 +140,7 @@ body.pks-body-intro-bg .pks-page {
   opacity: 1;
 }
 
-/* ─── INTRO ───────────────────────────────────────────────────────── */
+/* TELA DE INTRODUÇÃO */
 .pks-intro {
   display: flex;
   flex-direction: column;
@@ -210,7 +210,7 @@ body.pks-body-intro-bg .pks-page {
   line-height: 1.6;
 }
 
-/* ─── LEVEL SELECTOR ──────────────────────────────────────────────── */
+/* SELETOR DE DIFICULDADE */
 .pks-level-grid {
   display: flex;
   flex-wrap: wrap;
@@ -365,7 +365,7 @@ body.pks-body-intro-bg .pks-page {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* ─── LOADING ─────────────────────────────────────────────────────── */
+/* TELA DE CARREGAMENTO */
 .pks-loading {
   display: flex;
   flex-direction: column;
@@ -443,7 +443,7 @@ body.pks-body-intro-bg .pks-page {
   }
 }
 
-/* ─── ERROR ───────────────────────────────────────────────────────── */
+/* TELA DE ERRO */
 .pks-error-box {
   display: flex;
   flex-direction: column;
@@ -466,7 +466,7 @@ body.pks-body-intro-bg .pks-page {
   max-width: 400px;
 }
 
-/* ─── ARENA ────────────────────────────────────────────────── */
+/* ARENA DO JOGO */
 .pks-arena {
   padding: 6px 8px 10px;
   width: min(98vw, 1400px);
@@ -475,7 +475,7 @@ body.pks-body-intro-bg .pks-page {
 }
 
 
-/* ─── GAME HEADER ─────────────────────────────────────────────────── */
+/* CABEÇALHO DO JOGO */
 .pks-header {
   background: rgba(30, 8, 12, 0.9);
   border: 1px solid rgba(139, 0, 0, 0.3);
@@ -629,7 +629,7 @@ body.pks-body-intro-bg .pks-page {
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
 }
 
-/* ─── SELECTION ARENA ─────────────────────────────────────── */
+/* ÁREA DE SELEÇÃO */
 /*
   A arena encolhe ao tamanho do conteúdo (width: max-content) e
   fica centralizada via margin: auto. Isso elimina os espaços
@@ -695,7 +695,7 @@ body.pks-body-intro-bg .pks-page {
   width: 100%;
 }
 
-/* ─── SHADOW CARD ────────────────────────────────────────────────── */
+/* CARTÃO DE SILHUETA */
 .pks-shadow-card {
   position: relative;
   width: 72px;
@@ -795,7 +795,7 @@ body.pks-body-intro-bg .pks-page {
   }
 }
 
-/* ─── MOSAIC HINT (ARENA CENTER) ──────────────────────────────────── */
+/* DICA DO MOSAICO (CENTRO DA ARENA) */
 
 /* Wrapper legacy (fallback quando variant nao e passado) */
 .pks-mosaic-hint {
@@ -943,7 +943,7 @@ body.pks-body-intro-bg .pks-page {
       transparent 40%);
 }
 
-/* ─── HINT PANEL WRAPPER & INFO ──────────────────────────────────── */
+/* PAINEL DE DICAS */
 /* Wrapper que agrupa a legenda + o card mosaico */
 .pks-hint-panel-wrapper {
   display: flex;
@@ -1016,7 +1016,7 @@ body.pks-body-intro-bg .pks-page {
   border-top: none;
 }
 
-/* ─── ENHANCED TILE INTERACTIVITY ────────────────────────────────── */
+/* INTERAÇÃO DOS BLOCOS DO MOSAICO */
 /* Bordas mais evidentes nos tiles clicáveis */
 .pks-mosaic-tile-clickable {
   border: 1.5px solid rgba(239, 68, 68, 0.28);
@@ -1120,7 +1120,7 @@ body.pks-body-intro-bg .pks-page {
   cursor: not-allowed;
 }
 
-/* ─── REVEAL PANEL ────────────────────────────────────────────────── */
+/* PAINEL DE REVELAÇÃO */
 .pks-reveal-panel {
   display: flex;
   justify-content: center;
@@ -1424,7 +1424,7 @@ body.pks-body-intro-bg .pks-page {
   transform: translateX(4px);
 }
 
-/* ─── RESULT SCREEN ───────────────────────────────────────────────── */
+/* TELA DE RESULTADO */
 .pks-result-screen {
   display: flex;
   justify-content: center;
@@ -1549,7 +1549,7 @@ body.pks-body-intro-bg .pks-page {
   justify-content: center;
 }
 
-/* ─── BUTTONS ─────────────────────────────────────────────────────── */
+/* BOTÕES GERAIS */
 .pks-btn-primary {
   display: flex;
   align-items: center;
@@ -1593,13 +1593,13 @@ body.pks-body-intro-bg .pks-page {
   border-color: rgba(239, 68, 68, 0.4);
 }
 
-/* ─── JSON BOX (via JsonViewer) ───────────────────────────────────── */
+/* CAIXA JSON (VIA JSON VIEWER) */
 .pks-json-box {
   width: 100%;
   max-width: 680px;
 }
 
-/* ─── RESPONSIVE ──────────────────────────────────────────────────── */
+/* RESPONSIVIDADE (CELULARES) */
 @media (max-width: 768px) {
   .pks-title {
     font-size: 2.2rem;
@@ -1797,7 +1797,7 @@ body.pks-body-intro-bg .pks-page {
   }
 }
 
-/* ─── DESKTOP: MOLDURA COMPACTA ──────────────────────────────────── */
+/* DESKTOP: MOLDURA COMPACTA */
 /*
   Tamanhos de card e colunas fixas por nível.
   Topo e base têm o mesmo número de colunas × largura de card = mesma
@@ -1908,7 +1908,7 @@ body.pks-body-intro-bg .pks-page {
   }
 }
 
-/* ─── ENTRY LOADER ────────────────────────────────────────────────── */
+/* CARREGAMENTO DE ENTRADA */
 .pks-entry-loader {
   position: fixed;
   top: 0;
@@ -1979,7 +1979,7 @@ body.pks-body-intro-bg .pks-page {
   margin-top: 16px;
 }
 
-/* ─── EXIT LOADER ─────────────────────────────────────────────────── */
+/* CARREGAMENTO DE SAÍDA */
 .pks-exit-loader {
   position: fixed;
   top: 0;
@@ -2063,7 +2063,7 @@ body.pks-body-intro-bg .pks-page {
   opacity: 0.85;
 }
 
-/* ─── MUSIC BUTTON ────────────────────────────────────────────────── */
+/* BOTÃO DE MÚSICA */
 .pks-music-btn {
   position: fixed;
   top: 64px;
@@ -2095,9 +2095,9 @@ body.pks-body-intro-bg .pks-page {
   opacity: 1;
 }
 
-/* ============================================ */
+
 /* EXPORT BUTTON — PokeSombra (vermelho)        */
-/* ============================================ */
+
 
 .pokemon-export-button {
   background: linear-gradient(135deg, rgba(220, 38, 38, 0.35), rgba(153, 27, 27, 0.35)) !important;
@@ -2111,9 +2111,9 @@ body.pks-body-intro-bg .pks-page {
   color: #fee2e2 !important;
 }
 
-/* ============================================ */
+
 /* EXPORT EMAIL FEEDBACK                        */
-/* ============================================ */
+
 
 .gv-export-feedback {
   display: block;

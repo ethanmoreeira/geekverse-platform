@@ -1,27 +1,43 @@
-// JsonViewer.jsx
-// Componente para exibir JSON formatado com dados das APIs.
-// Requisito obrigatório do professor para visualização de dados brutos.
-
 import { useState } from 'react';
+import { FaChevronDown, FaChevronRight, FaClipboardList } from 'react-icons/fa';
 
-const JsonViewer = ({ data, title }) => {
+const JsonViewer = ({ data, title, variant = 'global' }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!data) return null;
 
+  // Se for variant="smv" (Multiverso), usamos as classes do Multiverso (smv-*)
+  // Se for "global", usamos as classes globais (gv-*)
+  const isSmv = variant === 'smv';
+  const prefix = isSmv ? 'smv-json' : 'gv-json';
+
   return (
-    <div className="gv-json-viewer">
+    <div className={`${prefix}-viewer`}>
       <button
-        className="gv-json-toggle"
+        className={`${prefix}-toggle`}
         onClick={() => setIsOpen(!isOpen)}
-        id="json-viewer-toggle"
+        type="button"
+        id={`json-viewer-toggle-${prefix}`}
       >
-        <span className="gv-json-toggle-icon">{isOpen ? '▼' : '▶'}</span>
-        <span>{title || '📋 Dados da API (JSON)'}</span>
+        {isSmv ? (
+          <FaClipboardList aria-hidden="true" className="smv-icon" />
+        ) : (
+          <span className={`${prefix}-toggle-icon`}>{isOpen ? '▼' : '▶'}</span>
+        )}
+        
+        <span>{title || ' Dados da API (JSON)'}</span>
+        
+        {isSmv && (
+          isOpen ? (
+            <FaChevronDown className={`${prefix}-toggle-icon`} />
+          ) : (
+            <FaChevronRight className={`${prefix}-toggle-icon`} />
+          )
+        )}
       </button>
       {isOpen && (
-        <div className="gv-json-content">
-          <pre className="gv-json-pre">
+        <div className={`${prefix}-content`}>
+          <pre className={`${prefix}-pre`}>
             {JSON.stringify(data, null, 2)}
           </pre>
         </div>

@@ -1,5 +1,5 @@
-// MemoryBoard.jsx
-// Tabuleiro do jogo da memória (Memória dos Bruxos - Harry Potter).
+
+// Tabuleiro do jogo da memória (Memória dos Bruxos).
 // Renderiza a grade de cartas. Lógica de jogo controlada pelo componente pai.
 
 import MemoryCard from './MemoryCard';

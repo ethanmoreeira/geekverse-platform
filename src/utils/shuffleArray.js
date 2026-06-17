@@ -1,4 +1,4 @@
-// shuffleArray.js
+
 // Utilitário para embaralhar arrays usando algoritmo Fisher-Yates.
 // Usado para embaralhar cartas nos jogos.
 

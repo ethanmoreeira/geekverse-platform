@@ -1,4 +1,4 @@
-// MemoryCard.jsx
+
 // Carta individual do jogo da memória.
 // Contém efeito de flip, imagem do personagem e estado (virada/oculta/encontrada).
 

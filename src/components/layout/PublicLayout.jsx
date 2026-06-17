@@ -1,4 +1,4 @@
-// PublicLayout.jsx
+
 // Layout para páginas públicas (Login, 404).
 // Não inclui navbar principal.
 

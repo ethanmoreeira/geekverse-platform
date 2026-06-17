@@ -1,4 +1,4 @@
-// DifficultySelector.jsx
+
 // Seletor de dificuldade para o jogo Star Wars Fuga do Hiperespaço.
 
 import { DIFFICULTY_CONFIG } from '../../../utils/starWarsMission';

@@ -1,4 +1,4 @@
-// Login.jsx
+
 // Página de login do GeekVerse G8.
 // Identificação acadêmica: Nome + E-mail + Senha padrão G82026.
 // Após login correto, redireciona para /app (Dashboard).
@@ -9,7 +9,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { FaUser, FaLock, FaSignInAlt, FaEnvelope } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
-import { registerAuditEvent } from '../../services/auditService';
+import { logAuditEvent } from '../../services/auditService';
 import loginBg from '../../assets/backgrounds/login/login-page-bg.png';
 import geekverseLogo from '../../assets/backgrounds/dashboard/geekverse_logo_cropped.png';
 import LoginTransitionLoader from '../../components/feedback/LoginTransitionLoader';
@@ -43,12 +43,11 @@ const Login = () => {
     if (result.success) {
       // Registrar evento de auditoria
       try {
-        registerAuditEvent(
-          'login_realizado',
-          '/login',
-          nome.trim(),
-          `E-mail: ${email.trim()}`
-        );
+        logAuditEvent({
+          eventType: 'login',
+          description: 'Login realizado com sucesso',
+          path: '/login'
+        });
       } catch (err) {
         // Auditoria não deve impedir o login
         console.warn('Auditoria: erro ao registrar login', err);

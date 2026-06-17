@@ -1,4 +1,4 @@
-// PilotCard.jsx
+
 // Card de piloto para a tela de montagem da missão Star Wars.
 // Exibe dados normalizados da SWAPI com espaço reservado para imagem.
 

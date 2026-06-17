@@ -1,4 +1,4 @@
-// pokeApi.js
+
 // Servico de integracao com a PokeAPI.
 // Busca Pokemon com dados reais: tipos, stats, habilidades, sprites.
 // URL base: https://pokeapi.co/api/v2
@@ -9,11 +9,7 @@ import apiClient from '../apiClient';
 const POKE_API_BASE = 'https://pokeapi.co/api/v2';
 const CACHE_PREFIX = 'pokemon_cache_';
 
-/**
- * Le cache do sessionStorage.
- * @param {number} id - ID do Pokemon.
- * @returns {Object|null} Dados do cache ou null.
- */
+// Passo 1: Lê o Pokémon que já foi baixado na memória do navegador
 const readCache = (id) => {
   try {
     const cached = sessionStorage.getItem(`${CACHE_PREFIX}${id}`);
@@ -26,11 +22,7 @@ const readCache = (id) => {
   return null;
 };
 
-/**
- * Salva dados no cache do sessionStorage.
- * @param {number} id - ID do Pokemon.
- * @param {Object} data - Dados normalizados.
- */
+// Passo 2: Salva um Pokémon que acabou de ser baixado na memória do navegador
 const writeCache = (id, data) => {
   try {
     sessionStorage.setItem(`${CACHE_PREFIX}${id}`, JSON.stringify(data));
@@ -39,12 +31,7 @@ const writeCache = (id, data) => {
   }
 };
 
-/**
- * Formata o nome do Pokemon para exibicao.
- * Primeira letra maiuscula, hifens substituidos por espacos.
- * @param {string} name - Nome bruto da API.
- * @returns {string} Nome formatado.
- */
+// Passo 3: Limpa o nome do Pokémon (ex: "bulbasaur" vira "Bulbasaur")
 const formatPokemonName = (name) => {
   if (!name) return '';
   return name
@@ -53,11 +40,8 @@ const formatPokemonName = (name) => {
     .join(' ');
 };
 
-/**
- * Normaliza os dados brutos de um Pokemon da API.
- * @param {Object} raw - Resposta bruta da PokeAPI.
- * @returns {Object} Pokemon normalizado.
- */
+// Passo 4: A API do Pokémon vem com muita lixeira.
+// Essa função limpa o arquivo gigante e deixa só o que a gente precisa: ID, Nome, Imagem, Status, etc.
 export const normalizePokemon = (raw, species = null) => {
   const officialArtwork =
     raw.sprites?.other?.['official-artwork']?.front_default || null;
@@ -85,11 +69,7 @@ export const normalizePokemon = (raw, species = null) => {
   };
 };
 
-/**
- * Busca um Pokemon por ID, com cache.
- * @param {number} id - ID do Pokemon.
- * @returns {Promise<Object|null>} Pokemon normalizado ou null em caso de erro.
- */
+// Passo 5: Tenta achar o Pokémon no Cache. Se não achar, bate na PokeAPI para baixar os dados dele.
 export const getPokemonById = async (id) => {
   // Verificar cache primeiro
   const cached = readCache(id);
@@ -117,12 +97,7 @@ export const getPokemonById = async (id) => {
   }
 };
 
-/**
- * Gera IDs aleatorios unicos dentro de um intervalo.
- * @param {number} count - Quantidade de IDs.
- * @param {number} maxId - ID maximo (inclusive).
- * @returns {number[]} Array de IDs unicos.
- */
+// Passo 6: Cria uma lista de números sorteados sem repetir (IDs dos Pokémons)
 const generateRandomIds = (count, maxId) => {
   const ids = new Set();
   const safeCount = Math.min(count, maxId);
@@ -133,14 +108,8 @@ const generateRandomIds = (count, maxId) => {
   return Array.from(ids);
 };
 
-/**
- * Busca um lote de Pokemon por IDs aleatorios.
- * Se alguma requisicao individual falhar, tenta substituir por outro ID.
- * @param {Object} params
- * @param {number} params.count - Quantidade desejada de Pokemon.
- * @param {number} params.maxPokemonId - ID maximo para sorteio.
- * @returns {Promise<Object>} Resultado com pokemon e metadados.
- */
+// Função Principal: É a que o jogo PokeSombra chama de verdade.
+// Ela baixa os Pokémons em lote e tem um truque: se um ID der erro na API, ela sorteia outro para não quebrar o jogo!
 export const getPokemonBatchByRandomIds = async ({ count, maxPokemonId }) => {
   const ids = generateRandomIds(count, maxPokemonId);
   const usedIds = new Set(ids);

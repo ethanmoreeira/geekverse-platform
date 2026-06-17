@@ -1,17 +1,26 @@
-// Ranking.jsx — RankingHome
-// Página principal do Ranking: Hall dos Campeões GeekVerse.
-// Rota: /app/ranking
-// Mostra 4 cards, um para cada jogo oficial.
-// Dados reais são salvos pelos jogos via rankingService.saveResult().
 
+// Página principal do Ranking (Hall dos Campeões).
+// Aqui eu mostro os 4 jogos principais para o usuário escolher de qual ele quer ver o placar.
+
+import { useEffect } from 'react';
 import RankingGameCard from '../../components/ranking/RankingGameCard';
 import titleImg from '../../assets/backgrounds/ranking/ranking-title-banner.png';
 import bgImg from '../../assets/backgrounds/ranking/geekverse_g8_multiverse_dashboard.png';
 import { RANKING_GAMES } from '../../services/rankingService';
+import { logPageViewOnce } from '../../services/auditService';
 import '../../styles/ranking.css';
 
 const Ranking = () => {
   const games = Object.values(RANKING_GAMES);
+
+  // Salva no banco de dados (auditoria) que o usuário abriu o Ranking Principal
+  useEffect(() => {
+    logPageViewOnce({
+      description: 'Acessou a página Ranking',
+      path: '/app/ranking',
+      metadata: { page: 'Ranking' }
+    });
+  }, []);
 
   return (
     <>

@@ -1,12 +1,11 @@
-/* ============================================ */
+
 /* GeekVerse G8 — App.css                       */
 /* Estilos completos do sistema arcade geek.    */
-/* ============================================ */
 
-/* ---- Google Font ---- */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* ---- CSS Variables ---- */
+
 :root {
   --gv-bg-primary: #0f0f1a;
   --gv-bg-secondary: #161625;
@@ -34,7 +33,7 @@
   --gv-transition: 0.2s ease;
 }
 
-/* ---- Reset ---- */
+
 *,
 *::before,
 *::after {
@@ -43,10 +42,10 @@
   padding: 0;
 }
 
-/* ---- Global Scrollbar — oculta / invisível ---- */
+
 * {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Compatibilidade: Firefox */
+  -ms-overflow-style: none; /* Compatibilidade: Internet Explorer e Edge */
 }
 
 *::-webkit-scrollbar {
@@ -73,7 +72,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Fullscreen mode — block horizontal scroll, allow vertical */
+/* Modo Tela Cheia — Bloqueia rolagem lateral, permite vertical */
 :fullscreen {
   overflow-x: hidden;
   overflow-y: auto;
@@ -97,9 +96,7 @@ body {
   flex-direction: column;
 }
 
-/* ============================================ */
-/* NAVBAR                                       */
-/* ============================================ */
+/* BARRA DE NAVEGAÇÃO SUPERIOR */
 
 .gv-navbar {
   background: transparent;
@@ -129,14 +126,6 @@ body {
   font-weight: 700;
   font-size: 18px;
   flex-shrink: 0;
-}
-
-
-.gv-navbar-brand-icon {
-  height: 26px;
-  width: auto;
-  object-fit: contain;
-  mix-blend-mode: screen;
 }
 
 .gv-navbar-links {
@@ -175,32 +164,6 @@ body {
   flex-shrink: 0;
 }
 
-.gv-navbar-username {
-  font-size: 13px;
-  color: var(--gv-text-muted);
-}
-
-.gv-btn-fullscreen {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  background: transparent;
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius-xs);
-  color: var(--gv-text-secondary);
-  font-size: 13px;
-  font-family: var(--gv-font);
-  cursor: pointer;
-  transition: all var(--gv-transition);
-}
-
-.gv-btn-fullscreen:hover {
-  border-color: var(--gv-accent);
-  color: var(--gv-accent);
-  background: var(--gv-accent-glow);
-}
-
 .gv-btn-logout {
   display: flex;
   align-items: center;
@@ -223,9 +186,7 @@ body {
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
 }
 
-/* ============================================ */
-/* PROTECTED LAYOUT                             */
-/* ============================================ */
+/* LAYOUT PROTEGIDO (Telas pós-login) */
 
 .gv-protected-layout {
   display: flex;
@@ -249,19 +210,12 @@ body {
 
 /* Os containers internos (Dashboard, Jogos, etc) definem sua largura máxima se necessário */
 .gv-dashboard,
-.gv-page-container {
-  width: 100%;
-  max-width: 1200px;
-  /* Mantém o conteúdo centralizado e responsivo */
-}
 
 .gv-public-layout {
   min-height: 100vh;
 }
 
-/* ============================================ */
-/* LOGIN PAGE                                   */
-/* ============================================ */
+/* PÁGINA DE LOGIN */
 
 .gv-login-page {
   min-height: 100vh;
@@ -294,16 +248,16 @@ body {
 /* Card de login: glassmorphism escuro com boa legibilidade */
 .gv-login-container {
   width: 100%;
-  max-width: 280px; /* Reduced from 320px */
+  max-width: 280px; /* Tamanho ajustado (reduzido) */
   position: relative;
   z-index: 2;
-  margin-top: 64px; /* Push down to align with background arena */
-  background: rgba(8, 12, 28, 0.15); /* Slightly less opaque */
-  backdrop-filter: blur(2px) saturate(1.1); /* Very subtle blur */
+  margin-top: 64px; /* Empurra o card para alinhar com o fundo da arena */
+  background: rgba(8, 12, 28, 0.15); /* Levemente mais transparente */
+  backdrop-filter: blur(2px) saturate(1.1); /* Desfoque super sutil no fundo de vidro */
   -webkit-backdrop-filter: blur(2px) saturate(1.1);
   border: 1px solid rgba(0, 220, 255, 0.18);
   border-radius: 18px;
-  padding: 6px 16px 6px; /* Reduced vertical padding further */
+  padding: 6px 16px 6px; /* Espaçamento vertical reduzido */
   box-shadow:
     0 0 28px rgba(0, 220, 255, 0.16),
     0 18px 50px rgba(0, 0, 0, 0.45);
@@ -349,7 +303,7 @@ body {
   margin-bottom: 6px;
 }
 
-/* Logo wrapper */
+/* Container do Logotipo */
 .gv-login-logo-wrapper {
   display: flex;
   justify-content: center;
@@ -357,12 +311,12 @@ body {
   margin-bottom: 8px;
 }
 
-/* Logo image — mix-blend-mode: screen removes the black background */
+/* Imagem do Logo — Remove fundo preto da imagem usando mix-blend-mode */
 .gv-login-logo {
   display: block;
-  width: min(315px, 93%); /* Increased slightly */
+  width: min(315px, 93%); /* Tamanho levemente aumentado */
   height: auto;
-  max-height: 74px; /* Increased slightly */
+  max-height: 74px; /* Tamanho levemente aumentado */
   object-fit: contain;
   mix-blend-mode: screen;
   filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.25));
@@ -370,7 +324,7 @@ body {
 
 .gv-login-subtitle {
   font-size: 12px;
-  color: rgba(180, 225, 255, 0.95); /* Light blue tone */
+  color: rgba(180, 225, 255, 0.95); /* Tom azul claro (Light blue) */
   letter-spacing: 0.3px;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   font-weight: 400;
@@ -402,7 +356,7 @@ body {
   position: absolute;
   left: 14px;
   bottom: 5px;
-  color: rgba(0, 220, 255, 0.78); /* Increased contrast */
+  color: rgba(0, 220, 255, 0.78); /* Contraste aumentado para facilitar a leitura */
   font-size: 14px;
   z-index: 1;
   transition: color var(--gv-transition);
@@ -415,10 +369,10 @@ body {
 .gv-input-group input {
   width: 100%;
   padding: 4px 14px 4px 38px;
-  background: rgba(8, 12, 28, 0.76); /* Darker and more legible */
+  background: rgba(8, 12, 28, 0.76); /* Escurecido para melhor legibilidade */
   border: 1px solid rgba(0, 220, 255, 0.22);
   border-radius: var(--gv-radius-sm);
-  color: rgba(245, 248, 255, 0.96); /* Higher contrast */
+  color: rgba(245, 248, 255, 0.96); /* Contraste mais alto */
   font-size: 14px;
   line-height: 1;
   font-family: var(--gv-font);
@@ -433,7 +387,7 @@ body {
 }
 
 .gv-input-group input::placeholder {
-  color: rgba(220, 230, 255, 0.58); /* Increased contrast */
+  color: rgba(220, 230, 255, 0.58); /* Contraste aumentado para facilitar a leitura */
   font-weight: 300;
 }
 
@@ -481,7 +435,7 @@ body {
   background: linear-gradient(135deg, #00b8d4 0%, #0097a7 50%, #00838f 100%);
   border: 1px solid rgba(0, 212, 255, 0.2);
   border-radius: var(--gv-radius-sm);
-  color: #e0fcfd; /* Light blue tone instead of pure white */
+  color: #e0fcfd; /* Azul claro suave ao invés de branco puro */
   font-size: 13px;
   font-weight: 600;
   font-family: var(--gv-font);
@@ -522,7 +476,7 @@ body {
   cursor: not-allowed;
 }
 
-/* Hint area below the form */
+/* Área de dicas/avisos abaixo do formulário */
 .gv-login-hint {
   text-align: center;
   margin-top: 10px;
@@ -532,28 +486,12 @@ body {
 
 .gv-login-hint p {
   font-size: 11px;
-  color: rgba(230, 240, 255, 0.76); /* Improved readability */
+  color: rgba(230, 240, 255, 0.76); /* Legibilidade aprimorada */
   line-height: 1.5;
   margin: 0;
 }
 
-
-
-.gv-login-footer {
-  text-align: center;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--gv-border);
-}
-
-.gv-login-footer p {
-  font-size: 12px;
-  color: var(--gv-text-muted);
-}
-
-/* ============================================ */
-/* DASHBOARD                                    */
-/* ============================================ */
+/* TELA INICIAL (DASHBOARD) */
 
 .gv-dashboard {
   display: flex;
@@ -577,61 +515,20 @@ body {
   mix-blend-mode: screen;
 }
 
-.gv-dashboard-title {
-  font-size: 36px;
-  font-weight: 800;
-  background: linear-gradient(90deg, #00ffff 0%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-  margin-top: 0;
-  margin-bottom: 6px;
-  letter-spacing: -0.5px;
-}
-
 .gv-dashboard-subtitle {
   font-size: 15px;
   color: var(--gv-text-secondary);
   margin-bottom: 16px;
 }
 
-.gv-tech-badges {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.gv-tech-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  background: var(--gv-bg-card);
-  border: 1px solid var(--gv-border);
-  border-radius: 20px;
-  font-size: 12px;
-  color: var(--gv-text-secondary);
-}
-
-/* Section */
+/* Seções de conteúdo */
 .gv-section {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.gv-section-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--gv-text-primary);
-}
-
-/* Game Cards Grid */
+/* Grade de Cartões dos Jogos */
 .gv-games-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -663,17 +560,6 @@ body {
   outline-offset: 2px;
 }
 
-.gv-game-card-icon-wrapper {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--gv-radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  flex-shrink: 0;
-}
-
 .gv-game-card-body {
   display: flex;
   flex-direction: column;
@@ -699,31 +585,7 @@ body {
   color: var(--gv-accent);
 }
 
-.gv-game-card-desc {
-  font-size: 13px;
-  color: var(--gv-text-secondary);
-  line-height: 1.5;
-  margin-top: 4px;
-}
-
-.gv-game-card-footer {
-  display: flex;
-  align-items: center;
-}
-
-/* Status Badge */
-.gv-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  background: rgba(245, 158, 11, 0.12);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
+/* Selos de Status (Online/Offline) */
 
 .gv-status-badge.gv-status-ok {
   background: rgba(34, 197, 94, 0.12);
@@ -737,157 +599,9 @@ body {
   border-color: rgba(245, 158, 11, 0.2);
 }
 
-/* Quick Links */
-.gv-quick-links {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
+/* Links Rápidos (Atalhos) */
 
-.gv-quick-link-card {
-  background: var(--gv-bg-card);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius);
-  padding: 18px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-  transition: all var(--gv-transition);
-}
-
-.gv-quick-link-card:hover {
-  background: var(--gv-bg-card-hover);
-  border-color: var(--gv-border-light);
-  transform: translateY(-1px);
-}
-
-.gv-quick-link-icon {
-  font-size: 24px;
-  flex-shrink: 0;
-}
-
-.gv-quick-link-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gv-text-primary);
-  margin-bottom: 2px;
-}
-
-.gv-quick-link-desc {
-  font-size: 12px;
-  color: var(--gv-text-muted);
-}
-
-/* ============================================ */
-/* GAME PLACEHOLDER PAGES                       */
-/* ============================================ */
-
-.gv-game-placeholder {
-  display: flex;
-  justify-content: center;
-  padding: 20px 0;
-}
-
-.gv-placeholder-card {
-  width: 100%;
-  max-width: 600px;
-  background: var(--gv-bg-card);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius);
-  padding: 36px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  text-align: center;
-}
-
-.gv-placeholder-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--gv-radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-}
-
-.gv-placeholder-title {
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--gv-text-primary);
-}
-
-.gv-placeholder-api {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gv-accent);
-}
-
-.gv-placeholder-desc {
-  font-size: 14px;
-  color: var(--gv-text-secondary);
-  max-width: 460px;
-  line-height: 1.6;
-}
-
-.gv-placeholder-mechanics {
-  width: 100%;
-  text-align: left;
-  background: var(--gv-bg-input);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius-sm);
-  padding: 18px;
-}
-
-.gv-placeholder-mechanics h3 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gv-text-primary);
-  margin-bottom: 8px;
-}
-
-.gv-placeholder-mechanics p {
-  font-size: 13px;
-  color: var(--gv-text-secondary);
-  line-height: 1.6;
-}
-
-.gv-placeholder-status {
-  margin: 4px 0;
-}
-
-.gv-placeholder-json {
-  width: 100%;
-  text-align: left;
-}
-
-.gv-placeholder-json h4 {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gv-text-muted);
-  margin-bottom: 8px;
-}
-
-.gv-json-preview {
-  background: var(--gv-bg-input);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius-sm);
-  padding: 16px;
-  font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 12px;
-  color: var(--gv-success);
-  overflow-x: auto;
-  white-space: pre;
-  line-height: 1.5;
-}
+/* PÁGINAS DE ESPERA DOS JOGOS */
 
 .gv-btn-back {
   display: inline-flex;
@@ -912,141 +626,11 @@ body {
   background: var(--gv-accent-glow);
 }
 
-/* ============================================ */
-/* NOT FOUND (404)                              */
-/* ============================================ */
+/* PÁGINA NÃO ENCONTRADA (ERRO 404) */
 
-.gv-not-found {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: var(--gv-bg-primary);
-}
+/* CONTAINERS DAS PÁGINAS (Ranking, Exportar, Sobre) */
 
-.gv-not-found-content {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.gv-not-found-icon {
-  font-size: 48px;
-  color: var(--gv-warning);
-}
-
-.gv-not-found-code {
-  font-size: 72px;
-  font-weight: 800;
-  color: var(--gv-text-primary);
-  line-height: 1;
-}
-
-.gv-not-found-title {
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--gv-text-primary);
-}
-
-
-.gv-not-found-desc {
-  font-size: 14px;
-  color: var(--gv-text-secondary);
-  margin-bottom: 8px;
-}
-
-/* ============================================ */
-/* PAGE CONTAINERS (Ranking, Exportar, Sobre)   */
-/* ============================================ */
-
-.gv-page-container {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.gv-page-header {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.gv-page-title {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--gv-text-primary);
-}
-
-.gv-page-subtitle {
-  font-size: 14px;
-  color: var(--gv-text-secondary);
-  max-width: 520px;
-  line-height: 1.6;
-}
-
-.gv-page-actions {
-  display: flex;
-  justify-content: center;
-  padding-top: 8px;
-}
-
-.gv-info-chips {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.gv-info-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  background: var(--gv-bg-card);
-  border: 1px solid var(--gv-border);
-  border-radius: 20px;
-  font-size: 12px;
-  color: var(--gv-text-secondary);
-}
-
-/* ============================================ */
-/* TABS (Ranking)                               */
-/* ============================================ */
-
-.gv-tabs {
-  display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: thin;
-}
-
-.gv-tab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: transparent;
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius-xs);
-  color: var(--gv-text-secondary);
-  font-size: 13px;
-  font-family: var(--gv-font);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all var(--gv-transition);
-}
-
-.gv-tab:hover {
-  background: var(--gv-bg-card);
-  color: var(--gv-text-primary);
-}
+/* ABAS DE NAVEGAÇÃO (Ranking) */
 
 .gv-tab.active {
   background: var(--gv-accent-glow);
@@ -1054,291 +638,21 @@ body {
   color: var(--gv-accent);
 }
 
-.gv-tab-label {
-  font-weight: 500;
-}
+/* Conteúdo Principal do Ranking */
 
-/* Ranking Content */
-.gv-ranking-content {
-  min-height: 200px;
-}
-
-.gv-empty-ranking {
-  text-align: center;
-  padding: 40px 20px;
-  background: var(--gv-bg-card);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.gv-empty-icon {
-  font-size: 36px;
-  color: var(--gv-text-muted);
-}
-
-.gv-empty-ranking h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--gv-text-primary);
-}
-
-.gv-empty-ranking p {
-  font-size: 13px;
-  color: var(--gv-text-secondary);
-  max-width: 400px;
-}
-
-/* ============================================ */
-/* EXPORT (Exportar)                            */
-/* ============================================ */
-
-.gv-export-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.gv-export-option {
-  background: var(--gv-bg-card);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius);
-  padding: 22px;
-  cursor: pointer;
-  transition: all var(--gv-transition);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.gv-export-option:hover {
-  background: var(--gv-bg-card-hover);
-  border-color: var(--gv-border-light);
-}
+/* TELA DE EXPORTAÇÃO DE RESULTADOS */
 
 .gv-export-option.selected {
   border-color: var(--gv-accent);
   background: var(--gv-accent-glow);
 }
 
-.gv-export-option-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--gv-radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-}
+/* TELA SOBRE A G8 */
 
-.gv-export-option-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--gv-text-primary);
-}
+/* FORMULÁRIO DE CONTATO */
 
-.gv-export-option-desc {
-  font-size: 12px;
-  color: var(--gv-text-secondary);
-  line-height: 1.5;
-}
+/* COMPORTAMENTO DO MENU EM TELA CHEIA */
 
-.gv-export-action-area {
-  background: var(--gv-bg-card);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius);
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.gv-export-selected-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--gv-text-secondary);
-}
-
-.gv-export-status {
-  display: flex;
-  justify-content: center;
-}
-
-/* ============================================ */
-/* ABOUT (Sobre)                                */
-/* ============================================ */
-
-.gv-about-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.gv-about-section-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--gv-text-primary);
-}
-
-.gv-about-card {
-  background: var(--gv-bg-card);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius);
-  padding: 20px;
-}
-
-.gv-about-card p {
-  font-size: 14px;
-  color: var(--gv-text-secondary);
-  line-height: 1.7;
-  margin-bottom: 4px;
-}
-
-.gv-about-card p:last-child {
-  margin-bottom: 0;
-}
-
-.gv-about-card strong {
-  color: var(--gv-text-primary);
-}
-
-.gv-about-apis-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.gv-about-api-card {
-  background: var(--gv-bg-card);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius-sm);
-  padding: 16px;
-}
-
-.gv-about-api-card h4 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gv-text-primary);
-  margin-bottom: 4px;
-}
-
-.gv-about-api-game {
-  font-size: 12px;
-  color: var(--gv-text-secondary);
-  margin-bottom: 6px;
-}
-
-.gv-about-api-link {
-  font-size: 11px;
-  color: var(--gv-accent);
-  word-break: break-all;
-}
-
-.gv-about-api-link:hover {
-  text-decoration: underline;
-}
-
-.gv-about-techs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.gv-about-contact-info {
-  font-size: 13px;
-  color: var(--gv-text-secondary);
-  margin-bottom: 16px;
-}
-
-/* ============================================ */
-/* CONTACT FORM                                 */
-/* ============================================ */
-
-.gv-contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.gv-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.gv-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.gv-form-group label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gv-text-secondary);
-}
-
-.gv-form-group input,
-.gv-form-group textarea {
-  padding: 10px 14px;
-  background: var(--gv-bg-input);
-  border: 1px solid var(--gv-border);
-  border-radius: var(--gv-radius-sm);
-  color: var(--gv-text-primary);
-  font-size: 14px;
-  font-family: var(--gv-font);
-  outline: none;
-  transition: border-color var(--gv-transition);
-  resize: vertical;
-}
-
-.gv-form-group input:focus,
-.gv-form-group textarea:focus {
-  border-color: var(--gv-accent);
-  box-shadow: 0 0 0 3px var(--gv-accent-glow);
-}
-
-.gv-form-group input::placeholder,
-.gv-form-group textarea::placeholder {
-  color: var(--gv-text-muted);
-}
-
-.gv-btn-submit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 11px 24px;
-  background: var(--gv-accent);
-  border: none;
-  border-radius: var(--gv-radius-sm);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: var(--gv-font);
-  cursor: pointer;
-  transition: background var(--gv-transition);
-  align-self: flex-start;
-}
-
-.gv-btn-submit:hover {
-  background: var(--gv-accent-hover);
-}
-
-/* ============================================ */
-/* FULLSCREEN NAVBAR BEHAVIOR                   */
-/* ============================================ */
 body.fullscreen-active .gv-navbar {
   transform: translateY(-100%);
   transition: transform 0.25s ease, opacity 0.25s ease;
@@ -1361,24 +675,10 @@ body.fullscreen-active .gv-navbar:focus-within {
   opacity: 1;
 }
 
-/* ============================================ */
-/* RESPONSIVE                                   */
-/* ============================================ */
+/* RESPONSIVIDADE (CELULARES E TABLETS) */
 
 @media (max-width: 1024px) {
   .gv-games-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .gv-quick-links {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .gv-export-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .gv-about-apis-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1386,21 +686,10 @@ body.fullscreen-active .gv-navbar:focus-within {
     display: none;
   }
 
-  .gv-navbar-username {
-    display: none;
-  }
-
   .gv-btn-logout span {
     display: none;
   }
 
-  .gv-btn-fullscreen span {
-    display: none;
-  }
-
-  .gv-dashboard-title {
-    font-size: 28px;
-  }
 }
 
 @media (max-width: 640px) {
@@ -1412,22 +701,6 @@ body.fullscreen-active .gv-navbar:focus-within {
     grid-template-columns: 1fr;
   }
 
-  .gv-quick-links {
-    grid-template-columns: 1fr;
-  }
-
-  .gv-export-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .gv-about-apis-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .gv-form-row {
-    grid-template-columns: 1fr;
-  }
-
   .gv-main-content {
     padding: 20px 16px 40px;
   }
@@ -1436,32 +709,8 @@ body.fullscreen-active .gv-navbar:focus-within {
     padding: 0 16px;
   }
 
-  .gv-dashboard-title {
-    font-size: 24px;
-  }
-
-  .gv-dashboard-header-icon {
-    font-size: 32px;
-  }
-
   .gv-login-container {
     padding: 28px 20px;
   }
 
-  .gv-placeholder-card {
-    padding: 24px 18px;
-  }
-
-  .gv-tabs {
-    gap: 6px;
-  }
-
-  .gv-tab {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
-  .gv-tab-label {
-    display: none;
-  }
 }

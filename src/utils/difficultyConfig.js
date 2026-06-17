@@ -1,4 +1,4 @@
-// difficultyConfig.js
+
 // Configuração de dificuldades dos jogos.
 // Define número de cartas, pares e tempo por nível de dificuldade.
 

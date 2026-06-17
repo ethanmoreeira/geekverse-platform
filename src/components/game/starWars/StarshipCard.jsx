@@ -1,4 +1,4 @@
-// StarshipCard.jsx
+
 // Card de nave para a tela de montagem da missão Star Wars.
 // Exibe dados normalizados da SWAPI com espaço reservado para imagem.
 

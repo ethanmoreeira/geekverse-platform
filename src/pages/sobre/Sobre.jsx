@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { getAuditSessionSummary, resetAuditSessionSummary, logAuditEvent } from '../../services/auditService';
+import { getAuditSessionSummary, resetAuditSessionSummary, logAuditEvent, logPageViewOnce, getAuditSessionTimelineText } from '../../services/auditService';
 import { sendContactEmail, sendAuditEmail } from '../../services/emailService';
 import { hasEmailExportBeenSent, markEmailExportAsSent, AUDIT_SESSION_KEY } from '../../utils/emailExportControl';
 import { useAuth } from '../../hooks/useAuth';
@@ -51,6 +51,8 @@ const Sobre = () => {
       const result = await sendContactEmail(formData);
       setContactFeedback({ type: 'success', text: result.message });
       setFormData({ name: '', email: '', subject: '', message: '' });
+      // Anota no banco de dados que a mensagem de contato foi enviada com sucesso
+      try { logAuditEvent({ eventType: 'contact_sent', description: 'Enviou formulário de contato', path: '/app/sobre', metadata: { page: 'Sobre', feature: 'contact_form' } }); } catch { /* auditoria opcional */ }
     } catch (error) {
       setContactFeedback({ type: 'error', text: error.message || 'Erro ao enviar mensagem.' });
     } finally {
@@ -69,6 +71,15 @@ const Sobre = () => {
     fetchAuditSummary();
   }, []);
 
+  // Anota no banco de dados que o usuário visitou a página Sobre
+  useEffect(() => {
+    logPageViewOnce({
+      description: 'Acessou a página Sobre',
+      path: '/app/sobre',
+      metadata: { page: 'Sobre' }
+    });
+  }, []);
+
   const handleClearAuditSession = () => {
     resetAuditSessionSummary();
     fetchAuditSummary();
@@ -81,7 +92,7 @@ const Sobre = () => {
   const handleAuditEmailSend = async () => {
     if (isSendingAudit) return;
 
-    // Guard: bloquear reenvio da auditoria na mesma sessão
+    // Evita que a pessoa envie o email de auditoria duas vezes na mesma sessão
     if (hasEmailExportBeenSent(AUDIT_SESSION_KEY)) {
       setAuditFeedback({ type: 'warn', text: 'A auditoria desta sessão já foi enviada.' });
       setTimeout(() => setAuditFeedback(null), 5000);
@@ -105,6 +116,7 @@ const Sobre = () => {
         game_finishes: freshSummary.gameFinishes ?? 0,
         result_exports: freshSummary.resultExports ?? 0,
         summary: 'Este relatório apresenta um resumo da sessão atual do usuário na aplicação GeekVerse G8, incluindo acessos aos jogos, partidas iniciadas, partidas finalizadas e exportações realizadas.',
+        audit_details: getAuditSessionTimelineText(),
         generated_at: new Date().toLocaleString('pt-BR', {
           dateStyle: 'long',
           timeStyle: 'medium',
@@ -116,7 +128,7 @@ const Sobre = () => {
       markEmailExportAsSent(AUDIT_SESSION_KEY);
       setAuditFeedback({ type: 'success', text: result.message });
 
-      // Registrar auditoria (sem quebrar o fluxo principal)
+      // Registrar no banco de dados que o email foi enviado
       try {
         await logAuditEvent({
           eventType: 'audit_email_send',
@@ -234,7 +246,6 @@ const Sobre = () => {
               <div className="about-members-list">
                 <strong>Integrantes:</strong>
                 <ul>
-                  <li>Gabriel Fagundes Motta</li>
                   <li>Ítalo Dias Moreira Campos</li>
                   <li>Julyanne Lauriano Genevain</li>
                   <li>Rakel Garcia da Silva</li>

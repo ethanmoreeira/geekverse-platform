@@ -1,16 +1,27 @@
-// NotFound.jsx
-// Página 404 do GeekVerse G8.
-// Exibe imagem de fundo do multiverso e botões para voltar.
 
+// Tela de "Página Não Encontrada" (Famoso Erro 404).
+// Aparece quando o usuário digita um link que não existe no nosso site.
+
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaHome, FaSignInAlt } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
+import { logPageViewOnce } from '../../services/auditService';
 import bgImage from '../../assets/backgrounds/errors/404_multiverse_error.png';
 import './NotFound.css';
 
 const NotFound = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+
+  // Anota no banco de dados que alguém tentou acessar uma página que não existe
+  useEffect(() => {
+    logPageViewOnce({
+      description: 'Acessou uma rota inválida (404)',
+      path: window.location.pathname,
+      metadata: { page: 'NotFound' }
+    });
+  }, []);
 
   const handleDashboard = () => {
     navigate('/app', { replace: true });
@@ -39,11 +50,6 @@ const NotFound = () => {
             </button>
           ) : (
             <button className="notfound-btn notfound-btn-primary" onClick={handleLogin}>
-              <FaSignInAlt /> Ir para o Login
-            </button>
-          )}
-          {isAuthenticated && (
-            <button className="notfound-btn notfound-btn-secondary" onClick={handleLogin}>
               <FaSignInAlt /> Ir para o Login
             </button>
           )}

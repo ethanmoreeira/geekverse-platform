@@ -1,4 +1,4 @@
-// harryPotterApi.js
+
 // Serviço de integração com a Harry Potter API.
 // Busca personagens com imagem e nome para o jogo Memória dos Bruxos.
 // URL base: https://hp-api.onrender.com/api
@@ -45,10 +45,8 @@ const PRIORITY_CHARACTERS = [
   'Hedwig',
 ];
 
-/**
- * Busca todos os personagens da Harry Potter API.
- * @returns {Promise<Array>} Lista completa de personagens.
- */
+// Passo 1: Busca todos os personagens da API.
+// Aqui eu também salvo no Cache (memória do navegador) pra não travar se o jogador der reload.
 export const fetchAllCharacters = async () => {
   // Tentar cache primeiro
   try {
@@ -76,25 +74,16 @@ export const fetchAllCharacters = async () => {
   return data;
 };
 
-/**
- * Filtra personagens que possuem nome e imagem válidos.
- * @param {Array} characters - Lista completa de personagens.
- * @returns {Array} Personagens com nome e imagem válidos.
- */
+// Passo 2: A API tem muito personagem inútil ou sem foto.
+// Essa função filtra só os que têm nome e imagem de verdade.
 export const filterValidCharacters = (characters) => {
   return characters.filter(
     (char) => char.name && char.image && char.image.trim() !== ''
   );
 };
 
-/**
- * Seleciona personagens priorizando os principais.
- * Se algum personagem principal não tiver imagem válida, é ignorado.
- * Completa com outros personagens válidos se necessário.
- * @param {Array} validCharacters - Personagens com imagem válida.
- * @param {number} count - Quantidade necessária de personagens.
- * @returns {Array} Personagens selecionados para o jogo.
- */
+// Passo 3: Pega os personagens filtrados e tenta encaixar os "Principais" primeiro (Harry, Rony, etc).
+// Se faltar gente para completar a dificuldade, ele pega os figurantes para inteirar.
 export const selectPrioritizedCharacters = (validCharacters, count) => {
   const selected = [];
   const usedIds = new Set();
@@ -128,12 +117,8 @@ export const selectPrioritizedCharacters = (validCharacters, count) => {
   return selected;
 };
 
-/**
- * Gera pares de cartas para o jogo da memória.
- * Cada personagem é duplicado, recebe um ID único e o array é embaralhado.
- * @param {Array} characters - Personagens selecionados.
- * @returns {Array} Cartas duplicadas com IDs únicos e embaralhadas.
- */
+// Passo 4: O jogo da memória precisa de PARES.
+// Essa função pega cada personagem, duplica ele (carta A e carta B) e embaralha tudo.
 export const generateCardPairs = (characters) => {
   const pairs = [];
   characters.forEach((char) => {
@@ -169,13 +154,8 @@ export const generateCardPairs = (characters) => {
   return pairs;
 };
 
-/**
- * Busca personagens formatados para o jogo conforme a dificuldade.
- * Se a API não retornar personagens suficientes, ajusta automaticamente
- * para o máximo disponível e sinaliza no metadata.
- * @param {number} pairsNeeded - Número de pares (personagens únicos).
- * @returns {Promise<Object>} Dados do jogo com cartas e metadados.
- */
+// Função Principal: É essa que a página do jogo chama de verdade.
+// Ela junta todos os 4 passos anteriores e devolve o tabuleiro de cartas pronto pro React.
 export const fetchCharactersForGame = async (pairsNeeded) => {
   const allCharacters = await fetchAllCharacters();
   const validCharacters = filterValidCharacters(allCharacters);
@@ -220,5 +200,5 @@ export const fetchCharactersForGame = async (pairsNeeded) => {
   };
 };
 
-// Manter export legado para compatibilidade
+// Export antigo, mantido só pra não quebrar outras partes do código
 export const fetchCharacters = fetchAllCharacters;

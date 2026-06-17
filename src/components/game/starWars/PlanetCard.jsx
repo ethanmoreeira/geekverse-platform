@@ -1,4 +1,4 @@
-// PlanetCard.jsx
+
 // Card de planeta para a tela de montagem da missão Star Wars.
 // Exibe dados normalizados da SWAPI com espaço reservado para imagem.
 

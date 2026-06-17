@@ -1,9 +1,7 @@
-/* games.css */
-/* Estilos específicos dos jogos do GeekVerse G8. */
 
-/* ============================================ */
-/* HARRY POTTER MEMORY GAME                     */
-/* ============================================ */
+
+/* JOGO DA MEMÓRIA DOS BRUXOS (HARRY POTTER)    */
+
 
 .gv-harry-page {
   display: flex;
@@ -16,7 +14,7 @@
   overflow-x: hidden;
 }
 
-/* Hide body scrollbar when Harry Potter game is active */
+/* Esconde a barra de rolagem principal quando o jogo do Harry Potter está ativo */
 html:has(.gv-harry-page) {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -39,15 +37,12 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   overflow: hidden;
 }
 
-/* Película para escurecer o fundo para legibilidade (opcional) */
 .gv-harry-page::before {
   content: '';
   position: absolute;
   inset: 0;
   background: transparent;
-  /* Removido o fundo escuro (antes era rgba(0,0,0,0.4)) */
   z-index: -1;
-  /* Sobre a imagem, mas atrás do conteúdo */
 }
 
 .gv-harry-header,
@@ -151,9 +146,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
 }
 
-/* ============================================ */
-/* DIFFICULTY SELECTOR                          */
-/* ============================================ */
+
+/* SELETOR DE DIFICULDADE (Fácil, Médio, Difícil)*/
+
 
 .gv-difficulty-selector {
   text-align: center;
@@ -234,9 +229,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   color: #ccc;
 }
 
-/* ============================================ */
-/* FLOATING DECORATIVE CARDS (idle screen)      */
-/* ============================================ */
+
+/* CARTAS FLUTUANTES DECORATIVAS (Tela de Espera)*/
+
 
 .gv-floating-cards-layer {
   position: relative;
@@ -304,9 +299,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   }
 }
 
-/* ============================================ */
+
 /* RELOAD BUTTON                                */
-/* ============================================ */
+
 
 .gv-reload-bar {
   display: flex;
@@ -339,9 +334,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
 }
 
-/* ============================================ */
-/* LOADING STATE                                */
-/* ============================================ */
+
+/* ESTADO DE CARREGAMENTO (Loading)             */
+
 
 .gv-loading-magic {
   display: flex;
@@ -388,9 +383,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   }
 }
 
-/* ============================================ */
+
 /* THEMED INTRO LOADER                          */
-/* ============================================ */
+
 
 .gv-themed-loader-wrapper {
   position: fixed;
@@ -471,9 +466,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   margin-top: 8px;
 }
 
-/* ============================================ */
+
 /* THEMED LOGOUT SCREEN                         */
-/* ============================================ */
+
 
 .gv-themed-logout-wrapper {
   position: fixed;
@@ -531,9 +526,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   margin: 0;
 }
 
-/* ============================================ */
-/* ERROR & WARNING STATES                       */
-/* ============================================ */
+
+/* ESTADOS DE ERRO E AVISOS                     */
+
 
 .gv-error-magic,
 .gv-warning-magic {
@@ -588,9 +583,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   transform: translateY(-2px);
 }
 
-/* ============================================ */
-/* MEMORY BOARD                                 */
-/* ============================================ */
+
+/* TABULEIRO DO JOGO DA MEMÓRIA                 */
+
 
 .gv-memory-board-wrapper {
   display: flex;
@@ -612,9 +607,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   overflow: visible;
 }
 
-/* ============================================ */
-/* MEMORY CARD — 3D FLIP                        */
-/* ============================================ */
+
+/* CARTA DA MEMÓRIA - ANIMAÇÃO DE GIRO 3D       */
+
 
 .gv-memory-card {
   aspect-ratio: 3 / 4;
@@ -871,9 +866,11 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
     0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-/* ============================================ */
-/* JSON VIEWER                                  */
-/* ============================================ */
+
+
+
+/* VISUALIZADOR DE JSON (Dados da API)          */
+
 
 .gv-json-viewer {
   margin-top: 32px;
@@ -960,9 +957,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   border-radius: 3px;
 }
 
-/* ============================================ */
+
 /* MEMORY STATS BAR                             */
-/* ============================================ */
+
 
 .gv-memory-stats {
   display: flex;
@@ -1037,9 +1034,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   }
 }
 
-/* ============================================ */
-/* VICTORY SCREEN                               */
-/* ============================================ */
+
+/* TELA DE VITÓRIA                              */
+
 
 .gv-victory-overlay {
   display: flex;
@@ -1450,9 +1447,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   box-shadow: 0 6px 24px rgba(138, 43, 226, 0.4), 0 0 16px rgba(255, 215, 0, 0.2);
 }
 
-/* ============================================ */
+
 /* SHUFFLE SPELL ANIMATION                      */
-/* ============================================ */
+
 
 /* Overlay do feitiço de embaralhamento */
 .gv-spell-overlay {
@@ -1918,9 +1915,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.3));
 }
 
-/* ============================================ */
+
 /* RESPONSIVIDADE                               */
-/* ============================================ */
+
 
 /* Grid por dificuldade — Desktop */
 .gv-grid-easy {
@@ -2011,9 +2008,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   }
 }
 
-/* ============================================ */
+
 /* EXPORT BUTTON — Memória dos Bruxos (roxo)    */
-/* ============================================ */
+
 
 .memory-export-button {
   background: linear-gradient(135deg, #6a0dad 0%, #8b5cf6 100%) !important;
@@ -2027,9 +2024,9 @@ html:has(.gv-harry-page)::-webkit-scrollbar {
   box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4) !important;
 }
 
-/* ============================================ */
+
 /* EXPORT EMAIL FEEDBACK (all games)            */
-/* ============================================ */
+
 
 .gv-export-feedback {
   display: block;

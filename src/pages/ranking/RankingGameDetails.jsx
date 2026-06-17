@@ -1,7 +1,6 @@
-// RankingGameDetails.jsx
-// Página de ranking específica de um jogo.
-// Rota: /app/ranking/:gameId
-// Mostra 3 cards (Fácil, Médio, Difícil) com pódio e classificação.
+
+// Página de detalhes do placar de um jogo específico.
+// Mostra os 3 pódios: Fácil, Médio e Difícil para o jogo que o usuário clicou.
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaExclamationTriangle } from 'react-icons/fa';
@@ -38,7 +37,7 @@ const RankingGameDetails = () => {
   const game = RANKING_GAMES[gameId];
   const customCriterion = CRITERIA_UI[gameId];
 
-  // gameId inválido
+  // Se a pessoa tentar entrar num jogo que não existe na URL, mostra a tela de erro
   if (!game) {
     return (
       <div className="rk-page">

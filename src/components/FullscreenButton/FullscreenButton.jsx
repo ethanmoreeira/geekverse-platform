@@ -1,4 +1,4 @@
-// FullscreenButton.jsx
+
 // Botão global reutilizável de tela cheia do GeekVerse G8.
 // Usa a Fullscreen API do navegador.
 // Aparece discreto no canto superior direito em todas as páginas.

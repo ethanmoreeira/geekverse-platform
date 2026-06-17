@@ -1,9 +1,9 @@
-/* ============================================ */
-/* RANKING — Hall dos Campeões GeekVerse        */
-/* Estilos para RankingHome e RankingGameDetails */
-/* ============================================ */
 
-/* ---- Page Container ---- */
+/* RANKING — Hall dos Campeões GeekVerse */
+/* Estilos para RankingHome e RankingGameDetails */
+
+
+/* CONTAINER DA PÁGINA */
 .rk-page {
   width: 100%;
   max-width: 1200px;
@@ -11,7 +11,7 @@
   padding: 0 0 48px;
 }
 
-/* ---- Header ---- */
+/* CABEÇALHO */
 .rk-header {
   text-align: center;
   margin-bottom: 12px;
@@ -60,7 +60,7 @@
   margin-bottom: 16px;
 }
 
-/* ---- Games Grid (RankingHome) ---- */
+/* GAMES GRID (RANKINGHOME) */
 .rk-games-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -195,7 +195,7 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* ---- Back Button ---- */
+/* BACK BUTTON */
 .rk-back-bar {
   margin-bottom: 20px;
 }
@@ -222,7 +222,7 @@
   background: var(--gv-accent-glow);
 }
 
-/* ---- Game Details Header ---- */
+/* GAME DETAILS HEADER */
 .rk-detail-header {
   text-align: center;
   margin-bottom: 28px;
@@ -313,14 +313,14 @@
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
 }
 
-/* ---- Difficulty Cards Grid ---- */
+/* DIFFICULTY CARDS GRID */
 .rk-difficulties-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
-/* ---- Difficulty Card ---- */
+/* DIFFICULTY CARD */
 .rk-diff-card {
   position: relative;
   background: rgba(14, 15, 23, 0.55);
@@ -573,7 +573,7 @@
   display: none;
 }
 
-/* ---- Podium ---- */
+/* PODIUM */
 .rk-podium {
   display: flex;
   align-items: flex-end;
@@ -663,7 +663,7 @@
   font-style: italic;
 }
 
-/* ---- Ranking List (4th–10th) ---- */
+/* RANKING LIST (4TH–10TH) */
 .rk-list {
   display: flex;
   flex-direction: column;
@@ -713,7 +713,7 @@
   white-space: nowrap;
 }
 
-/* ---- "Você" badge ---- */
+/* "VOCÊ" BADGE */
 .rk-you-badge {
   display: inline-flex;
   align-items: center;
@@ -734,7 +734,7 @@
   border: 1px solid rgba(168, 85, 247, 0.15);
 }
 
-/* ---- User Position Card ---- */
+/* USER POSITION CARD */
 .rk-user-pos {
   background: rgba(168, 85, 247, 0.06);
   border: 1px solid rgba(168, 85, 247, 0.2);
@@ -774,7 +774,7 @@
   color: var(--gv-text-muted);
 }
 
-/* ---- Action Buttons Row ---- */
+/* ACTION BUTTONS ROW */
 .rk-actions {
   display: flex;
   gap: 8px;
@@ -809,7 +809,7 @@
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
 }
 
-/* ---- Empty State ---- */
+/* ESTADO VAZIO */
 .rk-empty {
   text-align: center;
   padding: 32px 16px;
@@ -835,7 +835,7 @@
   line-height: 1.5;
 }
 
-/* ---- Full Ranking Modal ---- */
+/* FULL RANKING MODAL */
 .rk-modal-overlay {
   position: fixed;
   inset: 0;
@@ -889,7 +889,7 @@
   color: var(--gv-danger);
 }
 
-/* ---- Error State ---- */
+/* ERROR STATE */
 .rk-error {
   text-align: center;
   padding: 60px 24px;
@@ -915,7 +915,7 @@
   margin-bottom: 20px;
 }
 
-/* ---- Toast Feedback ---- */
+/* TOAST FEEDBACK */
 .rk-toast {
   position: fixed;
   bottom: 24px;
@@ -945,9 +945,9 @@
   }
 }
 
-/* ============================================ */
+
 /* RESPONSIVO                                   */
-/* ============================================ */
+
 
 @media (max-width: 900px) {
   .rk-difficulties-grid {

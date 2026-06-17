@@ -36,7 +36,7 @@ ul, ol {
   list-style: none;
 }
 
-/* Remove default Vite styles that may conflict */
+/* Remove os estilos padrão do Vite que podem quebrar o layout */
 #root {
   width: 100%;
   max-width: 100%;

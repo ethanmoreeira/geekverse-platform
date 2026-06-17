@@ -1,4 +1,4 @@
-// UserPositionCard.jsx
+
 // Exibe a colocação do jogador logado quando ele está fora do Top 10.
 
 const UserPositionCard = ({ position, result, formatMetric }) => {

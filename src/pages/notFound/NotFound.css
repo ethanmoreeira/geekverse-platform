@@ -1,4 +1,4 @@
-/* NotFound.css */
+
 /* Página 404 do GeekVerse G8 */
 
 .notfound-page {
@@ -125,17 +125,6 @@
   box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
 }
 
-.notfound-btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #c4b5fd;
-}
-
-.notfound-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
 
 /* Responsividade */
 @media (max-width: 480px) {

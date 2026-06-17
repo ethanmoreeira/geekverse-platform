@@ -1,4 +1,4 @@
-// EquipmentCard.jsx
+
 // Card de equipamento (veículo) para a tela de montagem da missão Star Wars.
 // Exibe dados normalizados da SWAPI com espaço reservado para imagem.
 

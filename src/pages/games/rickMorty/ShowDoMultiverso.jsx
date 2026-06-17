@@ -1,4 +1,4 @@
-// ShowDoMultiverso.jsx
+
 // Página: Show do Multiverso | Rota: /app/rick-morty
 // Quiz dinâmico com perguntas geradas a partir da Rick and Morty API.
 // 3 modos: Portal Verde (fácil), Viagem Interdimensional (médio), Desafio da Citadel (difícil).
@@ -8,12 +8,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
 import { logAuditEvent } from '../../../services/auditService';
-import QuestionCard from '../../../components/multiverseQuiz/QuestionCard';
-import AnswerCard from '../../../components/multiverseQuiz/AnswerCard';
-import ScoreBoard from '../../../components/multiverseQuiz/ScoreBoard';
-import JsonViewer from '../../../components/multiverseQuiz/JsonViewer';
-import RickMortyLoader from '../../../components/multiverseQuiz/RickMortyLoader';
-import RickMortyAudioControl from '../../../components/multiverseQuiz/RickMortyAudioControl';
+import QuestionCard from '../../../components/game/multiverseQuiz/QuestionCard';
+import AnswerCard from '../../../components/game/multiverseQuiz/AnswerCard';
+import ScoreBoard from '../../../components/game/multiverseQuiz/ScoreBoard';
+import JsonViewer from '../../../components/feedback/JsonViewer';
+import RickMortyLoader from '../../../components/game/multiverseQuiz/RickMortyLoader';
+import RickMortyAudioControl from '../../../components/game/multiverseQuiz/RickMortyAudioControl';
 import {
   FaArrowLeft, FaArrowRight, FaRedo, FaExclamationTriangle, FaCheckCircle,
   FaTimesCircle, FaFileExport
@@ -21,7 +21,7 @@ import {
 import { sendGameResultEmail } from '../../../services/emailService';
 import { hasEmailExportBeenSent, markEmailExportAsSent, buildResultKey } from '../../../utils/emailExportControl';
 import { useMultiverseQuiz, GAME_MODES } from '../../../hooks/useMultiverseQuiz';
-import rickMortyMusic from '../../../assets/audio/magpiemusic-ambient-meditative-clear-sky-353119.mp3';
+import { useMultiverseMusic } from '../../../hooks/audio/useMultiverseMusic';
 
 import '../../../styles/showDoMultiverso.css';
 import gameBg from '../../../assets/backgrounds/rick-morty/rick_and_morty_all_characters_depth.png';
@@ -37,7 +37,7 @@ const formatNumber = (value) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-// ─── Componente Principal ───────────────────────────────────────────
+// Componente principal do jogo
 const ShowDoMultiverso = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -115,45 +115,8 @@ const ShowDoMultiverso = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // ─── Música ambiente — padrão Harry Potter ──────────────────────
-  const audioRef = useRef(null);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-
-  // Toca a música quando o intro loader terminar (usuário já clicou para entrar no jogo)
-  useEffect(() => {
-    if (!isEntering && audioRef.current) {
-      audioRef.current.volume = 0.18;
-      audioRef.current.play().then(() => {
-        setIsMusicPlaying(true);
-      }).catch(() => {
-        // Navegador bloqueou autoplay — o usuário pode clicar no botão
-        setIsMusicPlaying(false);
-      });
-    }
-  }, [isEntering]);
-
-  // Para a música ao desmontar o componente (sair da página)
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  }, []);
-
-  const toggleMusic = () => {
-    if (!audioRef.current) return;
-    if (isMusicPlaying) {
-      audioRef.current.pause();
-      setIsMusicPlaying(false);
-    } else {
-      audioRef.current.play().then(() => {
-        setIsMusicPlaying(true);
-      }).catch((err) => {
-        console.warn('[ShowDoMultiverso] Não foi possível tocar a música:', err.message);
-      });
-    }
-  };
+  // Controle de música ambiente (Play/Pause/Stop)
+  const { isPlaying: isMusicPlaying, toggleMusic, stopMusic } = useMultiverseMusic();
 
   const handlePortalClick = (modeKey) => {
     if (isPortalTransitioning) return;
@@ -178,11 +141,7 @@ const ShowDoMultiverso = () => {
   const handleExitToDashboard = () => {
     if (isExiting) return;
     setIsExiting(true);
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    setIsMusicPlaying(false);
+    stopMusic();
     setTimeout(() => {
       navigate('/app');
     }, 2000);
@@ -243,6 +202,53 @@ const ShowDoMultiverso = () => {
     }
   }, [gamePhase, selectedMode, score, hintPenaltyTotal, gameWon, correctCount, hintsUsed, user, durationSeconds, finalScore, formatTime]);
 
+  const handleExportResult = async () => {
+    if (!user?.email) {
+      setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+      return;
+    }
+    // Guard: bloquear reenvio da mesma partida
+    const exportKey = buildResultKey('show-multiverso', matchKey);
+    if (hasEmailExportBeenSent(exportKey)) {
+      setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
+      return;
+    }
+    setIsExporting(true);
+    setExportFeedback(null);
+    try {
+      await sendGameResultEmail({
+        game_name: 'Show do Multiverso',
+        player_name: user?.nome || user?.name || 'Jogador GeekVerse',
+        player_email: user.email,
+        difficulty: modeConfig?.name || selectedMode || 'Padrão',
+        status: gameWon ? 'vitória' : 'derrota',
+        result_title: 'Resultado do Show do Multiverso',
+        result_message: gameWon
+          ? 'Você completou o modo atual do Show do Multiverso.'
+          : 'Você registrou uma tentativa no Show do Multiverso.',
+        main_metric_label: 'Pontuação final',
+        main_metric_value: String(finalScore),
+        secondary_metrics: `Acertos: ${correctCount}\nErros: ${gameWon ? 0 : 1}\nAjudas usadas: ${hintsUsed}\nPenalidade por ajudas: ${hintPenaltyTotal}`,
+        generated_at: new Date().toLocaleString('pt-BR'),
+      });
+      // Marcar como enviado APENAS após sucesso
+      markEmailExportAsSent(exportKey);
+      setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
+      try { 
+        logAuditEvent({ 
+          eventType: 'result_email_send', 
+          description: `E-mail de resultado enviado para Show do Multiverso`, 
+          gameId: 'show-multiverso', 
+          gameName: 'Show do Multiverso' 
+        }); 
+      } catch { /* auditoria opcional */ }
+    } catch {
+      setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const renderScreen = () => {
     if (isEntering) {
       return <RickMortyLoader />;
@@ -252,7 +258,7 @@ const ShowDoMultiverso = () => {
       return <RickMortyLoader variant="exit" />;
     }
 
-    // ─── TELA: MENU ──────────────────────────────────────────────────
+    // Tela 1: O Menu Principal onde o usuário escolhe o portal (Fácil, Médio, Difícil)
     if (gamePhase === 'menu') {
       return (
         <div className="smv-menu-page">
@@ -336,7 +342,7 @@ const ShowDoMultiverso = () => {
       );
     }
 
-    // ─── TELA: LOADING ────────────────────────────────────────────────
+    // Tela 2: O Carregamento estiloso enquanto a API do Rick and Morty é consultada
     if (gamePhase === 'loading') {
       let loaderTitle = 'Abrindo o Portal';
       let loaderSubtitle = 'Sincronizando universos...';
@@ -384,7 +390,7 @@ const ShowDoMultiverso = () => {
       return <RickMortyLoader title={loaderTitle} subtitle={loaderSubtitle} />;
     }
 
-    // ─── TELA: GAME OVER ─────────────────────────────────────────────
+    // Tela 3: O Fim de Jogo (Vitória ou Derrota) com pontuação e botão de enviar email
     if (gamePhase === 'gameover') {
       return (
         <div className="smv-page smv-bg-result" style={{ '--smv-rick-bg': `url(${gameWon ? quizBg : loseBg})` }}>
@@ -462,7 +468,7 @@ const ShowDoMultiverso = () => {
                 </div>
               </div>
 
-              <JsonViewer data={apiData} title="JSON da última rodada" />
+              <JsonViewer data={apiData} title="JSON da última rodada" variant="smv" />
 
               <div className="smv-gameover-actions" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: '12px', marginTop: '16px' }}>
                 <button
@@ -485,45 +491,7 @@ const ShowDoMultiverso = () => {
                   id="btn-export-multiverso"
                   style={{ padding: '10px 16px', fontSize: '13px', width: 'auto', flex: '1 1 140px', maxWidth: '200px' }}
                   disabled={isExporting || (matchKey && hasEmailExportBeenSent(buildResultKey('show-multiverso', matchKey)))}
-                  onClick={async () => {
-                    if (!user?.email) {
-                      setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
-                      return;
-                    }
-                    // Guard: bloquear reenvio da mesma partida
-                    const exportKey = buildResultKey('show-multiverso', matchKey);
-                    if (hasEmailExportBeenSent(exportKey)) {
-                      setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
-                      return;
-                    }
-                    setIsExporting(true);
-                    setExportFeedback(null);
-                    try {
-                      await sendGameResultEmail({
-                        game_name: 'Show do Multiverso',
-                        player_name: user?.nome || user?.name || 'Jogador GeekVerse',
-                        player_email: user.email,
-                        difficulty: modeConfig?.name || selectedMode || 'Padrão',
-                        status: gameWon ? 'vitória' : 'derrota',
-                        result_title: 'Resultado do Show do Multiverso',
-                        result_message: gameWon
-                          ? 'Você completou o modo atual do Show do Multiverso.'
-                          : 'Você registrou uma tentativa no Show do Multiverso.',
-                        main_metric_label: 'Pontuação final',
-                        main_metric_value: String(finalScore),
-                        secondary_metrics: `Acertos: ${correctCount}\nErros: ${gameWon ? 0 : 1}\nAjudas usadas: ${hintsUsed}\nPenalidade por ajudas: ${hintPenaltyTotal}`,
-                        generated_at: new Date().toLocaleString('pt-BR'),
-                      });
-                      // Marcar como enviado APENAS após sucesso
-                      markEmailExportAsSent(exportKey);
-                      setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
-                      try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Show do Multiverso`, gameId: 'show-multiverso', gameName: 'Show do Multiverso' }); } catch { /* auditoria opcional */ }
-                    } catch {
-                      setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
-                    } finally {
-                      setIsExporting(false);
-                    }
-                  }}
+                  onClick={handleExportResult}
                 >
                   <FaFileExport /> {isExporting ? 'Enviando...' : (gameWon ? 'Exportar resultado' : 'Exportar tentativa')}
                 </button>
@@ -537,7 +505,7 @@ const ShowDoMultiverso = () => {
       );
     }
 
-    // ─── TELA: PLAYING ────────────────────────────────────────────────
+    // Tela 4: O Jogo em si (Perguntas, alternativas e ajudas)
     if (!currentQuestion) {
       return (
         <div className="smv-page smv-bg-game" style={{ '--smv-rick-bg': `url(${quizBg})` }}>
@@ -679,7 +647,7 @@ const ShowDoMultiverso = () => {
 
             {/* JSON Viewer (após responder) */}
             {showResult && apiData && (
-              <JsonViewer data={apiData} title="Dados da API desta rodada" />
+              <JsonViewer data={apiData} title="Dados da API desta rodada" variant="smv" />
             )}
           </main>
         </div>
@@ -689,7 +657,7 @@ const ShowDoMultiverso = () => {
 
   return (
     <>
-      <audio ref={audioRef} src={rickMortyMusic} loop preload="auto" />
+
       <RickMortyAudioControl isMusicPlaying={isMusicPlaying} onToggle={toggleMusic} />
       {renderScreen()}
     </>

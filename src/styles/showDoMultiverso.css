@@ -1,11 +1,11 @@
- /* ============================================ */
- /* SHOW DO MULTIVERSO — Quiz Styles             */
+ 
+ /* SHOW DO MULTIVERSO — Estilos do Quiz */
  /* Estilos do quiz Rick and Morty.               */
  /* Mantém a estética escura do GeekVerse G8.     */
  /* Cor principal: verde portal (#22c55e).        */
- /* ============================================ */
+ 
 
- /* ---- Page Layout ---- */
+ /* LAYOUT DA PÁGINA */
  .smv-page {
    width: 100%;
    max-width: 1200px;
@@ -15,7 +15,7 @@
    z-index: 1;
  }
 
- /* ---- Hide scrollbar for immersive game screens ---- */
+ /* ESCONDER BARRA DE ROLAGEM NAS TELAS DE JOGO */
  html:has(.smv-page),
  html:has(.smv-menu-page) {
    scrollbar-width: none;
@@ -28,7 +28,7 @@
    height: 0;
  }
 
- /* ---- Fullscreen background for game/result screens ---- */
+ /* FUNDO DE TELA CHEIA PARA O JOGO */
  .smv-bg-game::before,
  .smv-bg-game::after,
  .smv-bg-result::before,
@@ -63,7 +63,7 @@
    background: rgba(3, 7, 18, 0.2);
  }
 
- /* ---- Top Bar — padrão Harry Potter ---- */
+ /* TOP BAR — PADRÃO HARRY POTTER */
  .smv-top-bar {
    position: absolute;
    top: 12px;
@@ -158,7 +158,7 @@
    gap: 12px;
  }
 
- /* ---- Sidebar Footer (mode + score + back) ---- */
+ /* SIDEBAR FOOTER (MODE + SCORE + BACK) */
  .smv-game-footer {
    background: var(--gv-bg-card);
    border: 1px solid var(--gv-border);
@@ -222,7 +222,7 @@
    gap: 14px;
  }
 
- /* ---- Menu com background em tela cheia ---- */
+ /* MENU COM BACKGROUND EM TELA CHEIA */
  .smv-menu-page {
    position: relative;
    min-height: 100vh;
@@ -312,10 +312,10 @@
    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8), 0 0 10px rgba(34, 197, 94, 0.4);
  }
 
- /* ============================================ */
+ 
  /* MODE — Portais Circulares Puros               */
  /* Sem caixa retangular — cada modo é um portal  */
- /* ============================================ */
+ 
 
  .smv-mode-grid {
    display: flex;
@@ -344,7 +344,7 @@
    transform: scale(1.03);
  }
 
- /* ---- Portal Circle — elemento principal ---- */
+ /* PORTAL CIRCLE — ELEMENTO PRINCIPAL */
  .smv-mode-portal {
    position: relative;
    width: 280px;
@@ -386,7 +386,7 @@
    animation-duration: 2.5s;
  }
 
- /* ---- Conteúdo dentro do portal ---- */
+ /* CONTEÚDO DENTRO DO PORTAL */
  .smv-mode-portal-content {
    position: relative;
    z-index: 2;
@@ -469,11 +469,11 @@
  }
 
 
- /* ============================================ */
+ 
  /* THEMED INTRO LOADER — Show do Multiverso     */
  /* Padrão cinematográfico (espelha Harry Potter) */
  /* Identidade: verde portal (#22c55e)            */
- /* ============================================ */
+ 
 
  .smv-themed-loader-wrapper {
    position: fixed;
@@ -571,9 +571,9 @@
    }
  }
 
- /* ============================================ */
+ 
  /* QUESTION CARD                                */
- /* ============================================ */
+ 
 
  .smv-question-card {
    background: rgba(16, 28, 40, 0.65);
@@ -633,7 +633,7 @@
    line-height: 1.6;
  }
 
- /* Target image / data in question (question-image and question-and-answer-cards) */
+ /* Imagem ou dados da pergunta */
  .smv-question-target {
    display: flex;
    align-items: center;
@@ -680,9 +680,9 @@
    color: #22c55e;
  }
 
- /* ============================================ */
+ 
  /* ANSWER CARDS                                 */
- /* ============================================ */
+ 
 
  .smv-answers-grid {
    display: grid;
@@ -832,7 +832,7 @@
    color: #22c55e;
  }
 
- /* ---- Answer Card — react-icons inline meta ---- */
+ /* ANSWER CARD — REACT-ICONS INLINE META */
  .smv-inline-meta {
    display: flex;
    align-items: center;
@@ -863,7 +863,7 @@
    flex-shrink: 0;
  }
 
- /* ---- Global react-icons base ---- */
+ /* GLOBAL REACT-ICONS BASE */
  .smv-icon {
    display: inline-block;
    vertical-align: middle;
@@ -911,9 +911,9 @@
    color: #22c55e;
  }
 
- /* ============================================ */
+ 
  /* SCOREBOARD                                   */
- /* ============================================ */
+ 
 
  .smv-scoreboard {
    background: rgba(16, 28, 40, 0.65);
@@ -1063,9 +1063,9 @@
    }
  }
 
- /* ============================================ */
+ 
  /* LOADING & ERROR                              */
- /* ============================================ */
+ 
 
  .smv-loading {
    display: flex;
@@ -1111,9 +1111,9 @@
    line-height: 1.5;
  }
 
- /* ============================================ */
+ 
  /* CONFIRM AREA                                 */
- /* ============================================ */
+ 
 
  .smv-confirm-area {
    display: flex;
@@ -1140,9 +1140,9 @@
    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
  }
 
- /* ============================================ */
+ 
  /* JSON VIEWER                                  */
- /* ============================================ */
+ 
 
  .smv-json-viewer {
    width: 100%;
@@ -1228,9 +1228,9 @@
    border-radius: 3px;
  }
 
- /* ============================================ */
+ 
  /* GAME FOOTER                                  */
- /* ============================================ */
+ 
 
  .smv-game-footer {
    display: flex;
@@ -1271,9 +1271,9 @@
    gap: 10px;
  }
 
- /* ============================================ */
+ 
  /* BUTTONS                                      */
- /* ============================================ */
+ 
 
  .smv-btn-primary {
    display: inline-flex;
@@ -1339,9 +1339,9 @@
    background: var(--gv-accent-glow);
  }
 
- /* ============================================ */
- /* GAME OVER SCREEN                             */
- /* ============================================ */
+ 
+ /* TELA DE GAME OVER */
+ 
 
  .smv-gameover-screen {
    display: flex;
@@ -1500,9 +1500,9 @@
    width: 100%;
  }
 
- /* ============================================ */
+ 
  /* RESPONSIVE                                   */
- /* ============================================ */
+ 
 
  @media (max-width: 900px) {
    .smv-game-layout {
@@ -1582,7 +1582,7 @@
    }
  }
 
- /* ---- Responsivo: Portais Circulares ---- */
+ /* RESPONSIVO: PORTAIS CIRCULARES */
  @media (max-width: 900px) {
    .smv-mode-grid {
      gap: 30px;
@@ -1663,7 +1663,7 @@
      height: 260px;
    }
 
-   /* Background adjustments for mobile */
+   /* Ajustes de fundo para celular */
    .smv-bg-game::before,
    .smv-bg-result::before {
      background-position: center top;
@@ -1674,9 +1674,9 @@
    }
  }
 
- /* ============================================ */
+ 
  /* FEEDBACK BLOCK — após resposta               */
- /* ============================================ */
+ 
 
  @keyframes smv-feedback-enter {
    from {
@@ -1797,9 +1797,9 @@
     }
  }
 
- /* ============================================ */
+ 
  /* PORTAL TRANSITION                            */
- /* ============================================ */
+ 
 
  .smv-portal-entering {
    animation: smv-portal-enter-anim 1s ease-in forwards !important;
@@ -1829,10 +1829,10 @@
    pointer-events: none;
  }
 
- /* --------------------------------------------------------- */
+ 
  /* TRANSICAO DO PORTAL — DIMENSIONAL                         */
  /* Sequencia: anel expande → fade escuro cobre tela → quiz   */
- /* --------------------------------------------------------- */
+ 
 
  .rick-portal-fullscreen {
    position: fixed;
@@ -2002,7 +2002,7 @@
    }
  }
 
- /* ---- Cinematic Brand Typography ---- */
+ /* CINEMATIC BRAND TYPOGRAPHY */
  .smv-brand-kicker {
    font-size: 14px;
    font-weight: 700;
@@ -2083,9 +2083,9 @@
    }
  }
 
- /* ============================================ */
+ 
  /* HINT CARDS                                   */
- /* ============================================ */
+ 
 
  .smv-hints-row {
    display: flex;
@@ -2161,9 +2161,9 @@
    color: #6b7280;
  }
 
- /* ============================================ */
+ 
  /* ELIMINATED ANSWER                            */
- /* ============================================ */
+ 
 
  .smv-answer-card.smv-answer-eliminated {
    opacity: 0.3;
@@ -2204,9 +2204,9 @@
    }
  }
 
- /* ============================================ */
+ 
  /* EXPORT BUTTON — Show do Multiverso (verde)   */
- /* ============================================ */
+ 
 
  .multiverse-export-button {
    background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(22, 163, 74, 0.25)) !important;
@@ -2220,9 +2220,9 @@
    color: #bbf7d0 !important;
  }
 
- /* ============================================ */
+ 
  /* EXPORT EMAIL FEEDBACK                        */
- /* ============================================ */
+ 
 
  .gv-export-feedback {
    display: block;

@@ -1,7 +1,6 @@
-// apiClient.js
-// Cliente HTTP centralizado usando Axios.
-// Configuração base para todas as chamadas de API.
-// Interceptors de request/response para tratamento global de erros.
+
+// Configuração central para baixar dados usando a biblioteca Axios.
+// Aqui eu defino um limite: se a API demorar mais de 10 segundos, ele desiste (timeout) para não travar o jogo eternamente.
 
 import axios from 'axios';
 
@@ -12,6 +11,5 @@ const apiClient = axios.create({
   },
 });
 
-// Interceptors serão configurados futuramente.
 
 export default apiClient;

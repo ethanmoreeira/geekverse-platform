@@ -1,4 +1,4 @@
-// ProtectedLayout.jsx
+
 // Layout para páginas protegidas (autenticadas).
 // Inclui AppNavbar no topo e Outlet para renderizar sub-rotas.
 

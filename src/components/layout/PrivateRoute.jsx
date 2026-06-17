@@ -1,4 +1,4 @@
-// PrivateRoute.jsx
+
 // Componente de rota privada com controle de acesso.
 // Redireciona para /login se o usuário não estiver autenticado.
 // Exibe loader durante verificação inicial de autenticação.

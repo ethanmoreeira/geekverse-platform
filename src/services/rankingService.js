@@ -1,11 +1,10 @@
-// rankingService.js
+
 // Serviço central do Ranking do GeekVerse G8.
 // Gerencia resultados de jogos via localStorage.
 // Chave: geekverse-ranking-results
 
-// ============================================
-// CONFIGURAÇÃO DOS JOGOS
-// ============================================
+// Configuração Visual e Regras de cada Jogo
+// Define como a pontuação funciona e quais ícones/cores usar.
 
 export const RANKING_GAMES = {
   'harry-memory': {
@@ -63,9 +62,7 @@ export const DIFFICULTIES = [
   { key: 'challenge', label: 'Difícil' },
 ];
 
-// ============================================
-// HELPERS
-// ============================================
+// Ferramentas de Ajuda (Formatar Tempo e Criar IDs)
 
 const STORAGE_KEY = 'geekverse-ranking-results';
 
@@ -80,9 +77,8 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
-// ============================================
-// CRITÉRIOS DE ORDENAÇÃO POR JOGO
-// ============================================
+// O cérebro do Ranking: Como desempatar os jogadores
+// Cada jogo tem uma regra de desempate diferente (quem errou menos, quem foi mais rápido, etc)
 
 function getSortFn(gameId) {
   switch (gameId) {
@@ -128,9 +124,7 @@ function getSortFn(gameId) {
   }
 }
 
-// ============================================
-// CRUD — localStorage (fallback / offline)
-// ============================================
+// Passo 1: Busca o ranking local na memória do navegador (fallback caso a internet caia)
 
 export function getAllResults() {
   try {
@@ -141,41 +135,7 @@ export function getAllResults() {
   }
 }
 
-// ============================================
-// LIMPEZA AUTOMÁTICA DE MOCKS ANTIGOS
-// ============================================
-// Remove entradas mockadas que usam o domínio @geekverse.com
-// (gerado exclusivamente pelo seedMockData). Resultados reais
-// usam o e-mail real do jogador, nunca @geekverse.com.
-// Roda uma vez por carregamento do módulo; só grava se houve remoção.
-
-function purgeLegacyMockData() {
-  try {
-    const all = getAllResults();
-    if (all.length === 0) return;
-    const clean = all.filter(
-      (r) => !r.playerEmail || !r.playerEmail.endsWith('@geekverse.com')
-    );
-    if (clean.length < all.length) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
-      if (import.meta.env.DEV) {
-        console.log(
-          `[rankingService] ${all.length - clean.length} registro(s) mock removido(s) do localStorage.`
-        );
-      }
-    }
-  } catch {
-    // Falha silenciosa — não impede o funcionamento do ranking
-  }
-}
-
-// Executa a limpeza automaticamente ao importar o módulo
-purgeLegacyMockData();
-
-// ============================================
-// SUPABASE — integração global
-// ============================================
-
+// Conexão com o Banco de Dados Real (Supabase)
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 
 // Converte objeto camelCase da app para snake_case do Supabase
@@ -239,9 +199,7 @@ function toCamelCase(row) {
   };
 }
 
-// ============================================
-// SAVE — salva no Supabase e/ou localStorage
-// ============================================
+// Passo 2: Salva o resultado da partida (Salva na memória local E manda pro Banco de Dados ao mesmo tempo)
 
 export function saveResult(result) {
   // 1. Sempre salva no localStorage (fallback + offline)
@@ -276,9 +234,7 @@ export function saveResult(result) {
   return entry;
 }
 
-// ============================================
-// QUERIES — locais (síncronas, para fallback)
-// ============================================
+// Funções de Leitura Offline (Puxam os dados locais se a internet cair)
 
 export function getResultsByGame(gameId) {
   return getAllResults().filter((r) => r.gameId === gameId);
@@ -332,11 +288,8 @@ export function getGameSummary(gameId) {
   };
 }
 
-// ============================================
-// QUERIES ASYNC — Supabase (global)
-// ============================================
-// Usadas pelo DifficultyRankingCard para buscar dados globais.
-// Se Supabase não estiver configurado ou falhar, retorna dados do localStorage.
+// Funções de Leitura Online (Puxam os dados direto do Supabase)
+// Usadas para montar a tela de "Dashboard / Ranking Global"
 
 export async function fetchTopTen(gameId, difficulty) {
   if (isSupabaseConfigured && supabase) {
@@ -401,152 +354,3 @@ export async function fetchUserPosition(gameId, difficulty, playerEmail) {
   return { position: index + 1, result: sorted[index] };
 }
 
-// ============================================
-// DADOS SIMULADOS PARA VISUALIZAÇÃO
-// ============================================
-// Dados temporários para visualização.
-// Remover ou substituir quando os jogos salvarem resultados reais.
-// Para ativar: chamar seedMockData() uma vez (ex: no console ou num useEffect temporário).
-
-const MOCK_NAMES = [
-  'Ítalo', 'Luna', 'Arthur', 'Helena', 'Mateus',
-  'Sofia', 'Lucas', 'Valentina', 'Pedro', 'Alice',
-  'Kaio', 'Beatriz', 'Gabriel', 'Manuela', 'Rafael',
-];
-
-
-
-function randomBetween(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function generateMockHarryMemory(difficulty, count) {
-  const results = [];
-  for (let i = 0; i < count; i++) {
-    const name = MOCK_NAMES[i % MOCK_NAMES.length];
-    const time = randomBetween(45, 300);
-    results.push({
-      id: generateId(),
-      gameId: 'harry-memory',
-      gameName: 'Memória dos Bruxos',
-      playerName: name,
-      playerEmail: `${name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')}@geekverse.com`,
-      difficulty,
-      status: 'completed',
-      score: null,
-      timeInSeconds: time,
-      formattedTime: formatTime(time),
-      attempts: randomBetween(15, 60),
-      errors: 0,
-      hits: 0,
-      pairs: difficulty === 'easy' ? 15 : difficulty === 'medium' ? 20 : 25,
-      hints: 0,
-      penalties: 0,
-      crystals: 0,
-      obstaclesDodged: 0,
-      collisions: 0,
-      mainMetric: time,
-      createdAt: new Date(Date.now() - randomBetween(0, 7 * 86400000)).toISOString(),
-    });
-  }
-  return results;
-}
-
-function generateMockPokeSombra(difficulty, count) {
-  const results = [];
-  for (let i = 0; i < count; i++) {
-    const name = MOCK_NAMES[i % MOCK_NAMES.length];
-    const time = randomBetween(45, 180);
-    const errors = randomBetween(0, 5);
-    const hints = randomBetween(0, 3);
-    const penalties = errors * 10 + hints * 5;
-    const finalTime = time + penalties;
-    results.push({
-      id: generateId(),
-      gameId: 'pokesombra',
-      gameName: 'PokeSombra',
-      playerName: name,
-      playerEmail: `${name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')}@geekverse.com`,
-      difficulty,
-      status: 'completed',
-      score: randomBetween(500, 5000),
-      timeInSeconds: finalTime,
-      formattedTime: formatTime(finalTime),
-      attempts: randomBetween(1, 10),
-      errors,
-      hits: 0,
-      pairs: 0,
-      hintsUsed: hints,
-      hints,
-      penalties,
-      crystals: 0,
-      obstaclesDodged: 0,
-      collisions: 0,
-      mainMetric: formatTime(finalTime),
-      createdAt: new Date(Date.now() - randomBetween(0, 7 * 86400000)).toISOString(),
-    });
-  }
-  return results;
-}
-
-function generateMockGeneric(gameId, gameName, difficulty, count) {
-  const results = [];
-  for (let i = 0; i < count; i++) {
-    const name = MOCK_NAMES[i % MOCK_NAMES.length];
-    const score = randomBetween(500, 5000);
-    const time = randomBetween(30, 180);
-    results.push({
-      id: generateId(),
-      gameId,
-      gameName,
-      playerName: name,
-      playerEmail: `${name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')}@geekverse.com`,
-      difficulty,
-      status: 'completed',
-      score,
-      timeInSeconds: time,
-      formattedTime: formatTime(time),
-      attempts: randomBetween(1, 30),
-      errors: randomBetween(0, 10),
-      hits: randomBetween(5, 30),
-      pairs: 0,
-      hints: randomBetween(0, 5),
-      penalties: randomBetween(0, 3),
-      crystals: randomBetween(0, 20),
-      obstaclesDodged: randomBetween(5, 50),
-      collisions: randomBetween(0, 8),
-      mainMetric: score,
-      createdAt: new Date(Date.now() - randomBetween(0, 7 * 86400000)).toISOString(),
-    });
-  }
-  return results;
-}
-
-export function seedMockData() {
-  // Não sobrescreve se já houver dados
-  const existing = getAllResults();
-  if (existing.length > 0) {
-    // Força a atualização dos mocks para PokeSombra caso os antigos usem score
-    const hasOldPokeSombra = existing.some(r => r.gameId === 'pokesombra' && typeof r.mainMetric === 'number');
-    if (hasOldPokeSombra) {
-       const filtered = existing.filter(r => r.gameId !== 'pokesombra');
-       let pokeMocks = [];
-       const diffs = ['easy', 'medium', 'challenge'];
-       diffs.forEach((d) => { pokeMocks = pokeMocks.concat(generateMockPokeSombra(d, 12)); });
-       localStorage.setItem(STORAGE_KEY, JSON.stringify([...filtered, ...pokeMocks]));
-    }
-    return;
-  }
-
-  let all = [];
-  const diffs = ['easy', 'medium', 'challenge'];
-
-  diffs.forEach((d) => {
-    all = all.concat(generateMockHarryMemory(d, 12));
-    all = all.concat(generateMockPokeSombra(d, 12));
-    all = all.concat(generateMockGeneric('show-multiverso', 'Show do Multiverso', d, 12));
-    all = all.concat(generateMockGeneric('fuga-hiperespaco', 'Fuga do Hiperespaço', d, 12));
-  });
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-}

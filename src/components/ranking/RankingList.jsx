@@ -1,4 +1,4 @@
-// RankingList.jsx
+
 // Lista de posições do 4º ao 10º lugar.
 // Destaca o jogador logado com badge "Você".
 // padTo: preenche com traços até atingir esse total de linhas.

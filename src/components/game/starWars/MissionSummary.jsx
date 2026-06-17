@@ -1,8 +1,8 @@
-// MissionSummary.jsx
+
 // Tela de resumo completo da missão com todos os stats calculados.
 // Inclui seção "Efeitos da Combinação" com atributos finais e sinergias.
 
-// Imports de ícones removidos — não usados neste componente.
+// Imports de ícones removidosnão usados neste componente.
 
 const StatRow = ({ label, value, unit }) => (
   <div className="sw-summary-stat">

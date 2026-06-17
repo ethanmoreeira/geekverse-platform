@@ -1,572 +1,55 @@
-// HyperdriveEscape.jsx
-// Arena jogável: Fuga do Hiperespaço.
-// Movimento em 4 direções com aceleração, efeito de profundidade,
-// cristais de hiperespaço, 4 tipos de obstáculos, pontuação por ação.
-// Usa requestAnimationFrame (rAF) para o game loop.
-// Dados mutáveis em useRef; apenas o que precisa de render em useState.
-
-import { useState, useEffect, useRef, useMemo } from 'react';
-import {
-  FaArrowLeft, FaRedo,
-  FaChevronLeft, FaChevronRight, FaChevronUp, FaChevronDown, FaFileExport
-} from 'react-icons/fa';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
 import { sendGameResultEmail } from '../../../services/emailService';
 import { hasEmailExportBeenSent, markEmailExportAsSent, buildResultKey } from '../../../utils/emailExportControl';
 import { logAuditEvent } from '../../../services/auditService';
 import spaceshipSpriteImg from '../../../assets/backgrounds/star-wars/spaceship_sprite_topdown.png';
-import { stopAllFugaMusic, switchToFugaArenaMusic } from '../../../services/audioService';
 
-// Controle experimental de gamepad — usado apenas para mover a nave
 import { useGamepadControls } from '../../../experimental/gamepad/useGamepadControls';
-
-// ─── Constantes ─────────────────────────────────────────────────────
-
-const GAME_STATUS = {
-  READY: 'ready',
-  COUNTDOWN: 'countdown',
-  PLAYING: 'playing',
-  WON: 'won',
-  LOST: 'lost',
-};
-
-const ARENA_W = 100; // percentual
-const ARENA_H = 100;
-
-// Tipos de obstáculo
-const OBSTACLE_TYPES = [
-  { type: 'small', css: 'sw-obstacle-small', w: 3, h: 3, speedMult: 1.3, weight: 35 },
-  { type: 'medium', css: 'sw-obstacle-medium', w: 4.5, h: 4.5, speedMult: 1.0, weight: 35 },
-  { type: 'large', css: 'sw-obstacle-large', w: 6, h: 6, speedMult: 0.7, weight: 15 },
-  { type: 'debris', css: 'sw-obstacle-debris', w: 4, h: 2.2, speedMult: 1.15, weight: 15 },
-];
-
-const TARGETED_OBSTACLE_CHANCE_BY_LEVEL = {
-  'Fácil': 0.30,
-  'Médio': 0.40,
-  'Difícil': 0.50,
-};
-
-// ─── Helpers ────────────────────────────────────────────────────────
-
-const pickObstacleType = (planetDanger) => {
-  // Maior perigo do planeta = mais asteroides grandes
-  const adjusted = OBSTACLE_TYPES.map(o => ({
-    ...o,
-    weight: o.type === 'large' || o.type === 'debris'
-      ? o.weight + planetDanger * 2
-      : o.weight,
-  }));
-  const totalWeight = adjusted.reduce((s, o) => s + o.weight, 0);
-  let r = Math.random() * totalWeight;
-  for (const o of adjusted) {
-    r -= o.weight;
-    if (r <= 0) return o;
-  }
-  return adjusted[1];
-};
-
-const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
-
-// Escala de profundidade: objetos começam pequenos e crescem ao se aproximar
-const getDepthScale = (progress) => 0.3 + progress * 0.7; // 0.3 → 1.0
-const getDepthOpacity = (progress) => 0.2 + progress * 0.8; // 0.2 → 1.0
-
-// ─── Rastros de estrelas para o fundo ───────────────────────────────
-
-const StarField = () => {
-  const stars = useMemo(() => {
-    return Array.from({ length: 40 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      height: 8 + Math.random() * 25,
-      duration: 1.5 + Math.random() * 2.5,
-      delay: Math.random() * 4,
-      opacity: 0.15 + Math.random() * 0.35,
-    }));
-  }, []);
-
-  return (
-    <div className="sw-arena-starfield">
-      {stars.map(s => (
-        <div
-          key={s.id}
-          className="sw-star-streak"
-          style={{
-            left: `${s.left}%`,
-            height: `${s.height}px`,
-            animationDuration: `${s.duration}s`,
-            animationDelay: `${s.delay}s`,
-            opacity: s.opacity,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// ─── Componente ─────────────────────────────────────────────────────
+import { GAME_STATUS, clamp } from './hyperdrive/constants';
+import { useHyperdriveEngine } from '../../../hooks/useHyperdriveEngine';
+import StarField from './hyperdrive/StarField';
+import HyperdriveHUD from './hyperdrive/HyperdriveHUD';
+import HyperdriveMobileControls from './hyperdrive/HyperdriveMobileControls';
+import HyperdriveResultScreen from './hyperdrive/HyperdriveResultScreen';
 
 const HyperdriveEscape = ({
   missionStats,
   onBackToBuilder,
+  musicController
 }) => {
-  // ── Estado para render ──
-  const [gameStatus, setGameStatus] = useState(GAME_STATUS.READY);
-  const [renderTick, setRenderTick] = useState(0);
   const [exportFeedback, setExportFeedback] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const [matchKey, setMatchKey] = useState(null);
-  const [countdownValue, setCountdownValue] = useState(null);
 
-  // ── Auth & Ranking ──
   const { user } = useAuth();
   const hasSavedRankingRef = useRef(false);
-
-  // ── Refs mutáveis (dados de frame, nunca causam re-render) ──
-  const gameRef = useRef(null);
   const arenaRef = useRef(null);
-  const tickRef = useRef(null);
-
-  // Controle experimental de gamepad — apenas movimento da nave
+  
   const { gamepadInputRef } = useGamepadControls();
 
-  // ── Parâmetros derivados de missionStats (com fallbacks seguros) ──
+  const {
+    gameStatus,
+    setGameStatus,
+    renderTick,
+    countdownValue,
+    gameRef,
+    startGame,
+    handleMobileDown,
+    handleMobileUp,
+  } = useHyperdriveEngine(missionStats, gamepadInputRef, musicController);
+
   const ms = missionStats || {};
   const duration = ms.routeDuration || ms.duration || 45;
-  const obstacleSpawnRate = ms.obstacleSpawnRate || ms.spawnRate || 1500;
-  const crystalSpawnRate = ms.crystalSpawnRate || 3500;
-  const obstacleSpeed = ms.obstacleSpeed || ms.asteroidSpeed || 2;
-  const finalHandling = ms.finalHandling || 10;
-  const finalLives = ms.finalLives || 3;
-  const finalSpeed = ms.finalSpeed || 10;
-  const finalAcceleration = ms.finalAcceleration || 0.8;
-  const shipHitboxSize = ms.shipHitboxSize || 7;
   const crystalValue = ms.crystalValue || 100;
-  const collectionRadius = ms.collectionRadius || 30;
   const collisionPenalty = ms.collisionPenalty || 150;
   const scoreMultiplier = ms.scoreMultiplier || 1;
-  const planetDanger = ms.planetDanger || 1;
   const synergyBonus = ms.synergyBonus || 0;
   const activeEffects = ms.activeEffects || [];
   const difficultyLabel = ms.difficultyLabel || 'Fácil';
 
-  // Parâmetros de movimento da nave derivados das stats (suavizado)
-  const diffFactor = planetDanger >= 3 ? 1.0 : (planetDanger >= 2 ? 0.70 : 0.60);
-  const maxMoveSpeed = (0.35 + finalSpeed * 0.035) * diffFactor; // % por frame
-  const accel = (0.025 + finalAcceleration * 0.015) * diffFactor;
-  const friction = 0.80 + finalHandling * 0.003; // menor = para mais rápido = mais controle
-  const hitboxHalf = shipHitboxSize / 2;
-
-  // ── Hypercrystal Schedule Helper ──
-  const generateHyperCrystalSchedule = (totalDuration, diffLabel) => {
-    const l = diffLabel.toLowerCase();
-    let quota = 2; // Padrão para fácil
-    if (l.includes('médio') || l.includes('medio')) quota = 4;
-    if (l.includes('difícil') || l.includes('dificil')) quota = 6;
-    
-    const schedule = [];
-    const blockTime = totalDuration / quota;
-    for (let i = 0; i < quota; i++) {
-       const minTime = i * blockTime + (blockTime * 0.15); // evita bordas exatas
-       const maxTime = (i + 1) * blockTime - (blockTime * 0.15); 
-       schedule.push(minTime + Math.random() * (maxTime - minTime));
-    }
-    return schedule.sort((a, b) => a - b);
-  };
-
-  // ── Init game ref ──
-  const initGameState = () => ({
-    status: GAME_STATUS.READY,
-    shipX: 50,
-    shipY: 80,
-    velX: 0,
-    velY: 0,
-    obstacles: [],
-    crystals: [],
-    feedbacks: [],
-    lives: finalLives,
-    score: 0,
-    crystalsCollected: 0,
-    hyperCrystalsCollected: 0,
-    obstaclesDodged: 0,
-    collisions: 0,
-    startTime: 0,
-    lastObstacleSpawn: 0,
-    lastCrystalSpawn: 0,
-    timeLeft: duration,
-    keysDown: {},
-    mobileDir: { x: 0, y: 0 },
-    frameId: null,
-    mounted: true,
-    flashUntil: 0,
-    hyperCrystalsSpawned: 0,
-    hyperCrystalSchedule: generateHyperCrystalSchedule(duration, difficultyLabel),
-  });
-
-  if (!gameRef.current) {
-    gameRef.current = initGameState();
-  }
-
-  // ──────────────────────────────────────────────────────────────────
-  // KEYBOARD
-  // ──────────────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    const onDown = (e) => {
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'a', 'd', 'w', 's', 'A', 'D', 'W', 'S'].includes(e.key)) {
-        e.preventDefault();
-        gameRef.current.keysDown[e.key] = true;
-      }
-    };
-    const onUp = (e) => {
-      delete gameRef.current.keysDown[e.key];
-    };
-    window.addEventListener('keydown', onDown);
-    window.addEventListener('keyup', onUp);
-    return () => {
-      window.removeEventListener('keydown', onDown);
-      window.removeEventListener('keyup', onUp);
-    };
-  }, []);
-
-  // ──────────────────────────────────────────────────────────────────
-  // GAME LOOP
-  // ──────────────────────────────────────────────────────────────────
-
-  tickRef.current = (now) => {
-    const g = gameRef.current;
-    if (!g.mounted || g.status !== GAME_STATUS.PLAYING) return;
-
-    const elapsed = (now - g.startTime) / 1000;
-    const remaining = Math.max(0, duration - elapsed);
-    g.timeLeft = Math.ceil(remaining);
-
-    // ── Mover a nave com aceleração ──
-    const keys = g.keysDown;
-    let dirX = 0, dirY = 0;
-    if (keys['ArrowLeft'] || keys['a'] || keys['A']) dirX -= 1;
-    if (keys['ArrowRight'] || keys['d'] || keys['D']) dirX += 1;
-    if (keys['ArrowUp'] || keys['w'] || keys['W']) dirY -= 1;
-    if (keys['ArrowDown'] || keys['s'] || keys['S']) dirY += 1;
-
-    // Sobrescreve com direção mobile, se houver
-    if (g.mobileDir.x !== 0) dirX = g.mobileDir.x;
-    if (g.mobileDir.y !== 0) dirY = g.mobileDir.y;
-
-    // Integração com gamepad experimental (apenas movimento)
-    if (gamepadInputRef && gamepadInputRef.current) {
-      dirX += gamepadInputRef.current.moveX;
-      dirY += gamepadInputRef.current.moveY;
-
-      // Clamp para evitar aceleração dupla se usar teclado + controle juntos
-      dirX = Math.max(-1, Math.min(1, dirX));
-      dirY = Math.max(-1, Math.min(1, dirY));
-    }
-
-    // Aplicar aceleração
-    if (dirX !== 0) {
-      g.velX += dirX * accel;
-    } else {
-      g.velX *= (1 - (1 - friction) * 4); // drag mais forte (para mais rápido)
-    }
-    if (dirY !== 0) {
-      g.velY += dirY * accel;
-    } else {
-      g.velY *= (1 - (1 - friction) * 4);
-    }
-
-    // Limitar velocidade máxima
-    g.velX = clamp(g.velX, -maxMoveSpeed, maxMoveSpeed);
-    g.velY = clamp(g.velY, -maxMoveSpeed, maxMoveSpeed);
-
-    // Aplicar velocidade
-    g.shipX = clamp(g.shipX + g.velX, hitboxHalf + 1, ARENA_W - hitboxHalf - 1);
-    g.shipY = clamp(g.shipY + g.velY, 15, ARENA_H - 5);
-
-    // ── Spawn obstacles ──
-    const spawnMult = planetDanger >= 3 ? 0.65 : (planetDanger >= 2 ? 0.75 : 0.85);
-    const finalSpawnRate = obstacleSpawnRate * spawnMult;
-    if (now - g.lastObstacleSpawn > finalSpawnRate) {
-      g.lastObstacleSpawn = now;
-      const oType = pickObstacleType(planetDanger);
-      const x = 10 + Math.random() * 80; // distribui pela largura
-      const speedVariance = 0.8 + Math.random() * 0.4;
-      const computedSpeed = obstacleSpeed * oType.speedMult * speedVariance;
-
-      let isTargeted = false;
-      let velX = 0;
-      let velY = 0;
-
-      const targetedChance = TARGETED_OBSTACLE_CHANCE_BY_LEVEL[difficultyLabel] ?? 0.40;
-
-      if (Math.random() < targetedChance) {
-        isTargeted = true;
-        const dx = g.shipX - x;
-        const dy = g.shipY - (-2);
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const baseSpeed = computedSpeed * 0.15; // Ligeiramente maior ou igual ao padrao 0.14
-        velX = (dx / dist) * baseSpeed;
-        velY = (dy / dist) * baseSpeed;
-      }
-
-      g.obstacles.push({
-        id: now + Math.random(),
-        x,
-        y: -2, // começa acima da arena
-        speed: computedSpeed,
-        isTargeted,
-        velX,
-        velY,
-        ...oType,
-      });
-    }
-
-    // ── Spawn crystals and hypercrystals ──
-    
-    // Spawn independente de hipercristais
-    if (g.hyperCrystalSchedule.length > 0 && elapsed >= g.hyperCrystalSchedule[0]) {
-      g.hyperCrystalSchedule.shift(); // Remove da fila
-      g.hyperCrystalsSpawned += 1;
-      
-      if (import.meta.env.DEV) {
-        console.log(`[HyperdriveEscape] Hipercristal gerado ${g.hyperCrystalsSpawned}`);
-      }
-
-      g.crystals.push({
-        id: now + Math.random(),
-        x: 10 + Math.random() * 80,
-        y: -2,
-        speed: obstacleSpeed * 1.0,
-        isHyper: true
-      });
-    }
-
-    // Spawn de cristais comuns
-    if (now - g.lastCrystalSpawn > crystalSpawnRate) {
-      g.lastCrystalSpawn = now;
-      g.crystals.push({
-        id: now + Math.random(),
-        x: 10 + Math.random() * 80,
-        y: -2,
-        speed: obstacleSpeed * 0.8,
-        isHyper: false
-      });
-    }
-
-    // ── Mover obstáculos e verificar colisões ──
-    const shipL = g.shipX - hitboxHalf;
-    const shipR = g.shipX + hitboxHalf;
-    const shipT = g.shipY - hitboxHalf;
-    const shipB = g.shipY + hitboxHalf;
-
-    const aliveObstacles = [];
-    for (const o of g.obstacles) {
-      if (o.isTargeted) {
-        o.x += o.velX;
-        o.y += o.velY;
-      } else {
-        o.y += o.speed * 0.14;
-      }
-
-      if (o.y > 105 || o.x < -20 || o.x > 120) {
-        // Dodged (apenas pontua se passou pelo fundo)
-        if (o.y > 105) {
-          g.obstaclesDodged += 1;
-          g.score += 30;
-        }
-        continue;
-      }
-
-      // Verificar colisão
-      const oL = o.x - o.w / 2;
-      const oR = o.x + o.w / 2;
-      const oT = o.y - o.h / 2;
-      const oB = o.y + o.h / 2;
-
-      if (oR > shipL && oL < shipR && oB > shipT && oT < shipB) {
-        g.lives -= 1;
-        g.collisions += 1;
-        g.score = Math.max(0, g.score - collisionPenalty);
-        g.flashUntil = now + 300;
-        continue;
-      }
-      aliveObstacles.push(o);
-    }
-    g.obstacles = aliveObstacles;
-
-    // ── Mover cristais e verificar coleta ──
-    g.crystals = g.crystals.filter(c => {
-      c.y += c.speed * 0.14;
-      if (c.y > 105) {
-        if (c.isHyper && import.meta.env.DEV) {
-           console.log('[HyperdriveEscape] Hipercristal saiu da arena sem coleta');
-        }
-        return false;
-      }
-
-      const dx = c.x - g.shipX;
-      const dy = c.y - g.shipY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < collectionRadius / 10) {
-        if (c.isHyper) {
-          g.score += 300 * scoreMultiplier;
-          g.hyperCrystalsCollected += 1;
-          g.feedbacks.push({ id: Date.now(), x: c.x, y: c.y, text: `+${300 * scoreMultiplier} Hipercristal!`, created: now });
-          if (import.meta.env.DEV) {
-            console.log(`[HyperdriveEscape] Hipercristal coletado ${g.hyperCrystalsCollected}`);
-          }
-        } else {
-          g.score += crystalValue * scoreMultiplier;
-          g.crystalsCollected += 1;
-          g.feedbacks.push({ id: Date.now(), x: c.x, y: c.y, text: `+${crystalValue * scoreMultiplier}`, created: now });
-        }
-        return false;
-      }
-      return true;
-    });
-
-    // Limpar feedbacks antigos
-    g.feedbacks = g.feedbacks.filter(f => now - f.created < 800);
-
-    // ── Condições de fim de jogo ──
-    if (g.lives <= 0) {
-      g.status = GAME_STATUS.LOST;
-      setGameStatus(GAME_STATUS.LOST);
-      setRenderTick(t => t + 1);
-      return;
-    }
-    if (remaining <= 0) {
-      g.status = GAME_STATUS.WON;
-      g.score += 500;
-      g.score += synergyBonus;
-      g.score = Math.round(g.score * scoreMultiplier);
-      g.score = Math.max(0, g.score);
-      setGameStatus(GAME_STATUS.WON);
-      setRenderTick(t => t + 1);
-      return;
-    }
-
-    // ── Disparar re-render ──
-    setRenderTick(t => t + 1);
-
-    // Agendar próximo frame
-    g.frameId = requestAnimationFrame(tickRef.current);
-  };
-
-  // ──────────────────────────────────────────────────────────────────
-  // START / RESTART
-  // ──────────────────────────────────────────────────────────────────
-
-  const startGame = () => {
-    const g = gameRef.current;
-
-    if (g.frameId) {
-      cancelAnimationFrame(g.frameId);
-      g.frameId = null;
-    }
-
-    // Reset para fase COUNTDOWN (nav visível, mas sem movimento ou tempo)
-    Object.assign(g, {
-      status: GAME_STATUS.COUNTDOWN,
-      shipX: 50,
-      shipY: 80,
-      velX: 0,
-      velY: 0,
-      obstacles: [],
-      crystals: [],
-      feedbacks: [],
-      lives: finalLives,
-      score: 0,
-      crystalsCollected: 0,
-      hyperCrystalsCollected: 0,
-      obstaclesDodged: 0,
-      collisions: 0,
-      timeLeft: duration,
-      keysDown: {},
-      mobileDir: { x: 0, y: 0 },
-    });
-
-    setGameStatus(GAME_STATUS.COUNTDOWN);
-    setCountdownValue(3);
-    setRenderTick(0);
-    hasSavedRankingRef.current = false;
-    setMatchKey(null);
-    setExportFeedback(null);
-
-    // Música começa junto com a contagem
-    switchToFugaArenaMusic();
-  };
-
-  // ── Countdown Effect ──
-  useEffect(() => {
-    if (gameStatus === GAME_STATUS.COUNTDOWN && countdownValue !== null) {
-      if (typeof countdownValue === 'number') {
-        if (countdownValue > 1) {
-          const t = setTimeout(() => {
-            setCountdownValue(countdownValue - 1);
-          }, 1000);
-          return () => clearTimeout(t);
-        } else if (countdownValue === 1) {
-          const t = setTimeout(() => {
-            setCountdownValue(null);
-
-            // Iniciar arena valendo
-            const g = gameRef.current;
-            Object.assign(g, {
-              status: GAME_STATUS.PLAYING,
-              startTime: performance.now(),
-              lastObstacleSpawn: performance.now(),
-              lastCrystalSpawn: performance.now(),
-              flashUntil: 0,
-              hyperCrystalsSpawned: 0,
-              hyperCrystalSchedule: generateHyperCrystalSchedule(duration, difficultyLabel),
-            });
-
-            setGameStatus(GAME_STATUS.PLAYING);
-
-            try {
-              logAuditEvent({
-                eventType: 'game_start',
-                description: 'Usuário iniciou uma partida em Fuga do Hiperespaço',
-                gameId: 'fuga-hiperespaco',
-                gameName: 'Fuga do Hiperespaço',
-                metadata: {
-                  difficulty: difficultyLabel,
-                  startedAt: new Date().toISOString()
-                }
-              });
-            } catch { /* auditoria opcional */ }
-
-            // Libera a engine
-            g.frameId = requestAnimationFrame(tickRef.current);
-          }, 1000);
-          return () => clearTimeout(t);
-        }
-      }
-    }
-  }, [gameStatus, countdownValue, difficultyLabel, duration]);
-
-  // ── Cleanup on unmount ──
-  useEffect(() => {
-    const g = gameRef.current;
-    g.mounted = true;
-    return () => {
-      g.mounted = false;
-      if (g.frameId) {
-        cancelAnimationFrame(g.frameId);
-        g.frameId = null;
-      }
-      // Limpar teclas pressionadas
-      g.keysDown = {};
-      g.mobileDir = { x: 0, y: 0 };
-      // Parar toda música do Fuga ao desmontar
-      stopAllFugaMusic();
-    };
-  }, []);
-
-  // ── Salvar resultado no Ranking quando o jogo terminar (fora do rAF) ──
+  // ── Salvar resultado no Ranking quando o jogo terminar ──
   useEffect(() => {
     if (gameStatus !== GAME_STATUS.WON && gameStatus !== GAME_STATUS.LOST) return;
     if (hasSavedRankingRef.current) return;
@@ -575,10 +58,8 @@ const HyperdriveEscape = ({
     const g = gameRef.current;
     const isWin = gameStatus === GAME_STATUS.WON;
 
-    // Gerar identificador único desta partida para controle de envio de e-mail
     setMatchKey(`${Date.now()}`);
 
-    // Converter rótulo de dificuldade para chave do ranking
     const labelToKey = { 'fácil': 'easy', 'médio': 'medium', 'difícil': 'challenge' };
     const diffKey = labelToKey[difficultyLabel.toLowerCase()] || 'easy';
     const survived = duration - (g.timeLeft || 0);
@@ -625,199 +106,73 @@ const HyperdriveEscape = ({
       }
     });
 
-    stopAllFugaMusic();
+  }, [gameStatus, difficultyLabel, duration, scoreMultiplier, synergyBonus, user, gameRef]);
 
-    if (import.meta.env.DEV) {
-      console.log('[HyperdriveEscape] Resultado salvo no ranking:', payload);
+  // Export
+  const handleExport = async () => {
+    if (!user?.email) {
+      setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+      return;
     }
-  }, [gameStatus, difficultyLabel, duration, scoreMultiplier, synergyBonus, user]);
-
-  // ── Mobile controls ──
-  const handleMobileDown = (dx, dy) => {
-    gameRef.current.mobileDir = { x: dx, y: dy };
+    const exportKey = buildResultKey('fuga-hiperespaco', matchKey);
+    if (hasEmailExportBeenSent(exportKey)) {
+      setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
+      return;
+    }
+    setIsExporting(true);
+    setExportFeedback(null);
+    try {
+      const g = gameRef.current;
+      const isWin = gameStatus === GAME_STATUS.WON;
+      const timeSurvived = duration - (g.timeLeft || 0);
+      const fmtSurv = (s) => { const m = Math.floor(s / 60); const r = Math.round(s % 60); return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`; };
+      await sendGameResultEmail({
+        game_name: 'Fuga do Hiperespaço',
+        player_name: user?.nome || user?.name || 'Jogador GeekVerse',
+        player_email: user.email,
+        difficulty: difficultyLabel,
+        status: isWin ? 'vitória' : 'derrota',
+        result_title: 'Resultado da Fuga do Hiperespaço',
+        result_message: isWin ? 'Você concluiu a missão no hiperespaço.' : 'Você registrou uma tentativa na missão do hiperespaço.',
+        main_metric_label: 'Pontuação final',
+        main_metric_value: Math.max(0, g.score).toLocaleString('pt-BR'),
+        secondary_metrics: `Cristais: ${g.crystalsCollected}\nHipercristais: ${g.hyperCrystalsCollected}\nDesvios: ${g.obstaclesDodged}\nColisões: ${g.collisions}\nTempo de sobrevivência: ${fmtSurv(timeSurvived)}`,
+        generated_at: new Date().toLocaleString('pt-BR'),
+      });
+      markEmailExportAsSent(exportKey);
+      setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
+    } catch {
+      setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
+    } finally {
+      setIsExporting(false);
+    }
   };
-  const handleMobileUp = () => {
-    gameRef.current.mobileDir = { x: 0, y: 0 };
-  };
 
-  // ── Ler estado do jogo para renderização ──
-  const g = gameRef.current;
-  const timeSurvived = duration - (g.timeLeft || 0);
-
-  // ──────────────────────────────────────────────────────────────────
-  // RENDER — RESULT SCREEN
-  // ──────────────────────────────────────────────────────────────────
+  const getDepthScale = (progress) => 0.3 + progress * 0.7;
+  const getDepthOpacity = (progress) => 0.2 + progress * 0.8;
 
   if (gameStatus === GAME_STATUS.WON || gameStatus === GAME_STATUS.LOST) {
-    const isWin = gameStatus === GAME_STATUS.WON;
-    const finalScore = Math.max(0, g.score);
-    const mult = isWin ? scoreMultiplier : 1;
-
-    // Calcula o detalhamento invertendo as multiplicações do final (com arredondamentos seguros)
-    const crystalsPts = Math.round(g.crystalsCollected * crystalValue * scoreMultiplier * mult);
-    const hyperPts = Math.round(g.hyperCrystalsCollected * 300 * scoreMultiplier * mult);
-    const dodgePts = Math.round(g.obstaclesDodged * 30 * mult);
-    const colPts = Math.round(g.collisions * collisionPenalty * mult);
-    const survPts = isWin ? Math.round((500 + synergyBonus) * mult) : 0;
-
     return (
-      <div className="sw-game-result">
-        <div className={`sw-result-card ${isWin ? 'sw-result-card-victory' : 'sw-result-card-defeat'}`}>
-          <div className="sw-result-header">
-            <h2 className="sw-result-title">
-              {isWin ? 'Fuga concluida com sucesso' : 'Nave destruida'}
-            </h2>
-          </div>
-
-          <div className="sw-result-body" style={{ display: 'flex', justifyContent: 'center' }}>
-            {/* Coluna Única: Resultado */}
-            <div className="sw-result-column" style={{ width: '100%', maxWidth: '450px' }}>
-              <h3 className="sw-result-column-title">Resultado da Partida</h3>
-              <div className="sw-result-stat sw-result-stat-highlight">
-                <span className="sw-result-stat-label">Pontuacao final</span>
-                <span className="sw-result-stat-value">
-                  {finalScore.toLocaleString('pt-BR')} pts
-                </span>
-              </div>
-              <div className="sw-result-stats">
-                <div className="sw-result-stat">
-                  <span className="sw-result-stat-label">Cristais</span>
-                  <span className="sw-result-stat-value">{g.crystalsCollected}</span>
-                </div>
-                {g.hyperCrystalsCollected > 0 && (
-                  <div className="sw-result-stat">
-                    <span className="sw-result-stat-label">Hipercristais</span>
-                    <span className="sw-result-stat-value sw-text-cyan-bright">{g.hyperCrystalsCollected}</span>
-                  </div>
-                )}
-                <div className="sw-result-stat">
-                  <span className="sw-result-stat-label">Desvios</span>
-                  <span className="sw-result-stat-value">{g.obstaclesDodged}</span>
-                </div>
-                <div className="sw-result-stat">
-                  <span className="sw-result-stat-label">Colisoes</span>
-                  <span className="sw-result-stat-value">{g.collisions}</span>
-                </div>
-              </div>
-
-              <div className="sw-result-breakdown">
-                <div className="sw-result-breakdown-title">Detalhamento</div>
-                <div className="sw-result-breakdown-grid">
-                  <div className="sw-result-breakdown-item">
-                    <span>Cristais ({g.crystalsCollected}):</span>
-                    <span className="sw-text-cyan">+{crystalsPts}</span>
-                  </div>
-                  {g.hyperCrystalsCollected > 0 && (
-                    <div className="sw-result-breakdown-item">
-                      <span>Hipercristais ({g.hyperCrystalsCollected}):</span>
-                      <span className="sw-text-cyan-bright">+{hyperPts}</span>
-                    </div>
-                  )}
-                  <div className="sw-result-breakdown-item">
-                    <span>Desvios ({g.obstaclesDodged}):</span>
-                    <span className="sw-text-cyan">+{dodgePts}</span>
-                  </div>
-                  {g.collisions > 0 && (
-                    <div className="sw-result-breakdown-item">
-                      <span>Colisoes ({g.collisions}):</span>
-                      <span className="sw-text-cyan-dim">-{colPts}</span>
-                    </div>
-                  )}
-                  {isWin && (
-                    <div className="sw-result-breakdown-item">
-                      <span>Sobrevivencia:</span>
-                      <span className="sw-text-cyan">+{survPts}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Efeitos e sinergias */}
-          {activeEffects.length > 0 && (
-            <details className="sw-result-effects-details">
-              <summary className="sw-result-effects-summary">Ver efeitos da build</summary>
-              <div className="sw-result-effects-content">
-                {activeEffects.map((e, i) => (
-                  <div
-                    key={i}
-                    className={`sw-result-effect-item ${e.type === 'synergy' ? 'sw-effect-synergy' : ''}`}
-                  >
-                    {e.text}
-                  </div>
-                ))}
-              </div>
-            </details>
-          )}
-
-          <div className="sw-result-actions">
-            <button className="sw-btn sw-btn-primary" onClick={startGame} type="button">
-              <FaRedo /> Jogar novamente
-            </button>
-            <button className="sw-btn sw-btn-secondary" onClick={onBackToBuilder} type="button">
-              <FaArrowLeft /> Editar missao
-            </button>
-            <button
-              className="sw-btn sw-btn-secondary starwars-export-button"
-              type="button"
-              id="btn-export-starwars"
-              disabled={isExporting || (matchKey && hasEmailExportBeenSent(buildResultKey('fuga-hiperespaco', matchKey)))}
-              onClick={async () => {
-                if (!user?.email) {
-                  setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
-                  return;
-                }
-                // Guard: bloquear reenvio da mesma partida
-                const exportKey = buildResultKey('fuga-hiperespaco', matchKey);
-                if (hasEmailExportBeenSent(exportKey)) {
-                  setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
-                  return;
-                }
-                setIsExporting(true);
-                setExportFeedback(null);
-                try {
-                  const fmtSurv = (s) => { const m = Math.floor(s / 60); const r = Math.round(s % 60); return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`; };
-                  await sendGameResultEmail({
-                    game_name: 'Fuga do Hiperespaço',
-                    player_name: user?.nome || user?.name || 'Jogador GeekVerse',
-                    player_email: user.email,
-                    difficulty: difficultyLabel,
-                    status: isWin ? 'vitória' : 'derrota',
-                    result_title: 'Resultado da Fuga do Hiperespaço',
-                    result_message: isWin
-                      ? 'Você concluiu a missão no hiperespaço.'
-                      : 'Você registrou uma tentativa na missão do hiperespaço.',
-                    main_metric_label: 'Pontuação final',
-                    main_metric_value: finalScore.toLocaleString('pt-BR'),
-                    secondary_metrics: `Cristais: ${g.crystalsCollected}\nHipercristais: ${g.hyperCrystalsCollected}\nDesvios: ${g.obstaclesDodged}\nColisões: ${g.collisions}\nTempo de sobrevivência: ${fmtSurv(timeSurvived)}`,
-                    generated_at: new Date().toLocaleString('pt-BR'),
-                  });
-                  // Marcar como enviado APENAS após sucesso
-                  markEmailExportAsSent(exportKey);
-                  setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
-                  try { logAuditEvent({ eventType: 'result_email_send', description: `E-mail de resultado enviado para Fuga do Hiperespaço`, gameId: 'fuga-hiperespaco', gameName: 'Fuga do Hiperespaço' }); } catch { /* auditoria opcional */ }
-                } catch {
-                  setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
-                } finally {
-                  setIsExporting(false);
-                }
-              }}
-            >
-              <FaFileExport /> {isExporting ? 'Enviando...' : (isWin ? 'Exportar resultado' : 'Exportar tentativa')}
-            </button>
-            {exportFeedback && (
-              <span className={`gv-export-feedback gv-export-feedback--${exportFeedback.type}`}>{exportFeedback.text}</span>
-            )}
-          </div>
-        </div>
-      </div>
+      <HyperdriveResultScreen 
+        gameStatus={gameStatus}
+        g={gameRef.current}
+        scoreMultiplier={scoreMultiplier}
+        crystalValue={crystalValue}
+        collisionPenalty={collisionPenalty}
+        synergyBonus={synergyBonus}
+        activeEffects={activeEffects}
+        startGame={() => {
+          hasSavedRankingRef.current = false;
+          startGame();
+        }}
+        onBackToBuilder={onBackToBuilder}
+        isExporting={isExporting}
+        exportFeedback={exportFeedback}
+        onExport={handleExport}
+        matchKey={matchKey}
+      />
     );
   }
-
-  // ──────────────────────────────────────────────────────────────────
-  // RENDER — READY SCREEN
-  // ──────────────────────────────────────────────────────────────────
 
   if (gameStatus === GAME_STATUS.READY) {
     return (
@@ -825,83 +180,36 @@ const HyperdriveEscape = ({
         <div className="sw-arena-ready-overlay">
           <img src={spaceshipSpriteImg} alt="Nave" className="sw-arena-ready-icon" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
           <h2 className="sw-arena-ready-title" style={{ color: '#38d9ff' }}>Pronto para a fuga?</h2>
-
           <p className="sw-arena-ready-sub" style={{ fontSize: '0.72rem', color: '#38d9ff' }}>
             Use WASD ou setas para mover em 4 direcoes
           </p>
-          <button className="sw-btn sw-btn-primary sw-btn-glow" onClick={startGame} type="button">
+          <button className="sw-btn sw-btn-primary sw-btn-glow" onClick={() => {
+            hasSavedRankingRef.current = false;
+            startGame();
+          }} type="button">
             Iniciar Fuga
           </button>
         </div>
-
       </div>
     );
   }
 
-  // ──────────────────────────────────────────────────────────────────
-  // RENDER — PLAYING SCREEN
-  // ──────────────────────────────────────────────────────────────────
-
+  const g = gameRef.current;
   const showFlash = g.flashUntil > performance.now();
 
   return (
     <div className="sw-arena-screen">
-      {/* HUD fora da arena para ficar limpo */}
-      <div className="sw-game-hud">
-        <div className="sw-hud-item">
-          <span className="sw-hud-label">TEMPO</span>
-          <span className="sw-hud-value">{g.timeLeft}s</span>
-        </div>
-        <div className="sw-hud-item sw-hud-lives">
-          <span className="sw-hud-label">VIDAS</span>
-          <span className="sw-hud-value">{g.lives}</span>
-        </div>
-        <div className="sw-hud-item">
-          <span className="sw-hud-label">PONTOS</span>
-          <span className="sw-hud-value">{Math.max(0, g.score)}</span>
-        </div>
-        <div className="sw-hud-item">
-          <span className="sw-hud-label">CRISTAIS</span>
-          <span className="sw-hud-value">{g.crystalsCollected}</span>
-        </div>
-        <div className="sw-hud-item">
-          <span className="sw-hud-label">HIPERCRISTAIS</span>
-          <span className="sw-hud-value" style={{ color: '#7dd3fc', textShadow: '0 0 5px rgba(125,211,252,0.5)' }}>{g.hyperCrystalsCollected}</span>
-        </div>
-        <div className="sw-hud-item">
-          <span className="sw-hud-label">DESVIOS</span>
-          <span className="sw-hud-value">{g.obstaclesDodged}</span>
-        </div>
-        <div className="sw-hud-item">
-          <span className="sw-hud-label">COLISOES</span>
-          <span className="sw-hud-value">{g.collisions}</span>
-        </div>
-        <div className="sw-hud-item">
-          <span className="sw-hud-label">DIF.</span>
-          <span className="sw-hud-value sw-hud-value-sm">{difficultyLabel}</span>
-        </div>
-      </div>
+      <HyperdriveHUD g={g} difficultyLabel={difficultyLabel} />
 
-      <div
-        className="sw-arena-shell"
-        ref={arenaRef}
-        tabIndex={0}
-      >
+      <div className="sw-arena-shell" ref={arenaRef} tabIndex={0}>
         <StarField />
-
-        {/* Collision flash */}
         {showFlash && <div className="sw-collision-flash" />}
-
-        {/* Countdown Overlay */}
         {gameStatus === GAME_STATUS.COUNTDOWN && countdownValue && (
           <div className="sw-countdown-overlay">
             <span className="sw-countdown-number">{countdownValue}</span>
           </div>
         )}
 
-        {/* HUD removido de dentro da arena para não sobrepor objetos */}
-
-        {/* Obstacles with depth effect */}
         {g.obstacles.map((o) => {
           const progress = clamp(o.y / 100, 0, 1);
           const scale = getDepthScale(progress);
@@ -920,7 +228,6 @@ const HyperdriveEscape = ({
           );
         })}
 
-        {/* Crystals and Hypercrystals with depth effect */}
         {g.crystals.map((c) => {
           const progress = clamp(c.y / 100, 0, 1);
           const scale = getDepthScale(progress);
@@ -949,7 +256,6 @@ const HyperdriveEscape = ({
           );
         })}
 
-        {/* Collection feedbacks */}
         {g.feedbacks.map((f) => (
           <div
             key={f.id}
@@ -964,7 +270,6 @@ const HyperdriveEscape = ({
           </div>
         ))}
 
-        {/* Ship */}
         <div
           className="sw-player-ship"
           style={{
@@ -979,51 +284,7 @@ const HyperdriveEscape = ({
         </div>
       </div>
 
-      {/* Mobile controls — 4 directions */}
-      <div className="sw-mobile-controls">
-        <div className="sw-mobile-dpad">
-          <button
-            className="sw-mobile-btn sw-mobile-btn-up"
-            onPointerDown={() => handleMobileDown(0, -1)}
-            onPointerUp={handleMobileUp}
-            onPointerLeave={handleMobileUp}
-            type="button"
-            aria-label="Mover cima"
-          >
-            <FaChevronUp />
-          </button>
-          <button
-            className="sw-mobile-btn sw-mobile-btn-left"
-            onPointerDown={() => handleMobileDown(-1, 0)}
-            onPointerUp={handleMobileUp}
-            onPointerLeave={handleMobileUp}
-            type="button"
-            aria-label="Mover esquerda"
-          >
-            <FaChevronLeft />
-          </button>
-          <button
-            className="sw-mobile-btn sw-mobile-btn-down"
-            onPointerDown={() => handleMobileDown(0, 1)}
-            onPointerUp={handleMobileUp}
-            onPointerLeave={handleMobileUp}
-            type="button"
-            aria-label="Mover baixo"
-          >
-            <FaChevronDown />
-          </button>
-          <button
-            className="sw-mobile-btn sw-mobile-btn-right"
-            onPointerDown={() => handleMobileDown(1, 0)}
-            onPointerUp={handleMobileUp}
-            onPointerLeave={handleMobileUp}
-            type="button"
-            aria-label="Mover direita"
-          >
-            <FaChevronRight />
-          </button>
-        </div>
-      </div>
+      <HyperdriveMobileControls handleMobileDown={handleMobileDown} handleMobileUp={handleMobileUp} />
     </div>
   );
 };

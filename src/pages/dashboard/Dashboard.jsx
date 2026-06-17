@@ -1,10 +1,11 @@
-// Dashboard.jsx
+
 // Painel principal do GeekVerse G8.
 // Exibe cards dos 4 jogos oficiais.
 // Estilo arcade geek com grid responsivo.
 
-
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logPageViewOnce } from '../../services/auditService';
 import {
   GiMagicSwirl,
   GiSwordsPower,
@@ -65,15 +66,21 @@ const GAMES = [
   },
 ];
 
-import { playFugaMusic } from '../../services/audioService';
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
+  // Auditoria: registrar acesso ao Dashboard (uma vez por sessão)
+  useEffect(() => {
+    logPageViewOnce({
+      description: 'Acessou o Dashboard',
+      path: '/app',
+      metadata: { page: 'Dashboard' }
+    });
+  }, []);
+
   const handleGameClick = (game) => {
-    if (game.id === 'star-wars') {
-      playFugaMusic();
-    }
     navigate(game.route);
   };
 

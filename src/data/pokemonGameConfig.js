@@ -1,4 +1,4 @@
-// pokemonGameConfig.js
+
 // Configuracao dos niveis do jogo PokeSombra.
 // Define tamanho do board, alvos, limites de ID e penalidades.
 

@@ -1,9 +1,7 @@
-// starWarsMission.js
-// Configuração de dificuldade e cálculo de atributos da missão
-// para o jogo Fuga do Hiperespaço (Star Wars).
-// Cada escolha do jogador gera impacto real e perceptível na arena.
+// Arquivo responsável pela Matemática e pelas Regras do jogo do Star Wars.
+// É aqui que definimos o quão rápido a nave voa, o tamanho do asteroide e os multiplicadores de pontos.
 
-// ─── Configuração de Dificuldade ────────────────────────────────────
+// 
 
 export const DIFFICULTY_CONFIG = {
   easy: {
@@ -47,7 +45,7 @@ export const DIFFICULTY_CONFIG = {
   },
 };
 
-// ─── Mapeamento de hitbox por tamanho da nave ───────────────────────
+// 
 
 const HITBOX_MAP = {
   small: 5,
@@ -56,7 +54,7 @@ const HITBOX_MAP = {
   colossal: 12,
 };
 
-// ─── Sinergias ──────────────────────────────────────────────────────
+// 
 
 const SYNERGY_RULES = [
   {
@@ -138,7 +136,7 @@ const SYNERGY_RULES = [
   },
 ];
 
-// ─── Gerar efeitos descritivos de cada escolha ──────────────────────
+// 
 
 const getShipEffects = (starship) => {
   if (!starship) return [];
@@ -239,13 +237,13 @@ const getVehicleEffects = (vehicle) => {
   return effects;
 };
 
-// ─── Helper Seguro ───────────────────────────────────────────────────
+// 
 const safeNumber = (value, fallback = 0) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 };
 
-// ─── Cálculo dos Stats da Missão ────────────────────────────────────
+// 
 
 /**
  * Calcula os atributos finais da missão com base nas escolhas do jogador.
@@ -257,7 +255,7 @@ const safeNumber = (value, fallback = 0) => {
 export const calculateMissionStats = ({ starship, pilot, planet, vehicle, difficulty }) => {
   const diff = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.easy;
 
-  // ── Velocidade final ──
+  // 
   let finalSpeed = Math.max(
     1,
     safeNumber(starship?.gameSpeed, 5) +
@@ -265,13 +263,13 @@ export const calculateMissionStats = ({ starship, pilot, planet, vehicle, diffic
     safeNumber(vehicle?.equipmentSpeedBonus, 0)
   );
 
-  // ── Aceleração (derivada de speed + handling) ──
+  // 
   let finalAcceleration = Math.max(
     0.3,
     (safeNumber(starship?.gameSpeed, 5) * 0.12) + (safeNumber(starship?.handling, 5) * 0.08)
   );
 
-  // ── Escudo final ──
+  // 
   let finalShield = Math.max(
     1,
     safeNumber(starship?.baseShield, 5) +
@@ -279,7 +277,7 @@ export const calculateMissionStats = ({ starship, pilot, planet, vehicle, diffic
     safeNumber(vehicle?.equipmentShieldBonus, 0)
   );
 
-  // ── Controle final ──
+  // 
   let finalHandling = Math.max(
     1,
     safeNumber(starship?.handling, 5) +
@@ -288,53 +286,52 @@ export const calculateMissionStats = ({ starship, pilot, planet, vehicle, diffic
     safeNumber(planet?.handlingPenalty, 0)
   );
 
-  // ── Vidas finais ──
+  // 
   let finalLives = diff.baseLives;
   // Escudo alto dá vida extra
   if (finalShield >= 15) finalLives += 1;
 
-  // ── Hitbox da nave ──
+  // 
   let shipHitboxSize = HITBOX_MAP[starship?.shipSize || 'medium'] || 7;
 
-  // ── Velocidade dos obstáculos ──
+  // 
   let obstacleSpeed = Math.round(
     (diff.asteroidSpeedBase * (planet?.asteroidSpeedModifier || 1)) * 100
   ) / 100;
 
-  // ── Taxa de spawn de obstáculos ──
+  // 
   let obstacleSpawnRate = Math.max(
     400,
     Math.round(diff.spawnRateBase / (planet?.spawnRateModifier || 1))
   );
 
-  // ── Taxa de spawn de cristais ──
+  // 
   let crystalSpawnRate = diff.crystalSpawnBase;
 
-  // ── Valor do cristal ──
+  // 
   let crystalValue = 100;
 
-  // ── Raio de coleta ──
+  // 
   let collectionRadius = 30;
 
-  // ── Penalidade por colisão ──
+  // 
   let collisionPenalty = 150;
 
-  // ── Perigo do planeta ──
+  // 
   const planetDanger = planet?.planetDanger || 1;
 
-  // ── Multiplicador de score ──
+  // 
   let scoreMultiplier = diff.scoreMultiplier;
 
-  // ── Duração da rota ──
+  // 
   const routeDuration = diff.duration;
 
-  // ── Bonus de sinergia ──
+  // 
   let synergyBonus = 0;
 
-  // ── Efeitos ativos ──
-  let activeEffects = [];
-
-  // ── Aplicar efeitos individuais de cada escolha ──
+  // 
+  // Efeitos visuais da partida
+  // 
 
   // Efeitos específicos por piloto nomeado
   if (pilot?.name === 'Luke Skywalker') {
@@ -383,25 +380,25 @@ export const calculateMissionStats = ({ starship, pilot, planet, vehicle, diffic
     finalHandling = Math.max(1, finalHandling - 1);
   }
 
-  // ── Aplicar sinergias ──
+  // 
   const activeSynergies = [];
   for (const rule of SYNERGY_RULES) {
     if (rule.check(starship, pilot, planet, vehicle)) {
       rule.apply({
-        finalSpeed,
-        finalAcceleration,
-        finalHandling,
-        finalShield,
-        finalLives,
-        shipHitboxSize,
-        obstacleSpeed,
-        obstacleSpawnRate,
-        crystalSpawnRate,
-        crystalValue,
-        collectionRadius,
-        collisionPenalty,
-        scoreMultiplier,
-        synergyBonus,
+        get finalSpeed() { return finalSpeed; },
+        get finalAcceleration() { return finalAcceleration; },
+        get finalHandling() { return finalHandling; },
+        get finalShield() { return finalShield; },
+        get finalLives() { return finalLives; },
+        get shipHitboxSize() { return shipHitboxSize; },
+        get obstacleSpeed() { return obstacleSpeed; },
+        get obstacleSpawnRate() { return obstacleSpawnRate; },
+        get crystalSpawnRate() { return crystalSpawnRate; },
+        get crystalValue() { return crystalValue; },
+        get collectionRadius() { return collectionRadius; },
+        get collisionPenalty() { return collisionPenalty; },
+        get scoreMultiplier() { return scoreMultiplier; },
+        get synergyBonus() { return synergyBonus; },
         // Mutate via object reference
         set finalSpeed(v) { finalSpeed = v; },
         set finalAcceleration(v) { finalAcceleration = v; },
@@ -427,8 +424,8 @@ export const calculateMissionStats = ({ starship, pilot, planet, vehicle, diffic
     }
   }
 
-  // ── Coletar efeitos descritivos ──
-  activeEffects = [
+  // 
+  const activeEffects = [
     ...getShipEffects(starship),
     ...getPilotEffects(pilot),
     ...getPlanetEffects(planet),
@@ -436,7 +433,7 @@ export const calculateMissionStats = ({ starship, pilot, planet, vehicle, diffic
     ...activeSynergies,
   ];
 
-  // ── Clamp final values ──
+  // 
   finalSpeed = Math.min(Math.max(finalSpeed, 1), 25);
   finalAcceleration = Math.min(Math.max(finalAcceleration, 0.2), 3);
   finalHandling = Math.min(Math.max(finalHandling, 1), 25);
@@ -445,10 +442,10 @@ export const calculateMissionStats = ({ starship, pilot, planet, vehicle, diffic
   collisionPenalty = Math.min(Math.max(collisionPenalty, 50), 300);
   crystalValue = Math.min(Math.max(crystalValue, 50), 300);
 
-  // ── Label da dificuldade ──
+  // 
   const difficultyLabel = diff.label;
 
-  // ── Nível de risco geral (1-5) ──
+  // 
   const riskFactors = (
     (planetDanger / 5) * 0.4 +
     (obstacleSpeed / 10) * 0.3 +
@@ -459,13 +456,13 @@ export const calculateMissionStats = ({ starship, pilot, planet, vehicle, diffic
   else if (riskFactors > 0.5) riskLevel = 'Alto';
   else if (riskFactors > 0.3) riskLevel = 'Moderado';
 
-  // ── Score preview (estimativa) ──
+  // 
   const baseScore = routeDuration * 100;
   const diffBonus = scoreMultiplier;
   const dangerBonus = 1 + (planetDanger - 1) * 0.1;
   const scorePreview = Math.round(baseScore * diffBonus * dangerBonus);
 
-  // ── Combination summary ──
+  // 
   const combinationSummary = {
     shipName: starship?.name || '—',
     pilotName: pilot?.name || '—',

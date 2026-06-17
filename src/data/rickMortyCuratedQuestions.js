@@ -1,4 +1,4 @@
-// rickMortyCuratedQuestions.js
+
 // Perguntas curadas para o Show do Multiverso.
 // Cada pergunta é uma pista narrativa sobre um personagem.
 // A resposta é sempre um personagem buscado na Rick and Morty API.
@@ -19,7 +19,7 @@
  * }
  */
 
-// ─── EASY (8 perguntas) ─────────────────────────────────────────────
+// EASY (8 perguntas) 
 export const easyQuestions = [
   {
     id: 'easy_rick_scientist',
@@ -111,7 +111,7 @@ export const easyQuestions = [
   },
 ];
 
-// ─── MEDIUM (12 perguntas) ──────────────────────────────────────────
+//  MEDIUM (12 perguntas) 
 export const mediumQuestions = [
   {
     id: 'medium_unity',
@@ -247,7 +247,7 @@ export const mediumQuestions = [
   },
 ];
 
-// ─── HARD (15 perguntas) ────────────────────────────────────────────
+// HARD (15 perguntas) 
 export const hardQuestions = [
   {
     id: 'hard_abradolf',
@@ -416,7 +416,7 @@ export const hardQuestions = [
   },
 ];
 
-// ─── Exportação unificada ───────────────────────────────────────────
+//  Exportação unificada 
 
 /** Retorna perguntas curadas por modo. */
 export const getCuratedQuestionsByMode = (mode) => {

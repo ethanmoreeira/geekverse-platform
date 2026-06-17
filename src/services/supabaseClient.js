@@ -1,8 +1,7 @@
-// supabaseClient.js
-// Cliente Supabase para o GeekVerse G8.
-// Lê credenciais de import.meta.env (Vite).
-// Se as variáveis não existirem, exporta null — o rankingService
-// usará localStorage como fallback automático.
+
+// O "Porteiro" do Banco de Dados.
+// É ele quem pega as senhas secretas (no arquivo .env) e abre a porta do Supabase na internet.
+// Se a internet cair ou a senha estiver errada, ele avisa o resto do jogo para usar a memória local (fallback).
 
 import { createClient } from '@supabase/supabase-js';
 

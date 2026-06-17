@@ -1,23 +1,5 @@
-// emailService.js
-// Serviço de envio de e-mail via EmailJS (@emailjs/browser).
-// Todas as funções estão preparadas mas NÃO implementadas ainda.
-// O envio real será ativado quando as chaves do EmailJS forem configuradas no .env.
-//
-// Funções:
-// - sendContactEmail      — formulário de contato da página Sobre
-// - sendGameResultEmail   — resultado pessoal de uma partida (enviado ao jogador)
-// - sendRankingEmail      — ranking local por jogo (página Exportar)
-// - sendAuditEmail        — relatório de auditoria de navegação (página Sobre)
-//
-// Fluxo:
-// 1. O usuário joga um ou mais jogos.
-// 2. Os resultados são salvos automaticamente no localStorage via gameHistoryService.
-// 3. O usuário acessa /app/exportar e seleciona o que quer enviar.
-// 4. O sistema monta o payload e envia via EmailJS.
-//
-// IMPORTANTE:
-// - NÃO fazer envio automático a cada navegação.
-// - O envio é sempre MANUAL, feito pelo usuário na página Exportar ou Sobre.
+// Serviço do Carteiro (EmailJS): Responsável por enviar todos os e-mails do jogo.
+// O envio nunca é automático! O usuário sempre tem que clicar no botão "Enviar por E-mail".
 
 import emailjs from '@emailjs/browser';
 
@@ -27,11 +9,7 @@ const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 const TEMPLATE_CONTACT_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_CONTATO;
 const TEMPLATE_GAME_RESULT_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_GAME_RESULT;
 
-/**
- * Envia e-mail de contato a partir do formulário da página Sobre.
- * @param {Object} formData - { name, email, subject, message }
- * @returns {Promise<Object>} Resultado do envio.
- */
+// 1. Envia a mensagem do Formulário de Contato (Página Sobre) para o dono do jogo
 export const sendContactEmail = async (formData) => {
   // Validar variáveis de ambiente
   if (!SERVICE_ID || !TEMPLATE_CONTACT_ID || !PUBLIC_KEY) {
@@ -60,22 +38,8 @@ export const sendContactEmail = async (formData) => {
   }
 };
 
-/**
- * Envia resultado pessoal de uma partida por e-mail ao jogador.
- * @param {Object} resultData - Dados mapeados para o template EmailJS.
- * @param {string} resultData.game_name
- * @param {string} resultData.player_name
- * @param {string} resultData.player_email
- * @param {string} resultData.difficulty
- * @param {string} resultData.status
- * @param {string} resultData.result_title
- * @param {string} resultData.result_message
- * @param {string} resultData.main_metric_label
- * @param {string} resultData.main_metric_value
- * @param {string} resultData.secondary_metrics
- * @param {string} resultData.generated_at
- * @returns {Promise<Object>} Resultado do envio.
- */
+// 2. Envia o Boletim/Resultado da partida direto para o e-mail de quem jogou.
+// Exige que o jogador tenha digitado o e-mail corretamente na tela de Login!
 export const sendGameResultEmail = async (resultData) => {
   // Validar variáveis de ambiente
   if (!SERVICE_ID || !TEMPLATE_GAME_RESULT_ID || !PUBLIC_KEY) {
@@ -112,24 +76,8 @@ export const sendGameResultEmail = async (resultData) => {
 };
 
 
-/**
- * Envia ranking de um jogo por e-mail usando o serviço EmailJS de Ranking.
- *
- * Usa variáveis de ambiente dedicadas ao ranking (conta/serviço separado):
- *   VITE_EMAILJS_RANKING_SERVICE_ID
- *   VITE_EMAILJS_TEMPLATE_RANKING
- *   VITE_EMAILJS_RANKING_PUBLIC_KEY
- *
- * @param {Object} rankingData
- * @param {string} rankingData.ranking_title   — Título do card/ranking
- * @param {string} rankingData.game_name       — Nome do jogo
- * @param {string} rankingData.difficulty      — Dificuldade atual
- * @param {string} rankingData.player_name     — Nome do jogador logado
- * @param {string} rankingData.player_email    — E-mail do jogador logado
- * @param {string} rankingData.ranking_list    — Lista formatada em texto
- * @param {string} rankingData.generated_at    — Data/hora em pt-BR
- * @returns {Promise<Object>} Resultado do envio.
- */
+// 3. Envia a Tabela de Liderança (Ranking) de um jogo específico.
+// IMPORTANTE: Usa as chaves da Conta 2 do EmailJS para não estourar o limite da Conta Principal.
 export const sendRankingEmail = async (rankingData) => {
   const serviceId = import.meta.env.VITE_EMAILJS_RANKING_SERVICE_ID;
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_RANKING;
@@ -169,28 +117,8 @@ export const sendRankingEmail = async (rankingData) => {
   }
 };
 
-/**
- * Envia relatório de auditoria da sessão por e-mail.
- *
- * Usa o mesmo serviço/chave do ranking:
- *   VITE_EMAILJS_RANKING_SERVICE_ID
- *   VITE_EMAILJS_RANKING_PUBLIC_KEY
- * Com template dedicado de auditoria:
- *   VITE_EMAILJS_TEMPLATE_AUDIT
- *
- * @param {Object} auditData
- * @param {string} auditData.audit_title      — Título do relatório
- * @param {string} auditData.user_name        — Nome do usuário
- * @param {string} auditData.user_email       — E-mail do usuário
- * @param {number} auditData.total_events     — Total de eventos registrados
- * @param {number} auditData.game_enters      — Jogos acessados
- * @param {number} auditData.game_starts      — Partidas iniciadas
- * @param {number} auditData.game_finishes    — Partidas finalizadas
- * @param {number} auditData.result_exports   — Exportações realizadas
- * @param {string} auditData.summary          — Resumo descritivo
- * @param {string} auditData.generated_at     — Data/hora em pt-BR
- * @returns {Promise<Object>} Resultado do envio.
- */
+// 4. Envia o Dossiê de Auditoria (o relatório de tudo que o cara clicou no jogo).
+// Também usa a Conta 2 do EmailJS (as mesmas chaves do Ranking).
 export const sendAuditEmail = async (auditData) => {
   const serviceId = import.meta.env.VITE_EMAILJS_RANKING_SERVICE_ID;
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_AUDIT;
@@ -213,6 +141,7 @@ export const sendAuditEmail = async (auditData) => {
     game_finishes: auditData.game_finishes,
     result_exports: auditData.result_exports,
     summary: auditData.summary,
+    audit_details: auditData.audit_details || '',
     generated_at: auditData.generated_at,
   };
 

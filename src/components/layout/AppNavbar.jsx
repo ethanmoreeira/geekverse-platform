@@ -1,4 +1,4 @@
-// AppNavbar.jsx
+
 // Barra de navegação principal do GeekVerse G8.
 // Links para Dashboard, jogos, ranking, exportar e sobre.
 // Botão Sair.

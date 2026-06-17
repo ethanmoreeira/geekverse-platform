@@ -30,7 +30,6 @@ Além dos jogos, o projeto busca demonstrar o uso de autenticação simples, rot
 
 ## Integrantes
 
-- Gabriel Fagundes Motta
 - Ítalo Dias Moreira Campos
 - Julyanne Lauriano Genevain
 - Rakel Garcia da Silva

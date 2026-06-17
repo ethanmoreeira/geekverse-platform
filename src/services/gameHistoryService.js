@@ -1,37 +1,6 @@
-// gameHistoryService.js
-// Serviço de histórico de partidas jogadas no GeekVerse G8.
-// Salva e recupera resultados no localStorage.
-// Usado para ranking local (separado por jogo), exportação e auditoria.
-//
-// Estrutura de resultado single player:
-// {
-//   id,            — identificador único (gerado automaticamente)
-//   gameId,        — ex: 'harry-potter', 'pokemon', 'rick-morty', etc.
-//   gameName,      — ex: 'Memória dos Bruxos'
-//   playerName,    — nome do jogador
-//   mode,          — 'single' ou 'localMultiplayer'
-//   difficulty,    — 'easy', 'medium', 'challenge' (quando aplicável)
-//   score,         — pontuação numérica
-//   durationSeconds, — duração da partida em segundos
-//   attempts,      — número de tentativas
-//   status,        — 'victory', 'defeat', 'timeout', etc.
-//   createdAt,     — data/hora ISO string
-//   summary,       — resumo textual legível
-//   rawData        — dados brutos da API usados na partida (para JSON formatado)
-// }
-//
-// Estrutura de resultado multiplayer local:
-// {
-//   id,
-//   gameId,
-//   gameName,
-//   mode,          — 'localMultiplayer'
-//   players,       — [{ name, score }]
-//   winner,        — nome do vencedor
-//   createdAt,
-//   summary,
-//   rawData
-// }
+// Serviço de Histórico: O caderno de anotações do jogo!
+// Tudo o que o jogador faz (vitórias, derrotas, tempo, pontuação) é salvo aqui na memória do navegador (localStorage).
+// É daqui que a página de Ranking e a de Exportar por E-mail tiram os dados para mostrar para o usuário.
 
 const STORAGE_KEY = 'geekverse_game_history';
 
@@ -104,30 +73,3 @@ export const getResultsByGame = (gameId) => {
   return readAll().filter((r) => r.gameId === gameId);
 };
 
-/**
- * Remove todos os resultados do histórico.
- */
-export const clearGameResults = () => {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch (err) {
-    console.error('gameHistoryService: Erro ao limpar histórico', err);
-  }
-};
-
-/**
- * Remove um resultado específico pelo id.
- * @param {string} resultId - ID do resultado a remover.
- * @returns {boolean} true se removido, false se não encontrado.
- */
-export const removeGameResult = (resultId) => {
-  const all = readAll();
-  const filtered = all.filter((r) => r.id !== resultId);
-
-  if (filtered.length === all.length) {
-    return false; // Não encontrou
-  }
-
-  writeAll(filtered);
-  return true;
-};

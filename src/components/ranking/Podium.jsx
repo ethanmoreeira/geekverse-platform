@@ -1,4 +1,4 @@
-// Podium.jsx
+
 // Componente visual do pódio (1º, 2º, 3º lugar).
 // Ordem visual: 2º | 1º | 3º
 

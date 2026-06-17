@@ -1,4 +1,4 @@
-// starWarsApi.js
+
 // Serviço de integração com a SWAPI (swapi.tech).
 // Busca naves, personagens, planetas e veículos para Fuga do Hiperespaço.
 // URL base: https://www.swapi.tech/api
@@ -10,7 +10,7 @@ const SWAPI_BASE = 'https://www.swapi.tech/api';
 const CACHE_PREFIX = 'geekverse_swapi_';
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutos
 
-// ─── Listas Curadas ─────────────────────────────────────────────────
+// Lista de VIPs (Para o jogo não quebrar caso a API mude a ordem das páginas)
 // UIDs baseados no endpoint /starships/:uid, /people/:uid, etc.
 // Escolhidos por relevância ao universo Star Wars canônico.
 
@@ -30,12 +30,9 @@ export const CURATED_VEHICLE_IDS = [14, 18, 19, 4, 6, 38];
 // 14 = Snowspeeder | 18 = AT-AT | 19 = AT-ST
 // 4 = Sand Crawler | 6 = X-34 landspeeder | 38 = Sail barge
 
-// ─── Helpers ────────────────────────────────────────────────────────
+// Funções de Ajuda (Helpers)
 
-/**
- * Faz fetch e valida response.ok. Retorna JSON.
- * Lança erro amigável em caso de falha.
- */
+// Helper de segurança: avisa se a internet cair ou a SWAPI ficar fora do ar em vez de bugar o jogo
 const safeFetch = async (url, label = 'recurso') => {
   const response = await fetch(url);
   if (!response.ok) {
@@ -46,13 +43,10 @@ const safeFetch = async (url, label = 'recurso') => {
   return response.json();
 };
 
-// ─── Normalização de números ────────────────────────────────────────
+// Transformação de Dados: Arrumando a bagunça da API
 
-/**
- * Normaliza um valor vindo da SWAPI para número.
- * Trata: unknown, n/a, none, null, undefined, strings vazias,
- *        números com vírgula, textos com unidade (ex: "10 MGLT").
- */
+// Passo 1: Limpa números bagunçados da API
+// Trata casos tipo "unknown", "10 MGLT", tira vírgulas e pega só o número real.
 export const normalizeNumber = (value, fallback = 0) => {
   if (value === null || value === undefined) return fallback;
 
@@ -73,7 +67,7 @@ export const normalizeNumber = (value, fallback = 0) => {
   return isNaN(num) ? fallback : num;
 };
 
-// ─── Normalização de Naves ──────────────────────────────────────────
+// Conversão das Naves (Cria Status de Jogo baseado no peso/tamanho real)
 
 export const normalizeStarship = (raw) => {
   const props = raw.properties || raw;
@@ -137,7 +131,7 @@ export const normalizeStarship = (raw) => {
   };
 };
 
-// ─── Normalização de Pilotos ────────────────────────────────────────
+// Conversão dos Pilotos (Cria Bônus baseados no peso/altura)
 
 export const normalizePilot = (raw) => {
   const props = raw.properties || raw;
@@ -187,7 +181,7 @@ export const normalizePilot = (raw) => {
   };
 };
 
-// ─── Normalização de Planetas ───────────────────────────────────────
+// Conversão dos Planetas (Cria Nível de Perigo baseado na gravidade e clima)
 
 export const normalizePlanet = (raw) => {
   const props = raw.properties || raw;
@@ -280,7 +274,7 @@ export const normalizePlanet = (raw) => {
   };
 };
 
-// ─── Normalização de Veículos ───────────────────────────────────────
+// Conversão dos Veículos (Cria Status extras)
 
 export const normalizeVehicle = (raw) => {
   const props = raw.properties || raw;
@@ -338,12 +332,9 @@ export const normalizeVehicle = (raw) => {
   };
 };
 
-// ─── Busca por UID direto ────────────────────────────────────────────
+// Funções que vão lá na API buscar as coisas
 
-/**
- * Busca um item por UID direto da SWAPI.
- * Retorna null em caso de falha (sem quebrar o carregamento).
- */
+// Passo 2: Busca UM item na API (ex: 1 Nave) e salva na memória pra não travar depois
 const fetchByUid = async (endpoint, uid) => {
   // Tentar cache primeiro
   const cacheKey = `${CACHE_PREFIX}${endpoint}_${uid}`;
@@ -379,20 +370,15 @@ const fetchByUid = async (endpoint, uid) => {
   }
 };
 
-/**
- * Busca uma lista de itens por UIDs curados, em paralelo.
- * Filtra os que falharam (null) sem quebrar a lista inteira.
- */
+// Passo 3: Busca VÁRIOS itens da API ao mesmo tempo (em paralelo) pra tela carregar mais rápido
 const fetchCuratedList = async (endpoint, ids, normalizer) => {
   const results = await Promise.all(ids.map((uid) => fetchByUid(endpoint, uid)));
   return results.filter(Boolean).map(normalizer);
 };
 
-// ─── Funções públicas de busca ───────────────────────────────────────
+// Exportando as funções para o React poder usar
 
-/**
- * Busca as 6 naves curadas da SWAPI.
- */
+// Puxa só as 6 naves escolhidas a dedo (lista VIP)
 export const fetchStarships = async () => {
   try {
     return await fetchCuratedList('starships', CURATED_STARSHIP_IDS, normalizeStarship);
@@ -402,9 +388,7 @@ export const fetchStarships = async () => {
   }
 };
 
-/**
- * Busca os 6 pilotos curados da SWAPI.
- */
+// Puxa só os 6 pilotos escolhidos a dedo
 export const fetchPeople = async () => {
   try {
     return await fetchCuratedList('people', CURATED_PEOPLE_IDS, normalizePilot);
@@ -414,9 +398,7 @@ export const fetchPeople = async () => {
   }
 };
 
-/**
- * Busca os 6 planetas curados da SWAPI.
- */
+// Puxa só os 6 planetas escolhidos a dedo
 export const fetchPlanets = async () => {
   try {
     return await fetchCuratedList('planets', CURATED_PLANET_IDS, normalizePlanet);
@@ -426,9 +408,7 @@ export const fetchPlanets = async () => {
   }
 };
 
-/**
- * Busca os 6 veículos curados da SWAPI.
- */
+// Puxa só os 6 veículos escolhidos a dedo
 export const fetchVehicles = async () => {
   try {
     return await fetchCuratedList('vehicles', CURATED_VEHICLE_IDS, normalizeVehicle);
@@ -438,10 +418,8 @@ export const fetchVehicles = async () => {
   }
 };
 
-/**
- * Busca todos os dados para a tela de montagem da missão.
- * Aguarda TODOS os dados antes de retornar — sem renderização parcial.
- */
+// Função Principal: Essa é a que a tela do jogo (StarWarsGame) chama.
+// Ela manda baixar todas as naves, pilotos, planetas e veículos de uma vez só!
 export const fetchStarWarsMissionData = async () => {
   const [starships, pilots, planets, vehicles] = await Promise.all([
     fetchStarships(),

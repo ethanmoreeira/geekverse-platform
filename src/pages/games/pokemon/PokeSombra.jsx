@@ -1,4 +1,4 @@
-// PokeSombra.jsx
+
 // Pagina: PokeSombra | Rota: /app/pokemon | API: PokeAPI
 // Cacada visual por silhuetas de Pokemon.
 // Casca visual: renderiza telas, integra ranking, auditoria, áudio e navegação.
@@ -6,21 +6,21 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PokemonLevelSelector from '../../../components/pokemon/PokemonLevelSelector';
-import PokemonGameHeader from '../../../components/pokemon/PokemonGameHeader';
-import PokemonShadowGrid from '../../../components/pokemon/PokemonShadowGrid';
-import PokemonRevealPanel from '../../../components/pokemon/PokemonRevealPanel';
-import PokemonHintBox from '../../../components/pokemon/PokemonHintBox';
-import PokemonResultScreen from '../../../components/pokemon/PokemonResultScreen';
-import PokemonEntryLoader from '../../../components/pokemon/PokemonEntryLoader';
-import PokemonExitLoader from '../../../components/pokemon/PokemonExitLoader';
+import PokemonLevelSelector from '../../../components/game/pokemon/PokemonLevelSelector';
+import PokemonGameHeader from '../../../components/game/pokemon/PokemonGameHeader';
+import PokemonShadowGrid from '../../../components/game/pokemon/PokemonShadowGrid';
+import PokemonRevealPanel from '../../../components/game/pokemon/PokemonRevealPanel';
+import PokemonHintBox from '../../../components/game/pokemon/PokemonHintBox';
+import PokemonResultScreen from '../../../components/game/pokemon/PokemonResultScreen';
+import PokemonEntryLoader from '../../../components/game/pokemon/PokemonEntryLoader';
+import PokemonExitLoader from '../../../components/game/pokemon/PokemonExitLoader';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveResult } from '../../../services/rankingService';
 import { logAuditEvent } from '../../../services/auditService';
 import { FaArrowLeft, FaExclamationTriangle, FaRedo } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
-import { usePokemonMusic } from '../../../hooks/usePokemonMusic';
-import PokemonMusicButton from '../../../components/pokemon/PokemonMusicButton';
+import { usePokemonMusic } from '../../../hooks/audio/usePokemonMusic';
+import PokemonMusicButton from '../../../components/game/pokemon/PokemonMusicButton';
 import { usePokeSombraGame, GAME_STATUS } from '../../../hooks/usePokeSombraGame';
 import '../../../styles/pokeSombra.css';
 
@@ -222,12 +222,12 @@ const PokeSombra = () => {
     navigate('/app');
   };
 
-  // ─── RENDER: SAIDA ─────────────────────────────────────────────────
+  // Se o usuário estiver saindo para o menu, mostra a animação de despedida
   if (isExiting) {
     return <PokemonExitLoader />;
   }
 
-  // ─── RENDER: INTRO ─────────────────────────────────────────────────
+  // Tela inicial: Mostra a introdução e o seletor de dificuldade
   if (gameStatus === GAME_STATUS.INTRO) {
     if (showEntryLoader) {
       return <PokemonEntryLoader />;
@@ -259,7 +259,7 @@ const PokeSombra = () => {
     );
   }
 
-  // ─── RENDER: LOADING ────────────────────────────────────────────────
+  // Tela de Carregamento: Exibe enquanto busca os dados da API
   const isPreparingGame =
     gameStatus === GAME_STATUS.LOADING ||
     (gameStatus === GAME_STATUS.PLAYING && (!boardPokemon.length || !currentTarget));
@@ -275,7 +275,7 @@ const PokeSombra = () => {
     );
   }
 
-  // ─── RENDER: ERROR ─────────────────────────────────────────────────
+  // Tela de Erro: Mostra aviso se falhar ao baixar os Pokémon
   if (gameStatus === GAME_STATUS.ERROR) {
     return (
       <div className="pks-page">
@@ -298,7 +298,7 @@ const PokeSombra = () => {
     );
   }
 
-  // ─── RENDER: FINISHED ──────────────────────────────────────────────
+  // Tela Final: O jogo acabou, hora de mostrar os acertos e pontuação
   if (gameStatus === GAME_STATUS.FINISHED && selectedLevel) {
     return (
       <div className="pks-page">
@@ -318,7 +318,7 @@ const PokeSombra = () => {
     );
   }
 
-  // ─── RENDER: PLAYING / REVEAL ──────────────────────────────────────
+  // Tela Principal: A arena de jogo onde a partida realmente acontece
   return (
     <div className="pks-page">
       <PokemonMusicButton isPlaying={isPlaying} onToggle={toggleMusic} />

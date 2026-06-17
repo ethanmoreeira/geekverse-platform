@@ -1,4 +1,4 @@
-// useAuth.js
+
 // Hook customizado para acessar o contexto de autenticação.
 // Fornece: user, login, logout, isAuthenticated, loading.
 

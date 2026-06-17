@@ -1,20 +1,11 @@
-// emailExportControl.js
-// Utilitário para controle de envios únicos por e-mail no GeekVerse G8.
-// Usa sessionStorage para evitar múltiplos envios na mesma sessão/partida.
-// Não usa localStorage — o bloqueio é por sessão de navegador, não permanente.
-//
-// Chaves:
-//   geekverse_email_sent_result_${gameId}_${matchKey}  — resultado de jogo
-//   geekverse_email_sent_ranking_${gameId}_${difficulty} — ranking
-//   geekverse_email_sent_audit_session                 — auditoria da sessão
+// Controle do botão de enviar e-mail.
+// A gente usa o sessionStorage (memória temporária do navegador) pra evitar que o usuário 
+// fique clicando 50 vezes no botão de exportar o placar e acabe travando nosso e-mail.
+// Importante: Não usamos localStorage porque queremos que o bloqueio limpe se ele fechar e abrir o navegador.
 
 const PREFIX = 'geekverse_email_sent_';
 
-/**
- * Verifica se um e-mail com determinada chave já foi enviado nesta sessão.
- * @param {string} key - Chave de controle (sem o prefixo).
- * @returns {boolean} true se já foi enviado, false caso contrário.
- */
+// Essa função checa se o e-mail daquela partida já foi enviado hoje
 export function hasEmailExportBeenSent(key) {
   try {
     return sessionStorage.getItem(PREFIX + key) === 'true';
@@ -23,40 +14,24 @@ export function hasEmailExportBeenSent(key) {
   }
 }
 
-/**
- * Marca um e-mail como já enviado nesta sessão.
- * Deve ser chamado APENAS após sucesso confirmado do envio.
- * @param {string} key - Chave de controle (sem o prefixo).
- */
+// Se o envio der certo, a gente chama essa função pra "carimbar" que já foi enviado
 export function markEmailExportAsSent(key) {
   try {
     sessionStorage.setItem(PREFIX + key, 'true');
   } catch {
-    // Falha silenciosa — não impede o fluxo principal
+    // Se der erro no navegador, a gente ignora pra não quebrar a tela
   }
 }
 
-/**
- * Monta a chave de controle para resultado de um jogo.
- * @param {string} gameId - ID do jogo (ex: 'harry-memory').
- * @param {string} matchKey - Identificador único da partida.
- * @returns {string} Chave composta.
- */
+// Monta o nome do "carimbo" para o resultado de um jogo específico (ex: resultado do pokemon partida 3)
 export function buildResultKey(gameId, matchKey) {
   return `result_${gameId}_${matchKey}`;
 }
 
-/**
- * Monta a chave de controle para ranking de um jogo/dificuldade.
- * @param {string} gameId - ID do jogo (ex: 'show-multiverso').
- * @param {string} difficulty - Dificuldade (ex: 'easy', 'medium', 'challenge').
- * @returns {string} Chave composta.
- */
+// Monta o nome do "carimbo" para a tela de Ranking geral
 export function buildRankingKey(gameId, difficulty) {
   return `ranking_${gameId}_${difficulty}`;
 }
 
-/**
- * Chave fixa para a auditoria da sessão atual.
- */
+// Chave fixa pra gente auditar a sessão
 export const AUDIT_SESSION_KEY = 'audit_session';

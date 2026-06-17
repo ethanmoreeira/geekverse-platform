@@ -1,4 +1,4 @@
-// DifficultyRankingCard.jsx
+
 // Card de ranking por dificuldade. Mostra pódio, lista 4º–10º,
 // posição do jogador logado, e botões de ação.
 // Fonte oficial: Supabase (global). Fallback: localStorage.

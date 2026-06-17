@@ -1,4 +1,4 @@
-// MemoryStats.jsx
+
 // Estatísticas do jogo da memória.
 // Mostra tentativas, pares encontrados, dificuldade atual e tempo de partida.
 

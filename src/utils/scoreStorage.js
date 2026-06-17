@@ -1,57 +1,36 @@
-// scoreStorage.js
-// Utilitário para ranking local do GeekVerse G8.
-// Ranking separado por jogo, armazenado via localStorage.
-// Não há ranking global entre computadores (sem backend/banco de dados).
-//
-// Depende de gameHistoryService.js para ler resultados.
-// As funções aqui processam e ordenam os dados para exibição no ranking.
+// Arquivo responsável por organizar o Ranking (Placar) do site.
+// Ele lê os resultados salvos no navegador e cria o pódio de cada jogo.
 
 import { getGameResults, getResultsByGame } from '../services/gameHistoryService';
 
-/**
- * Retorna o ranking de um jogo específico, ordenado por score (maior primeiro).
- * Apenas resultados single player são incluídos no ranking individual.
- * @param {string} gameId - ID do jogo (ex: 'harry-potter').
- * @param {number} limit - Quantidade máxima de resultados (padrão: 10).
- * @returns {Array} Ranking ordenado por score descendente.
- */
+// Pega a lista de vitórias de um jogo (ex: Star Wars) e separa os Top 10 melhores jogadores.
 export const getRankingByGame = (gameId, limit = 10) => {
   const results = getResultsByGame(gameId);
   return sortByScore(results).slice(0, limit);
 };
 
-/**
- * Retorna o histórico geral de todos os jogos, do mais recente ao mais antigo.
- * Usado para a aba "Todos os resultados" da página Ranking.
- * @param {number} limit - Quantidade máxima (padrão: 50).
- * @returns {Array} Histórico completo ordenado por data.
- */
+// Pega todo o histórico de tudo que já foi jogado no site, misturando todos os jogos.
+// Serve para preencher a aba "Todos os resultados" lá na tela de Ranking.
 export const getGeneralHistory = (limit = 50) => {
   return getGameResults().slice(0, limit);
 };
 
-/**
- * Ordena resultados por score (maior primeiro).
- * Em caso de empate, ordena por menor duração.
- * @param {Array} results - Lista de resultados a ordenar.
- * @returns {Array} Lista ordenada.
- */
+// A "Calculadora de Empate".
+// Essa função pega uma lista de jogadores e coloca quem tem mais ponto em cima.
+// Se duas pessoas tiverem a mesma pontuação, ela olha no relógio e dá a vitória
+// para quem terminou o jogo mais rápido!
 export const sortByScore = (results) => {
   return [...results].sort((a, b) => {
-    // Maior score primeiro
+    // Quem tem o score maior fica na frente
     if ((b.score || 0) !== (a.score || 0)) {
       return (b.score || 0) - (a.score || 0);
     }
-    // Em empate, menor duração vence
+    // Desempate: quem jogou no menor tempo ganha a posição
     return (a.durationSeconds || 0) - (b.durationSeconds || 0);
   });
 };
 
-/**
- * Retorna o melhor resultado (maior score) de um jogo específico.
- * @param {string} gameId - ID do jogo.
- * @returns {Object|null} Melhor resultado ou null.
- */
+// Busca quem é o Top 1 (o Rei) de um jogo específico.
 export const getBestScore = (gameId) => {
   const ranking = getRankingByGame(gameId, 1);
   return ranking.length > 0 ? ranking[0] : null;

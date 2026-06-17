@@ -1,6 +1,6 @@
-// FloatingMemoryCards.jsx
+
 // Cartas decorativas flutuantes exibidas na tela inicial do Memória dos Bruxos,
-// antes do jogador escolher uma dificuldade. Puramente visuais — não participam da lógica do jogo.
+// antes do jogador escolher uma dificuldade. Puramente visuaisnão participam da lógica do jogo.
 
 import cardBackImg from '../../../assets/backgrounds/harry-potter/golden_snitch_background.png';
 

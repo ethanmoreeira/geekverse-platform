@@ -1,4 +1,4 @@
-// AuthContext.jsx
+
 // Contexto de autenticação do GeekVerse G8.
 // Gerencia estado de login/logout com credenciais acadêmicas simuladas.
 // Senha padrão: G82026

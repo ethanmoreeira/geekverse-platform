@@ -1,4 +1,4 @@
-// DifficultySelector.jsx
+
 // Seletor de dificuldade para jogos com múltiplos níveis.
 // Níveis: Fácil, Médio, Desafio (usado em Memória dos Bruxos).
 

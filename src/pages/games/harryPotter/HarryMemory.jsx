@@ -1,4 +1,4 @@
-// HarryMemory.jsx
+
 // Página: Memória dos Bruxos | Rota: /app/harry-potter | API: Harry Potter API
 // Mecânica: Jogo da memória com personagens. Fácil (30), Médio (40), Desafio (50).
 // Controlador principal: gerencia estados do jogo, lógica de pares e vitória.
@@ -23,7 +23,7 @@ import { useHarryMemoryGame } from '../../../hooks/useHarryMemoryGame';
 import '../../../styles/games.css';
 import boardBg from '../../../assets/backgrounds/harry-potter/harry-memory-board-bg.png';
 import victoryBg from '../../../assets/backgrounds/harry-potter/f087384f-df83-4ea0-bcbc-63a9473ae699.jpg';
-import magicAmbient from '../../../assets/audio/geoffharvey-let-the-mystery-unfold-122118.mp3';
+import { useHarryMusic } from '../../../hooks/audio/useHarryMusic';
 
 const HarryMemory = () => {
   const navigate = useNavigate();
@@ -59,46 +59,8 @@ const HarryMemory = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Música ambiente
-  const audioRef = useRef(null);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-
-  // Iniciar música quando o intro loader terminar (usuário já clicou para entrar)
-  useEffect(() => {
-    if (!showIntroLoader && audioRef.current) {
-      audioRef.current.volume = 0.18;
-      audioRef.current.play().then(() => {
-        setIsMusicPlaying(true);
-      }).catch(() => {
-        // Navegador bloqueou autoplay — o usuário pode clicar no botão
-        setIsMusicPlaying(false);
-      });
-    }
-  }, [showIntroLoader]);
-
-  // Pausar música ao sair da página — cleanup robusto
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-    };
-  }, []);
-
-  const toggleMusic = () => {
-    if (!audioRef.current) return;
-    if (isMusicPlaying) {
-      audioRef.current.pause();
-      setIsMusicPlaying(false);
-    } else {
-      audioRef.current.play().then(() => {
-        setIsMusicPlaying(true);
-      }).catch((err) => {
-        console.warn('Não foi possível tocar a música:', err.message);
-      });
-    }
-  };
+  // Música ambiente através do Hook refatorado
+  const { isPlaying: isMusicPlaying, toggleMusic } = useHarryMusic();
 
   const handleBack = () => {
     setIsLeaving(true);
@@ -202,11 +164,56 @@ const HarryMemory = () => {
     return <ThemedLogoutScreen />;
   }
 
+  const handleExportResult = async () => {
+    if (!user?.email) {
+      setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
+      return;
+    }
+    // Guard: bloquear reenvio da mesma partida
+    const exportKey = buildResultKey('harry-memory', matchKey);
+    if (hasEmailExportBeenSent(exportKey)) {
+      setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
+      return;
+    }
+    setIsExporting(true);
+    setExportFeedback(null);
+    try {
+      await sendGameResultEmail({
+        game_name: 'Memória dos Bruxos',
+        player_name: user?.nome || user?.name || 'Jogador GeekVerse',
+        player_email: user.email,
+        difficulty: difficultyConfig?.label || 'Padrão',
+        status: 'vitória',
+        result_title: 'Resultado da Memória dos Bruxos',
+        result_message: 'Você concluiu o desafio encontrando todos os pares.',
+        main_metric_label: 'Tempo final',
+        main_metric_value: formatTime(finalTime),
+        secondary_metrics: `Tentativas: ${attempts}\nPares encontrados: ${pairsFound}\nTotal de pares: ${totalPairs}\nTempo em segundos: ${finalTime}`,
+        generated_at: new Date().toLocaleString('pt-BR'),
+      });
+      // Marcar como enviado APENAS após sucesso
+      markEmailExportAsSent(exportKey);
+      setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
+      try { 
+        logAuditEvent({ 
+          eventType: 'result_email_send', 
+          description: 'E-mail de resultado enviado para Memória dos Bruxos', 
+          gameId: 'memoria-bruxos', 
+          gameName: 'Memória dos Bruxos' 
+        }); 
+      } catch { /* auditoria opcional */ }
+    } catch {
+      setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="gv-harry-page">
       <div className="gv-harry-page-bg" style={{ backgroundImage: `url(${boardBg})` }}></div>
       
-      <audio ref={audioRef} src={magicAmbient} loop preload="auto" />
+
 
       <div className="gv-harry-top-bar">
         <button className="gv-btn-back-magic" onClick={handleBack} id="btn-back">
@@ -272,7 +279,7 @@ const HarryMemory = () => {
         {/* Erro */}
         {error && (
           <div className="gv-error-magic" id="error-message">
-            <span className="gv-error-icon">⚠️</span>
+            <span className="gv-error-icon">!</span>
             <p>{error}</p>
             <button className="gv-btn-retry-magic" onClick={handleReload}>
               Tentar Novamente
@@ -283,7 +290,7 @@ const HarryMemory = () => {
         {/* Aviso de ajuste automático */}
         {adjustmentInfo && !loading && (
           <div className="gv-warning-magic" id="adjustment-warning">
-            <span className="gv-warning-icon">🧙‍♂️</span>
+            <span className="gv-warning-icon">i</span>
             <p>{adjustmentInfo}</p>
           </div>
         )}
@@ -356,43 +363,7 @@ const HarryMemory = () => {
                   className="gv-btn-play-again memory-export-button"
                   id="btn-export-memory"
                   disabled={isExporting || (matchKey && hasEmailExportBeenSent(buildResultKey('harry-memory', matchKey)))}
-                  onClick={async () => {
-                    if (!user?.email) {
-                      setExportFeedback({ type: 'warn', text: 'E-mail do jogador não encontrado. Faça login novamente para enviar o resultado.' });
-                      return;
-                    }
-                    // Guard: bloquear reenvio da mesma partida
-                    const exportKey = buildResultKey('harry-memory', matchKey);
-                    if (hasEmailExportBeenSent(exportKey)) {
-                      setExportFeedback({ type: 'warn', text: 'Este resultado já foi enviado para o e-mail cadastrado.' });
-                      return;
-                    }
-                    setIsExporting(true);
-                    setExportFeedback(null);
-                    try {
-                      await sendGameResultEmail({
-                        game_name: 'Memória dos Bruxos',
-                        player_name: user?.nome || user?.name || 'Jogador GeekVerse',
-                        player_email: user.email,
-                        difficulty: difficultyConfig?.label || 'Padrão',
-                        status: 'vitória',
-                        result_title: 'Resultado da Memória dos Bruxos',
-                        result_message: 'Você concluiu o desafio encontrando todos os pares.',
-                        main_metric_label: 'Tempo final',
-                        main_metric_value: formatTime(finalTime),
-                        secondary_metrics: `Tentativas: ${attempts}\nPares encontrados: ${pairsFound}\nTotal de pares: ${totalPairs}\nTempo em segundos: ${finalTime}`,
-                        generated_at: new Date().toLocaleString('pt-BR'),
-                      });
-                      // Marcar como enviado APENAS após sucesso
-                      markEmailExportAsSent(exportKey);
-                      setExportFeedback({ type: 'success', text: 'Resultado enviado com sucesso para o e-mail cadastrado.' });
-                      try { logAuditEvent({ eventType: 'result_email_send', description: 'E-mail de resultado enviado para Memória dos Bruxos', gameId: 'memoria-bruxos', gameName: 'Memória dos Bruxos' }); } catch { /* auditoria opcional */ }
-                    } catch {
-                      setExportFeedback({ type: 'error', text: 'Não foi possível enviar o resultado por e-mail. Tente novamente.' });
-                    } finally {
-                      setIsExporting(false);
-                    }
-                  }}
+                  onClick={handleExportResult}
                 >
                   <FaFileExport /> {isExporting ? 'Enviando...' : 'Exportar resultado'}
                 </button>
@@ -421,7 +392,7 @@ const HarryMemory = () => {
         {apiMetadata && !loading && (
           <JsonViewer
             data={apiMetadata}
-            title="📋 Dados da API — Harry Potter (JSON)"
+            title="Dados da API - Harry Potter (JSON)"
           />
         )}
       </div>

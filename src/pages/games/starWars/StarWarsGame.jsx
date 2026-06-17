@@ -1,4 +1,4 @@
-// StarWarsGame.jsx
+
 // Página principal: Fuga do Hiperespaço | Rota: /app/star-wars
 // Jogo de montagem de missão com dados reais da SWAPI.
 // Fluxo: BUILDER → SUMMARY → ARENA_PREVIEW → RESULT_PREVIEW
@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { logAuditEvent } from '../../../services/auditService';
 import { fetchStarWarsMissionData } from '../../../services/apis/starWarsApi';
 import { calculateMissionStats } from '../../../utils/starWarsMission';
-import { stopAllFugaMusic, toggleActiveFugaMusic, playFugaMusic, switchToFugaIntroMusic } from '../../../services/audioService';
+import { useHyperdriveMusic } from '../../../hooks/audio/useHyperdriveMusic';
 
 // Componentes
 import StarshipCard from '../../../components/game/starWars/StarshipCard';
@@ -36,20 +36,14 @@ import '../../../styles/starWars.css';
 import exitImage from '../../../assets/backgrounds/star-wars/capital_ship_exit_screen_8k.png';
 import capitalShipBg from '../../../assets/backgrounds/star-wars/capital_ship_8k_ultra_quality.png';
 
-// ─── Fases do Jogo ──────────────────────────────────────────────────
-
+// As três fases do jogo: Montar Missão, Resumo e Arena
 const GAME_PHASES = {
   BUILDER: 'builder',
   SUMMARY: 'summary',
   ARENA: 'arena',
 };
 
-// ─── Badges do Hero ─────────────────────────────────────────────────
-
-
-
-// ─── Passos do Builder ──────────────────────────────────────────────
-
+// A ordem dos passos para montar a frota
 const BUILDER_STEPS = {
   STARSHIP: 'starship',
   PILOT: 'pilot',
@@ -82,7 +76,7 @@ const DIFFICULTY_LABELS = {
   hard: 'Difícil',
 };
 
-// ─── Componente Principal ───────────────────────────────────────────
+// Componente principal do jogo
 
 const StarWarsGame = () => {
   const navigate = useNavigate();
@@ -90,6 +84,8 @@ const StarWarsGame = () => {
   // Estado de carregamento
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const musicController = useHyperdriveMusic();
 
   // Splash de entrada obrigatório para transição visual
   const [showEntrySplash, setShowEntrySplash] = useState(true);
@@ -115,14 +111,8 @@ const StarWarsGame = () => {
     }
   }, []);
 
-  useEffect(() => {
-    // Garante que a música toque caso o React StrictMode ou um reload cancele o play do Dashboard
-    playFugaMusic();
-
-    return () => {
-      stopAllFugaMusic();
-    };
-  }, []);
+  // O hook useHyperdriveMusic já tenta dar play na montagem e stop na desmontagem.
+  // Não precisamos fazer playFugaMusic / stopAllFugaMusic manualmente no useEffect principal.
 
   // Dados da API
   const [missionData, setMissionData] = useState(null);
@@ -145,7 +135,7 @@ const StarWarsGame = () => {
     if (gamePhase !== GAME_PHASES.BUILDER) {
       setGamePhase(GAME_PHASES.BUILDER);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      switchToFugaIntroMusic();
+      musicController.switchToIntroMusic();
       return;
     }
 
@@ -164,7 +154,7 @@ const StarWarsGame = () => {
     }, 1500);
   };
 
-  // ── Carregar dados ──
+  // Função para baixar os dados do Star Wars na API
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -200,7 +190,7 @@ const StarWarsGame = () => {
     loadData();
   }, [loadData]);
 
-  // ── Navegação do Stepper ──
+  // Funções para avançar ou voltar nos passos de escolha
   const currentStepIndex = STEP_ORDER.indexOf(activeBuilderStep);
 
   const getStepSelection = (step) => {
@@ -238,7 +228,7 @@ const StarWarsGame = () => {
     }
   };
 
-  // ── Handlers de seleção ──
+  // Funções que guardam o que o jogador clicou (Nave, Piloto, etc)
   const handleSelectStarship = (ship) => {
     setSelectedStarship(selectedStarship?.id === ship.id ? null : ship);
   };
@@ -259,7 +249,7 @@ const StarWarsGame = () => {
     setSelectedDifficulty(selectedDifficulty === diff ? null : diff);
   };
 
-  // ── Preparar missão ──
+  // Calcula a força final da missão baseada nas escolhas
   const handlePrepareMission = () => {
     if (!isMissionComplete) return;
 
@@ -276,7 +266,7 @@ const StarWarsGame = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // ── Navegação entre fases ──
+  // Controles de tela (Ir para arena, voltar pro menu)
   const handleStartArena = () => {
     setGamePhase(GAME_PHASES.ARENA);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -292,12 +282,10 @@ const StarWarsGame = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // ── Contagem de seleções ──
+  // Conta quantos itens já foram escolhidos (0 a 5)
   const selectionCount = STEP_ORDER.filter(step => !!getStepSelection(step)).length;
 
-  // ──────────────────────────────────────────────────────────────────
-  // RENDER
-  // ──────────────────────────────────────────────────────────────────
+  // Renderização principal das telas
 
   return (
     <div className="sw-game-page">
@@ -314,7 +302,7 @@ const StarWarsGame = () => {
         {gamePhase !== GAME_PHASES.ARENA && (
           <button
             className="fuga-audio-button"
-            onClick={toggleActiveFugaMusic}
+            onClick={musicController.toggleMusic}
             type="button"
             title="Pausar/Retomar música"
           >
@@ -323,7 +311,7 @@ const StarWarsGame = () => {
         )}
       </div>
 
-      {/* ── EXIT LOADING ── */}
+      {/* Animação saindo do jogo para o menu principal */}
       {isExiting && (
         <section
           className="starwars-transition-screen"
@@ -348,7 +336,7 @@ const StarWarsGame = () => {
         </div>
       )}
 
-      {/* ── LOADING ── */}
+      {/* Tela de carregamento enquanto baixa da API */}
       {(loading || showEntrySplash) && (
         <section
           className="starwars-transition-screen"
@@ -364,7 +352,7 @@ const StarWarsGame = () => {
         </section>
       )}
 
-      {/* ── ERROR ── */}
+      {/* Mostrar erro caso a internet caia ou a API falhe */}
       {error && !loading && !showEntrySplash && (
         <div className="sw-error">
           <FaExclamationTriangle className="sw-error-icon" />
@@ -375,7 +363,7 @@ const StarWarsGame = () => {
         </div>
       )}
 
-      {/* ── BUILDER PHASE ── */}
+      {/* Tela 1: Onde o usuário monta a sua frota (Builder) */}
       {!loading && !showEntrySplash && !error && missionData && gamePhase === GAME_PHASES.BUILDER && (
         <div className="sw-builder-layout">
 
@@ -549,7 +537,7 @@ const StarWarsGame = () => {
         </div>
       )}
 
-      {/* ── SUMMARY PHASE ── */}
+      {/* Tela 2: O resumo das escolhas e atributos combinados */}
       {gamePhase === GAME_PHASES.SUMMARY && missionStats && (
         <>
           <MissionSummary
@@ -571,7 +559,7 @@ const StarWarsGame = () => {
         </>
       )}
 
-      {/* ── ARENA PHASE (PLAYABLE) ── */}
+      {/* Tela 3: O minigame final (Fuga do Hiperespaço) */}
       {gamePhase === GAME_PHASES.ARENA && missionStats && (
         <HyperdriveEscape
           missionStats={missionStats}
@@ -581,6 +569,7 @@ const StarWarsGame = () => {
           vehicle={selectedVehicle}
           onBackToBuilder={handleBackToBuilder}
           onPlayAgain={handlePlayAgain}
+          musicController={musicController}
         />
       )}
     </div>

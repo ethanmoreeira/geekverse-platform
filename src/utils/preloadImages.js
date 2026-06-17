@@ -1,19 +1,9 @@
-// preloadImages.js
-// Utilitário para pré-carregar imagens antes de exibir a UI do jogo.
-// Garante que imagens estejam prontas no cache do navegador,
-// evitando cartas/sprites aparecendo quebrados ou tabuleiros vazios.
+// Ferramenta para forçar o navegador a baixar as imagens pesadas antes do jogo começar.
+// Isso evita que o jogador comece a partida e fique olhando para uma tela preta ou cartas invisíveis.
 
-/**
- * Pré-carrega um array de URLs de imagem em paralelo.
- * - Ignora URLs inválidas (null, undefined, string vazia)
- * - Resolve mesmo se imagens individuais falharem (não trava o jogo)
- * - Retorna resumo: { loaded, failed, total }
- *
- * @param {string[]} urls - Array de URLs de imagem para pré-carregar.
- * @returns {Promise<{ loaded: number, failed: number, total: number }>}
- */
+// Essa função pega uma lista de links de imagens e baixa todas ao mesmo tempo.
 export function preloadImages(urls = []) {
-  // Filtrar URLs válidas
+  // Tira da lista qualquer link que esteja vazio ou quebrado
   const validUrls = urls.filter(
     (url) => url && typeof url === 'string' && url.trim() !== ''
   );
@@ -30,15 +20,20 @@ export function preloadImages(urls = []) {
     (url) =>
       new Promise((resolve) => {
         const img = new Image();
+        
+        // Se a imagem baixar com sucesso, a gente conta +1
         img.onload = () => {
           loaded++;
           resolve({ url, status: 'loaded' });
         };
+        
+        // Se der erro (ex: link fora do ar), a gente não trava o jogo, só avisa que falhou
         img.onerror = () => {
           failed++;
           failedUrls.push(url);
           resolve({ url, status: 'failed' });
         };
+        
         img.src = url;
       })
   );
@@ -51,19 +46,13 @@ export function preloadImages(urls = []) {
   }));
 }
 
-/**
- * Wrapper de timeout para Promises.
- * Se a promise não resolver dentro de `timeoutMs`, rejeita com erro de timeout.
- * Útil para chamadas de API externa que podem travar.
- *
- * @param {Promise} promise - Promise original a ser executada.
- * @param {number} timeoutMs - Tempo limite em milissegundos (padrão: 12000ms).
- * @returns {Promise} Resolve com o resultado da promise ou rejeita por timeout.
- */
+// Essa função funciona como um cronômetro de segurança (Timeout) para a API.
+// Se a gente tentar puxar dados do Pokémon e demorar mais de 12 segundos, ela corta a conexão 
+// e dá erro de timeout, para o jogo não ficar carregando infinitamente.
 export function withTimeout(promise, timeoutMs = 12000) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
-      reject(new Error(`Tempo limite de ${timeoutMs / 1000}s excedido. Verifique sua conexão.`));
+      reject(new Error(`O tempo limite de ${timeoutMs / 1000} segundos acabou. Verifique sua conexão com a internet.`));
     }, timeoutMs);
 
     promise

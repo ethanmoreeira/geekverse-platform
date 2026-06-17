@@ -1,4 +1,4 @@
-// usePokeSombraGame.js
+
 // Hook personalizado com a lógica central do jogo PokéSombra.
 // Gerencia: estados da partida, timer, carregamento da PokéAPI,
 // lógica de alvos, dicas com penalidade e reset.

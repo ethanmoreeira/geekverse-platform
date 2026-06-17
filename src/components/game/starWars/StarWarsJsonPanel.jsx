@@ -1,4 +1,4 @@
-// StarWarsJsonPanel.jsx
+
 // Painel recolhível com JSON formatado dos dados raw da API.
 
 import { useState } from 'react';
