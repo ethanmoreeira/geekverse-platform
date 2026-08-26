@@ -10,7 +10,7 @@ O **GeekVerse G8** é uma aplicação web interativa desenvolvida em React para 
 - [Tipo de Aplicação](#tipo-de-aplicação)
 - [Tema Escolhido](#tema-escolhido)
 - [Objetivo do Sistema](#objetivo-do-sistema)
-- [Integrantes](#integrantes)
+- [Responsabilidade principal](#responsabilidade-principal)
 - [Jogos Desenvolvidos](#jogos-desenvolvidos)
 - [Funcionalidades Principais](#funcionalidades-principais)
 - [APIs Utilizadas](#apis-utilizadas)
@@ -68,12 +68,10 @@ Além do entretenimento dos jogos, o projeto serve como vitrine técnica para o 
 
 ---
 
-## Integrantes
+## Responsabilidade principal
 
-* **Ítalo Dias Moreira Campos**
-* **Julyanne Lauriano Genevain**
-* **Rakel Garcia da Silva**
-* **Raphaell Reiff Galoni**
+**Technical lead and primary developer:** Ítalo Dias Moreira Campos  
+**Context:** Projeto acadêmico apresentado como trabalho do Grupo G8.
 
 ---
 
@@ -187,12 +185,12 @@ Para rodar o projeto localmente, certifique-se de possuir instalado em sua máqu
 
 1. Clone ou baixe este repositório em sua máquina:
    ```bash
-   git clone https://gitlab.com/aula-dfe/g8-tf-geekversce.git
+   git clone https://github.com/ethanmoreeira/geekverse-platform.git
    ```
 
 2. Acesse a pasta do projeto:
    ```bash
-   cd g8-tf-geekversce
+   cd geekverse-platform
    ```
 
 
