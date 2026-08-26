@@ -27,7 +27,7 @@ import FullscreenButton from './components/FullscreenButton/FullscreenButton';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/geekverse-platform">
         <FullscreenButton />
         <Routes>
           {/* Rota Aberta (Qualquer um pode ver) */}
